@@ -1,0 +1,24 @@
+{
+  "name": "@myunisoft/sigyn",
+  "version": "1.0.0",
+  "description": "Grafana Loki Alerting Agent",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "keywords": [],
+  "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
+  "license": "MIT",
+  "workspaces": [
+    "src/agent"
+  ],
+  "devDependencies": {
+    "@nodesecure/eslint-config": "^1.7.1",
+    "@types/node": "^20.4.2",
+    "c8": "^8.0.0",
+    "cross-env": "^7.0.3",
+    "glob": "^10.3.3",
+    "tsup": "^7.1.0",
+    "tsx": "^3.12.7",
+    "typescript": "^5.1.6"
+  }
+}
