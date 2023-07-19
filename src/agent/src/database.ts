@@ -18,11 +18,7 @@ export function initDB(logger: Logger): SQLite3.Database {
   const db = getDB();
 
   const initRawSQL = fs.readFileSync(kDatabaseInitPath, "utf-8");
-  const initSQLQueries = initRawSQL.split(";");
-
-  for (const query of initSQLQueries) {
-    db.exec(query);
-  }
+  db.exec(initRawSQL);
 
   logger.info(`[Database] initialized at '${path.join(process.cwd(), kDatabaseFilename)}'`);
 

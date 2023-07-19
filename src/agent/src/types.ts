@@ -20,13 +20,13 @@ export interface SigynAlert {
   template?: TODO;
 }
 
-export interface IRule {
+export interface DbRule {
   name: string;
   counter: number;
   lastRunAt?: number;
 }
 
-export interface ICounter {
+export interface DbCounter {
   name: string;
   counter: number;
   timestamp: number;

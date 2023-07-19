@@ -1,5 +1,4 @@
 // Import Third-party Dependencies
-import { GrafanaLoki } from "@myunisoft/loki";
 import { AsyncTask } from "toad-scheduler";
 import { Logger } from "pino";
 
@@ -7,33 +6,22 @@ import { Logger } from "pino";
 import { Rule } from "../rules";
 import { SigynRule } from "../types";
 
-// CONSTANTS
-const kApi = new GrafanaLoki({
-  remoteApiURL: "https://loki.myunisoft.fr"
-});
-
 export interface AsyncTaskOptions {
   logger: Logger;
-  ruleName: string;
+  rule: Rule;
 }
 
 export function asyncTask(ruleConfig: SigynRule, options: AsyncTaskOptions) {
-  const { ruleName, logger } = options;
+  const { rule, logger } = options;
 
-  const task = new AsyncTask(ruleName, async() => {
+  const task = new AsyncTask(ruleConfig.name, async() => {
     try {
-      logger.info(`[${ruleName}](state: polling start|polling: ${ruleConfig.polling}|query: ${ruleConfig.logql})`);
+      logger.info(`[${ruleConfig.name}](state: polling start|polling: ${ruleConfig.polling}|query: ${ruleConfig.logql})`);
 
-      const ruleHandler = new Rule(ruleConfig, { logger });
-
-      const logs = await kApi.queryRange(ruleConfig.logql, {
-        start: ruleHandler.getQueryRangeStartUnixTimestamp()
-      });
-
-      ruleHandler.handleLogs(logs);
+      rule.handleLogs();
     }
     catch (e) {
-      logger.error(`[${ruleName}](error: ${e.message})`);
+      logger.error(`[${ruleConfig.name}](error: ${e.message})`);
     }
   });
 

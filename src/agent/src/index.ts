@@ -9,8 +9,10 @@ import ms from "ms";
 
 // Import Internal Dependencies
 import { initDB } from "./database";
-import { IRule, SigynConfig } from "./types";
+import { SigynConfig } from "./types";
 import { asyncTask } from "./tasks/asyncTask";
+import { Rule } from "./rules";
+import * as utils from "./utils";
 
 // CONSTANTS
 const kScheduler = new ToadScheduler();
@@ -27,23 +29,20 @@ export async function start(
   kLogger.info(`Starting sigyn agent at '${location}'`);
 
   const config = JSON.parse(fs.readFileSync(path.join(location, "/config.json"), "utf-8")) as SigynConfig;
-  const db = initDB(kLogger);
+  initDB(kLogger);
 
-  const rules = db.prepare("SELECT * FROM rules").all() as IRule[];
+  for (const ruleConfig of config.rules) {
+    const rule = new Rule(ruleConfig, { logger: kLogger });
+    rule.init();
 
-  for (const rule of rules) {
-    const ruleConfig = config.rules.find((ruleConfig) => ruleConfig.name === rule.name);
-
-    if (!ruleConfig) {
-      // TODO: remove from db ?
-      continue;
-    }
-
-    const task = asyncTask(ruleConfig, { ruleName: rule.name, logger: kLogger });
+    const task = asyncTask(ruleConfig, { rule, logger: kLogger });
     const job = new SimpleIntervalJob({ milliseconds: ms(ruleConfig.polling), runImmediately: true }, task);
 
     kScheduler.addIntervalJob(job);
   }
+
+  utils.cleanRulesInDb(config.rules);
+
   /**
    * TODO:
    * 3. schedule alerting interval
