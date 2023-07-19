@@ -10,6 +10,7 @@ export interface SigynRule {
   logql: string;
   polling: string;
   alert: SigynAlert;
+  disabled?: boolean;
 }
 
 export interface SigynAlert {

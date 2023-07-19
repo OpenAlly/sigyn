@@ -32,6 +32,10 @@ export async function start(
   initDB(kLogger);
 
   for (const ruleConfig of config.rules) {
+    if (ruleConfig.disabled) {
+      continue;
+    }
+
     const rule = new Rule(ruleConfig, { logger: kLogger });
     rule.init();
 
