@@ -1,8 +1,16 @@
 type TODO = any;
 
 export interface SigynConfig {
-  notifier: Record<string, TODO>;
+  notifiers: SigynNotifiers;
   rules: SigynRule[]
+}
+
+export interface SigynNotifiers {
+  discord?: DiscordNotifier;
+}
+
+export interface DiscordNotifier {
+  webhookUrl: string;
 }
 
 export interface SigynRule {
@@ -11,6 +19,7 @@ export interface SigynRule {
   polling: string;
   alert: SigynAlert;
   disabled?: boolean;
+  notifiers?: string[];
 }
 
 export interface SigynAlert {
@@ -21,14 +30,31 @@ export interface SigynAlert {
   template?: TODO;
 }
 
-export interface DbRule {
+interface BaseEntity {
+  id: number;
+}
+
+export interface DbRule extends BaseEntity {
   name: string;
   counter: number;
   lastRunAt?: number;
 }
 
-export interface DbCounter {
+export interface DbCounter extends BaseEntity {
   name: string;
   counter: number;
   timestamp: number;
+}
+
+export interface DbAlert extends BaseEntity {
+  createdAt: number;
+}
+
+export interface DbNotifier extends BaseEntity {
+  name: string;
+}
+
+export interface DbAlertNotifs extends BaseEntity {
+  alertId: BaseEntity["id"];
+  notifierId: BaseEntity["id"];
 }

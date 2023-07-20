@@ -9,6 +9,7 @@ import ms from "ms";
 import { DbCounter, DbRule, SigynRule } from "./types";
 import { getDB } from "./database";
 import * as utils from "./utils";
+import { Alert } from "./alert";
 
 // CONSTANTS
 const kApi = new GrafanaLoki({
@@ -49,13 +50,12 @@ export class Rule {
       start: this.#getQueryRangeStartUnixTimestamp()
     });
     const rule = this.#getRuleFromDatabase();
-
     const now = dayjs().unix();
     const lasttIntervalDate = utils.durationToDate(this.#config.alert.on.interval, "subtract");
     const timeThreshold = lasttIntervalDate.unix();
 
-    const previousCounters = this.#db.prepare("SELECT * FROM counters WHERE name = ? AND timestamp >= ?").all(
-      rule.name,
+    const previousCounters = this.#db.prepare("SELECT * FROM counters WHERE ruleId = ? AND timestamp >= ?").all(
+      rule.id,
       timeThreshold
     ) as DbCounter[];
 
@@ -64,22 +64,21 @@ export class Rule {
 
     rule.counter -= substractCounter;
     rule.counter += logs.length;
-
-    this.#db.prepare("UPDATE rules SET counter = ? WHERE name = ?").run(
+    this.#db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(
       rule.counter,
-      rule.name
+      rule.id
     );
 
     if (logs.length) {
-      this.#db.prepare("INSERT INTO counters (name, counter, timestamp) VALUES (?, ?, ?)").run(
-        rule.name,
+      this.#db.prepare("INSERT INTO counters (ruleId, counter, timestamp) VALUES (?, ?, ?)").run(
+        rule.id,
         logs.length,
         now
       );
     }
 
-    this.#db.prepare("DELETE FROM counters WHERE name = ? AND timestamp < ?").run(
-      rule.name,
+    this.#db.prepare("DELETE FROM counters WHERE ruleId = ? AND timestamp < ?").run(
+      rule.id,
       timeThreshold
     );
 
@@ -90,6 +89,12 @@ export class Rule {
 
 
     if (rule.counter >= alertThreshold) {
+      const alert = new Alert(rule.name, { logger: this.#logger });
+      await alert.send();
+
+      this.#db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);
+      this.#db.prepare("DELETE from counters WHERE ruleId = ?").run(rule.id);
+
       this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
     }
   }
@@ -98,7 +103,7 @@ export class Rule {
     const rule = this.#getRuleFromDatabase();
     const now = dayjs();
 
-    this.#db.prepare("UPDATE rules SET lastRunAt = ? WHERE name = ?").run(now.unix(), rule.name);
+    this.#db.prepare("UPDATE rules SET lastRunAt = ? WHERE id = ?").run(now.unix(), rule.id);
 
     if (rule.lastRunAt) {
       const diff = Math.abs(dayjs.unix(rule.lastRunAt!).diff(now, "ms"));

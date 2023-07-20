@@ -1,7 +1,7 @@
 {
-  "name": "@myunisoft/sigyn.agent",
+  "name": "@sigyn/agent",
   "version": "1.0.0",
-  "description": "Another inspired Rust's Result implementation.",
+  "description": "Loki alerting agent",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

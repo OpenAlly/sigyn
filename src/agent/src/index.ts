@@ -1,7 +1,3 @@
-// Import Node.js Dependencies
-import fs from "node:fs";
-import path from "node:path";
-
 // Import Third-party Dependencies
 import { ToadScheduler, SimpleIntervalJob } from "toad-scheduler";
 import { pino } from "pino";
@@ -9,10 +5,10 @@ import ms from "ms";
 
 // Import Internal Dependencies
 import { initDB } from "./database";
-import { SigynConfig } from "./types";
 import { asyncTask } from "./tasks/asyncTask";
 import { Rule } from "./rules";
 import * as utils from "./utils";
+import { initConfig } from "./config";
 
 // CONSTANTS
 const kScheduler = new ToadScheduler();
@@ -28,8 +24,9 @@ export async function start(
 ) {
   kLogger.info(`Starting sigyn agent at '${location}'`);
 
-  const config = JSON.parse(fs.readFileSync(path.join(location, "/config.json"), "utf-8")) as SigynConfig;
   initDB(kLogger);
+
+  const config = initConfig(location);
 
   for (const ruleConfig of config.rules) {
     if (ruleConfig.disabled) {
@@ -46,11 +43,4 @@ export async function start(
   }
 
   utils.cleanRulesInDb(config.rules);
-
-  /**
-   * TODO:
-   * 3. schedule alerting interval
-   *  3.1 looking in DB, if matching condition -> alert (delete proceeded rows)
-   *  3.2 store in DB the alert, send event notification to notifiers
-   */
 }
