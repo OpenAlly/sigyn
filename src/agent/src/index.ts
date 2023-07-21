@@ -8,7 +8,7 @@ import { initDB } from "./database";
 import { asyncTask } from "./tasks/asyncTask";
 import { Rule } from "./rules";
 import * as utils from "./utils";
-import { initConfig } from "./config";
+import * as config from "./config";
 
 // CONSTANTS
 const kScheduler = new ToadScheduler();
@@ -26,9 +26,9 @@ export async function start(
 
   initDB(kLogger);
 
-  const config = initConfig(location);
+  const { rules } = config.initConfig(location);
 
-  for (const ruleConfig of config.rules) {
+  for (const ruleConfig of rules) {
     if (ruleConfig.disabled) {
       continue;
     }
@@ -42,5 +42,5 @@ export async function start(
     kScheduler.addIntervalJob(job);
   }
 
-  utils.cleanRulesInDb(config.rules);
+  utils.cleanRulesInDb(rules);
 }

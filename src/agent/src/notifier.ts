@@ -6,7 +6,7 @@ import { getDB } from "./database";
 import { NOTIFIER_QUEUE_EVENTS, NotifierQueue } from "./notifierQueue";
 import { DbAlert, DbAlertNotif, DbNotifier, DbRule } from "./types";
 import { getConfig } from "./config";
-import { discord } from "./discord";
+import * as discord from "./discord/discord";
 
 // CONSTANTS
 const kPrivateInstancier = Symbol("instancier");
@@ -25,7 +25,7 @@ export interface NotifierAlert {
 let notifier: Notifier;
 
 export class Notifier {
-  #queue: NotifierQueue;
+  #queue = new NotifierQueue();
   #logger: Logger;
 
   constructor(logger: Logger, instancier: symbol) {
@@ -34,16 +34,12 @@ export class Notifier {
     }
 
     this.#logger = logger;
-    this.#queue = new NotifierQueue();
     this.#queue.on(NOTIFIER_QUEUE_EVENTS.DEQUEUE, (alert) => this.#sendNotifications(alert));
   }
 
   static getNotifier(logger: Logger): Notifier {
-    if (notifier === undefined) {
-      notifier = new Notifier(logger, kPrivateInstancier);
-    }
-
-    return notifier;
+    // eslint-disable-next-line no-return-assign
+    return notifier ??= new Notifier(logger, kPrivateInstancier);
   }
 
   sendAlert(alert: Omit<NotifierAlert, "notif">) {
@@ -59,7 +55,7 @@ export class Notifier {
   }
 
   async #sendNotifications(alerts: NotifierAlert[]) {
-    await Promise.all(alerts.map((alert) => this.#sendNotification(alert)));
+    await Promise.allSettled(alerts.map((alert) => this.#sendNotification(alert)));
   }
 
   async #sendNotification(alert: NotifierAlert) {
@@ -79,7 +75,6 @@ export class Notifier {
         default:
           throw new Error(`Unknown notifier: ${notifier}`);
       }
-      this.#queue.emit(NOTIFIER_QUEUE_EVENTS.DONE);
 
       db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
         "success", alert.notif.alertId
@@ -94,6 +89,9 @@ export class Notifier {
       );
 
       this.#logger.error(`[${alert.rule.name}](notify: error|message: ${alert.error!.message})`);
+    }
+    finally {
+      this.#queue.emit(NOTIFIER_QUEUE_EVENTS.DONE);
     }
   }
 

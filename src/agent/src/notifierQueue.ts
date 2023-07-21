@@ -1,5 +1,7 @@
 // Import Node.js Dependencies
 import EventEmitter from "node:events";
+
+// Import Internal Dependencies
 import { NotifierAlert } from "./notifier";
 
 // CONSTANTS
@@ -18,27 +20,32 @@ export class NotifierQueue extends EventEmitter {
 
   constructor() {
     super();
-    this.on(NOTIFIER_QUEUE_EVENTS.DONE, this.#notifHandled);
+    this.on(NOTIFIER_QUEUE_EVENTS.DONE, () => this.#notifHandled());
   }
 
   push(notifs: NotifierAlert) {
     this.#queue.push(notifs);
 
-    if (this.#inProgress > 0) {
-      this.removeAllListeners(kReadyEvent);
-
-      this.once(kReadyEvent, () => {
-        this.emit(NOTIFIER_QUEUE_EVENTS.DEQUEUE, [...this.#dequeue()]);
-      });
+    if (this.#inProgress++ === 0) {
+      this.emit(NOTIFIER_QUEUE_EVENTS.DEQUEUE, [...this.#dequeue()]);
 
       return;
     }
 
-    this.emit(NOTIFIER_QUEUE_EVENTS.DEQUEUE, [...this.#dequeue()]);
+    this.removeAllListeners(kReadyEvent);
+
+    this.once(kReadyEvent, () => {
+      this.emit(NOTIFIER_QUEUE_EVENTS.DEQUEUE, [...this.#dequeue()]);
+    });
   }
 
   #notifHandled() {
     this.#inProgress--;
+
+    if (this.#inProgress === -1) {
+      console.log("ERROR: inProgress is negative");
+      this.#inProgress = 0;
+    }
 
     if (this.#inProgress === 0 && this.#queue.length > 0) {
       this.emit(NOTIFIER_QUEUE_EVENTS.DEQUEUE, [...this.#dequeue()]);
