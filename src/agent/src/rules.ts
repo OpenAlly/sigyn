@@ -10,7 +10,7 @@ import { DbCounter, DbRule, SigynRule } from "./types";
 import { getDB } from "./database";
 import * as utils from "./utils";
 import { createAlert } from "./alert";
-import { NOTIFIER_EVENTS, Notifier, NotifierAlert } from "./notifier";
+import { Notifier } from "./notifier";
 import { getConfig } from "./config";
 
 // CONSTANTS
@@ -34,28 +34,9 @@ export class Rule {
     this.#logger = logger;
     this.#config = rule;
     this.#db = getDB();
-    this.#notifier = Notifier.getNotifier();
-
-    this.#notifier.on(NOTIFIER_EVENTS.SUCCESS(rule.name), (alert) => this.#handleNotificationSuccess(alert));
-    this.#notifier.on(NOTIFIER_EVENTS.ERROR(rule.name), (alert) => this.#handleNotificationError(alert));
+    this.#notifier = Notifier.getNotifier(logger);
   }
 
-
-  #handleNotificationSuccess(alert: NotifierAlert) {
-    this.#db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
-      "success", alert.notif.alertId
-    );
-
-    this.#logger.info(`[${alert.rule.name}](notify: success|notifier: ${alert.notifier})`);
-  }
-
-  #handleNotificationError(alert: NotifierAlert) {
-    this.#db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
-      "failed", alert.notif.alertId
-    );
-
-    this.#logger.error(`[${alert.rule.name}](notify: error|message: ${alert.error!.message})`);
-  }
 
   #getRuleFromDatabase(): DbRule {
     return this.#db.prepare("SELECT * FROM rules WHERE name = ?").get(this.#config.name) as DbRule;
@@ -120,7 +101,7 @@ export class Rule {
       const notifiers = ruleConfigNotifiers.length > 0 ? ruleConfigNotifiers : Object.keys(getConfig().notifiers);
 
       for (const notifier of notifiers) {
-        this.#notifier.emit(NOTIFIER_EVENTS.ALERT, { rule, notifier });
+        this.#notifier.sendAlert({ rule, notifier });
       }
 
       this.#db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);

@@ -18,7 +18,6 @@ export class NotifierQueue extends EventEmitter {
 
   constructor() {
     super();
-
     this.on(NOTIFIER_QUEUE_EVENTS.DONE, this.#notifHandled);
   }
 

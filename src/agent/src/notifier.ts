@@ -1,5 +1,5 @@
-// Import Node.js Dependencies
-import EventEmitter from "node:events";
+// Import Third-party Dependencies
+import { Logger } from "pino";
 
 // Import Internal Dependencies
 import { getDB } from "./database";
@@ -10,12 +10,6 @@ import { discord } from "./discord";
 
 // CONSTANTS
 const kPrivateInstancier = Symbol("instancier");
-
-export const NOTIFIER_EVENTS = {
-  ALERT: Symbol("alert"),
-  SUCCESS: (ruleName: string) => `${ruleName}:success`,
-  ERROR: (ruleName: string) => `${ruleName}:error`
-};
 
 export interface NotifierAlert {
   rule: DbRule;
@@ -30,32 +24,29 @@ export interface NotifierAlert {
  */
 let notifier: Notifier;
 
-export class Notifier extends EventEmitter {
+export class Notifier {
   #queue: NotifierQueue;
+  #logger: Logger;
 
-  constructor(instancier: symbol) {
+  constructor(logger: Logger, instancier: symbol) {
     if (instancier !== kPrivateInstancier) {
       throw new Error("Cannot instanciate NotifierQueue, use NotifierQueue.getNotifier instead");
     }
 
-    super();
-
+    this.#logger = logger;
     this.#queue = new NotifierQueue();
-
-    // TODO CONSTANTS
-    this.on(NOTIFIER_EVENTS.ALERT, (alert) => this.#onNewAlert(alert));
     this.#queue.on(NOTIFIER_QUEUE_EVENTS.DEQUEUE, (alert) => this.#sendNotifications(alert));
   }
 
-  static getNotifier(): Notifier {
+  static getNotifier(logger: Logger): Notifier {
     if (notifier === undefined) {
-      notifier = new Notifier(kPrivateInstancier);
+      notifier = new Notifier(logger, kPrivateInstancier);
     }
 
     return notifier;
   }
 
-  #onNewAlert(alert: NotifierAlert) {
+  sendAlert(alert: Omit<NotifierAlert, "notif">) {
     const db = getDB();
     const { id: alertId } = db
       .prepare("SELECT id from alerts WHERE ruleId = ?")
@@ -64,8 +55,7 @@ export class Notifier extends EventEmitter {
 
     db.prepare("INSERT INTO alertNotifs (alertId, notifierId) VALUES (?, ?)").run(alertId, notifierId);
 
-    alert.notif = { alertId, notifierId };
-    this.#queue.push(alert);
+    this.#queue.push({ ...alert, notif: { alertId, notifierId } });
   }
 
   async #sendNotifications(alerts: NotifierAlert[]) {
@@ -75,6 +65,7 @@ export class Notifier extends EventEmitter {
   async #sendNotification(alert: NotifierAlert) {
     const { notifier } = alert;
 
+    const db = getDB();
     const config = getConfig();
     const ruleConfig = config.rules.find((rule) => rule.name === alert.rule.name);
     const notifierConfig = config.notifiers[notifier];
@@ -88,13 +79,21 @@ export class Notifier extends EventEmitter {
         default:
           throw new Error(`Unknown notifier: ${notifier}`);
       }
-
       this.#queue.emit(NOTIFIER_QUEUE_EVENTS.DONE);
-      this.emit(NOTIFIER_EVENTS.SUCCESS(alert.rule.name), alert);
+
+      db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
+        "success", alert.notif.alertId
+      );
+
+      this.#logger.info(`[${alert.rule.name}](notify: success|notifier: ${alert.notifier})`);
     }
     catch (error) {
       alert.error = error;
-      this.emit(NOTIFIER_EVENTS.ERROR(alert.rule.name), alert);
+      db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
+        "failed", alert.notif.alertId
+      );
+
+      this.#logger.error(`[${alert.rule.name}](notify: error|message: ${alert.error!.message})`);
     }
   }
 
