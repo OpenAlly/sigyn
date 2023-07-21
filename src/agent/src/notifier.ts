@@ -1,11 +1,12 @@
 // Import Third-party Dependencies
 import { Logger } from "pino";
+import { match } from "ts-pattern";
+import { Err, Ok } from "@openally/result";
 
 // Import Internal Dependencies
-import { getDB } from "./database";
+import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "./database";
 import { NOTIFIER_QUEUE_EVENTS, NotifierQueue } from "./notifierQueue";
-import { DbAlert, DbAlertNotif, DbNotifier, DbRule } from "./types";
-import { getConfig } from "./config";
+import { SigynNotifiers, getConfig } from "./config";
 import * as discord from "./discord/discord";
 
 // CONSTANTS
@@ -13,7 +14,7 @@ const kPrivateInstancier = Symbol("instancier");
 
 export interface NotifierAlert {
   rule: DbRule;
-  notifier: string;
+  notifier: keyof SigynNotifiers;
   notif: Pick<DbAlertNotif, "alertId" | "notifierId">;
   error?: Error;
 }
@@ -38,8 +39,11 @@ export class Notifier {
   }
 
   static getNotifier(logger: Logger): Notifier {
-    // eslint-disable-next-line no-return-assign
-    return notifier ??= new Notifier(logger, kPrivateInstancier);
+    if (notifier === undefined) {
+      notifier = new Notifier(logger, kPrivateInstancier);
+    }
+
+    return notifier;
   }
 
   sendAlert(alert: Omit<NotifierAlert, "notif">) {
@@ -66,33 +70,36 @@ export class Notifier {
     const ruleConfig = config.rules.find((rule) => rule.name === alert.rule.name);
     const notifierConfig = config.notifiers[notifier];
 
-    try {
-      switch (notifier) {
-        case "discord":
+    const result = await match(notifier)
+      .with("discord", async() => {
+        try {
           await discord.executeWebhook({ ...notifierConfig, ruleConfig, rule: alert.rule });
-          break;
 
-        default:
-          throw new Error(`Unknown notifier: ${notifier}`);
-      }
+          return Ok(void 0);
+        }
+        catch (error) {
+          return Err(error);
+        }
+      })
+      .otherwise(() => Err(`Unknown notifier: ${notifier}`));
 
+    if (result.ok) {
       db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
         "success", alert.notif.alertId
       );
 
       this.#logger.info(`[${alert.rule.name}](notify: success|notifier: ${alert.notifier})`);
     }
-    catch (error) {
-      alert.error = error;
+    else {
+      alert.error = result.val;
       db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
         "failed", alert.notif.alertId
       );
 
       this.#logger.error(`[${alert.rule.name}](notify: error|message: ${alert.error!.message})`);
     }
-    finally {
-      this.#queue.emit(NOTIFIER_QUEUE_EVENTS.DONE);
-    }
+
+    this.#queue.emit(NOTIFIER_QUEUE_EVENTS.DONE);
   }
 
   #databaseNotifierId(notifier: string) {

@@ -16,6 +16,38 @@ const kDatabaseInitPath = path.join(__dirname, "../data/init-db.sql");
 
 let db: SQLite3.Database;
 
+export interface DbRule {
+  id: number;
+  name: string;
+  counter: number;
+  lastRunAt?: number;
+}
+
+export interface DbCounter {
+  id: number;
+  name: string;
+  counter: number;
+  timestamp: number;
+}
+
+export interface DbAlert {
+  id: number;
+  createdAt: number;
+}
+
+export interface DbNotifier {
+  id: number;
+  name: string;
+}
+
+export interface DbAlertNotif {
+  id: number;
+  alertId: number;
+  notifierId: number;
+  status: "pending" | "success" | "error";
+  retries: number;
+}
+
 export interface InitDbOptions {
   /**
    * @default process.env.SIGYN_DB.

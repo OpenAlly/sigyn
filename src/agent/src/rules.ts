@@ -1,17 +1,14 @@
 // Import Third-party Dependencies
 import { GrafanaLoki } from "@myunisoft/loki";
-import SQLite3 from "better-sqlite3";
 import dayjs from "dayjs";
 import { Logger } from "pino";
 import ms from "ms";
 
 // Import Internal Dependencies
-import { DbCounter, DbRule, SigynRule } from "./types";
-import { getDB } from "./database";
+import { DbCounter, DbRule, getDB } from "./database";
 import * as utils from "./utils";
 import { createAlert } from "./alert";
-import { Notifier } from "./notifier";
-import { getConfig } from "./config";
+import { SigynRule } from "./config";
 
 // CONSTANTS
 const kApi = new GrafanaLoki({
@@ -24,35 +21,32 @@ export interface RuleOptions {
 
 export class Rule {
   #config: SigynRule;
-  #db: SQLite3.Database;
   #logger: Logger;
-  #notifier: Notifier;
 
   constructor(rule: SigynRule, options: RuleOptions) {
     const { logger } = options;
 
     this.#logger = logger;
     this.#config = rule;
-    this.#db = getDB();
-    this.#notifier = Notifier.getNotifier(logger);
   }
 
 
   #getRuleFromDatabase(): DbRule {
-    return this.#db.prepare("SELECT * FROM rules WHERE name = ?").get(this.#config.name) as DbRule;
+    return getDB().prepare("SELECT * FROM rules WHERE name = ?").get(this.#config.name) as DbRule;
   }
 
   init(): void {
     const databaseRule = this.#getRuleFromDatabase();
 
     if (databaseRule === undefined) {
-      this.#db.prepare("INSERT INTO rules (name) VALUES (?)").run(this.#config.name);
+      getDB().prepare("INSERT INTO rules (name) VALUES (?)").run(this.#config.name);
 
       this.#logger.info(`[Database] New rule '${this.#config.name}' added`);
     }
   }
 
   async handleLogs(): Promise<void> {
+    const db = getDB();
     const logs = await kApi.queryRange(this.#config.logql, {
       start: this.#getQueryRangeStartUnixTimestamp()
     });
@@ -61,7 +55,7 @@ export class Rule {
     const lasttIntervalDate = utils.durationToDate(this.#config.alert.on.interval, "subtract");
     const timeThreshold = lasttIntervalDate.unix();
 
-    const previousCounters = this.#db.prepare("SELECT * FROM counters WHERE ruleId = ? AND timestamp >= ?").all(
+    const previousCounters = db.prepare("SELECT * FROM counters WHERE ruleId = ? AND timestamp >= ?").all(
       rule.id,
       timeThreshold
     ) as DbCounter[];
@@ -71,20 +65,20 @@ export class Rule {
 
     rule.counter -= substractCounter;
     rule.counter += logs.length;
-    this.#db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(
+    db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(
       rule.counter,
       rule.id
     );
 
     if (logs.length) {
-      this.#db.prepare("INSERT INTO counters (ruleId, counter, timestamp) VALUES (?, ?, ?)").run(
+      db.prepare("INSERT INTO counters (ruleId, counter, timestamp) VALUES (?, ?, ?)").run(
         rule.id,
         logs.length,
         now
       );
     }
 
-    this.#db.prepare("DELETE FROM counters WHERE ruleId = ? AND timestamp < ?").run(
+    db.prepare("DELETE FROM counters WHERE ruleId = ? AND timestamp < ?").run(
       rule.id,
       timeThreshold
     );
@@ -96,16 +90,10 @@ export class Rule {
 
 
     if (rule.counter >= alertThreshold) {
-      createAlert(rule.id);
-      const ruleConfigNotifiers = this.#config.notifiers ?? [];
-      const notifiers = ruleConfigNotifiers.length > 0 ? ruleConfigNotifiers : Object.keys(getConfig().notifiers);
+      createAlert(rule, this.#config, this.#logger);
 
-      for (const notifier of notifiers) {
-        this.#notifier.sendAlert({ rule, notifier });
-      }
-
-      this.#db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);
-      this.#db.prepare("DELETE from counters WHERE ruleId = ?").run(rule.id);
+      db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);
+      db.prepare("DELETE from counters WHERE ruleId = ?").run(rule.id);
 
       this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
     }
@@ -115,7 +103,7 @@ export class Rule {
     const rule = this.#getRuleFromDatabase();
     const now = dayjs();
 
-    this.#db.prepare("UPDATE rules SET lastRunAt = ? WHERE id = ?").run(now.unix(), rule.id);
+    getDB().prepare("UPDATE rules SET lastRunAt = ? WHERE id = ?").run(now.unix(), rule.id);
 
     if (rule.lastRunAt) {
       const diff = Math.abs(dayjs.unix(rule.lastRunAt!).diff(now, "ms"));

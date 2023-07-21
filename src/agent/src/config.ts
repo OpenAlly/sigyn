@@ -2,8 +2,40 @@
 import path from "node:path";
 import fs from "node:fs";
 
-// Import Internal Dependencies
-import { SigynConfig } from "./types";
+export interface SigynConfig {
+  notifiers: SigynNotifiers;
+  rules: SigynRule[]
+}
+
+export interface SigynNotifiers {
+  discord?: DiscordNotifier;
+}
+
+export interface DiscordNotifier {
+  webhookUrl: string;
+}
+
+export interface SigynRule {
+  name: string;
+  logql: string;
+  polling: string;
+  alert: SigynAlert;
+  disabled?: boolean;
+  notifiers?: (keyof SigynNotifiers)[];
+}
+
+export interface SigynAlert {
+  on: {
+    count: number;
+    interval: string;
+  },
+  template: SigynAlertTemplate;
+}
+
+export interface SigynAlertTemplate {
+  title?: string;
+  content?: string[];
+}
 
 let config: SigynConfig;
 
