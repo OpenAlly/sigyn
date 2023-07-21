@@ -1,5 +1,3 @@
-type TODO = any;
-
 export interface SigynConfig {
   notifiers: SigynNotifiers;
   rules: SigynRule[]
@@ -27,7 +25,12 @@ export interface SigynAlert {
     count: number;
     interval: string;
   },
-  template?: TODO;
+  template: SigynAlertTemplate;
+}
+
+export interface SigynAlertTemplate {
+  title?: string;
+  content?: string[];
 }
 
 interface BaseEntity {
@@ -54,7 +57,9 @@ export interface DbNotifier extends BaseEntity {
   name: string;
 }
 
-export interface DbAlertNotifs extends BaseEntity {
+export interface DbAlertNotif extends BaseEntity {
   alertId: BaseEntity["id"];
   notifierId: BaseEntity["id"];
+  status: "pending" | "success" | "error";
+  retries: number;
 }

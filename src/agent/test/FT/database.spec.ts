@@ -35,10 +35,10 @@ const kExpectedTablesColumns = {
     { name: "name", dflt_value: null, type: "TEXT", pk: 0, notnull: 1 }
   ],
   alertNotifs: [
-    { name: "alertId", dflt_valut: null, type: "INTEGER", pk: 0 },
-    { name: "notifierId", dflt_valut: null, type: "INTEGER", pk: 0 },
-    { name: "status", dflt_valut: null, type: "TEXT", pk: 0 },
-    { name: "retries", dflt_valut: 0, type: "INTEGER", pk: 0 }
+    { name: "alertId", dflt_value: null, type: "INTEGER", pk: 0 },
+    { name: "notifierId", dflt_value: null, type: "INTEGER", pk: 0 },
+    { name: "status", dflt_value: "\"pending\"", type: "TEXT", pk: 0 },
+    { name: "retries", dflt_value: 0, type: "INTEGER", pk: 0 }
   ]
 };
 
@@ -74,7 +74,7 @@ describe("Database", () => {
               assert.ok(actualColumn);
             });
 
-            if (column.dflt_value) {
+            if (column.dflt_value !== undefined) {
               it(`default value should be ${column.dflt_value}`, () => {
                 assert.equal(actualColumn.dflt_value, column.dflt_value);
               });
@@ -84,13 +84,13 @@ describe("Database", () => {
               assert.equal(actualColumn.type, column.type);
             });
 
-            if (column.pk) {
+            if (column.pk !== undefined) {
               it(`should${column.pk === 1 ? " " : " NOT"} be a primary key`, () => {
                 assert.equal(actualColumn.pk, column.pk);
               });
             }
 
-            if (column.notnull) {
+            if (column.notnull !== undefined) {
               it(`should${column.notnull === 1 ? " " : " NOT"} be non null`, () => {
                 assert.equal(actualColumn.notnull, column.notnull);
               });

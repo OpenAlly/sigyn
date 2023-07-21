@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS alertNotifs
   (
     alertId    INTEGER,
     notifierId INTEGER,
-    status     TEXT,
+    status     TEXT DEFAULT "pending",
     retries    INTEGER DEFAULT 0,
     FOREIGN KEY(alertId) REFERENCES alerts(id),
     FOREIGN KEY(notifierId) REFERENCES notifiers(id)

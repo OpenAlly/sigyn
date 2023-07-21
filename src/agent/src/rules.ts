@@ -9,7 +9,9 @@ import ms from "ms";
 import { DbCounter, DbRule, SigynRule } from "./types";
 import { getDB } from "./database";
 import * as utils from "./utils";
-import { Alert } from "./alert";
+import { createAlert } from "./alert";
+import { NOTIFIER_EVENTS, Notifier, NotifierAlert } from "./notifier";
+import { getConfig } from "./config";
 
 // CONSTANTS
 const kApi = new GrafanaLoki({
@@ -24,18 +26,42 @@ export class Rule {
   #config: SigynRule;
   #db: SQLite3.Database;
   #logger: Logger;
+  #notifier: Notifier;
 
   constructor(rule: SigynRule, options: RuleOptions) {
-    this.#logger = options.logger;
+    const { logger } = options;
+
+    this.#logger = logger;
     this.#config = rule;
     this.#db = getDB();
+    this.#notifier = Notifier.getNotifier();
+
+    this.#notifier.on(NOTIFIER_EVENTS.SUCCESS(rule.name), (alert) => this.#handleNotificationSuccess(alert));
+    this.#notifier.on(NOTIFIER_EVENTS.ERROR(rule.name), (alert) => this.#handleNotificationError(alert));
+  }
+
+
+  #handleNotificationSuccess(alert: NotifierAlert) {
+    this.#db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
+      "success", alert.notif.alertId
+    );
+
+    this.#logger.info(`[${alert.rule.name}](notify: success|notifier: ${alert.notifier})`);
+  }
+
+  #handleNotificationError(alert: NotifierAlert) {
+    this.#db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
+      "failed", alert.notif.alertId
+    );
+
+    this.#logger.error(`[${alert.rule.name}](notify: error|message: ${alert.error!.message})`);
   }
 
   #getRuleFromDatabase(): DbRule {
     return this.#db.prepare("SELECT * FROM rules WHERE name = ?").get(this.#config.name) as DbRule;
   }
 
-  init() {
+  init(): void {
     const databaseRule = this.#getRuleFromDatabase();
 
     if (databaseRule === undefined) {
@@ -89,8 +115,13 @@ export class Rule {
 
 
     if (rule.counter >= alertThreshold) {
-      const alert = new Alert(rule.name, { logger: this.#logger });
-      await alert.send();
+      createAlert(rule.id);
+      const ruleConfigNotifiers = this.#config.notifiers ?? [];
+      const notifiers = ruleConfigNotifiers.length > 0 ? ruleConfigNotifiers : Object.keys(getConfig().notifiers);
+
+      for (const notifier of notifiers) {
+        this.#notifier.emit(NOTIFIER_EVENTS.ALERT, { rule, notifier });
+      }
 
       this.#db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);
       this.#db.prepare("DELETE from counters WHERE ruleId = ?").run(rule.id);
