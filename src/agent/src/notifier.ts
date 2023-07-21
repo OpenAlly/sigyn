@@ -21,7 +21,7 @@ export interface NotifierAlert {
 
 /**
  * This is the global notifier.
- * We don't want a notifier rule but a global notifier shared with each rules.
+ * We don't want a notifier per rule but a global notifier shared with each rules.
  */
 let notifier: Notifier;
 
