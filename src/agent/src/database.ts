@@ -1,15 +1,10 @@
 // Import Node.js Dependencies
 import path from "node:path";
-import url from "node:url";
 import fs from "node:fs";
 
 // Import Third-party Dependencies
 import SQLite3 from "better-sqlite3";
 import { Logger } from "pino";
-
-// CONSTANTS
-const __filename = url.fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const kDefaultDatabaseFilename = process.env.SIGYN_DB ?? "sigyn.sqlite3";
 const kDatabaseInitPath = path.join(__dirname, "../data/init-db.sql");

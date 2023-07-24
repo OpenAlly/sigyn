@@ -1,12 +1,11 @@
 // NOTE: This will be redesigned & moved to @sigyn/discord.
 
-// Import Third-party Dependencies
-import pupa from "pupa";
-
 // CONSTANTS
 const kWebhookUsername = "Sigyn Agent";
 
 export async function executeWebhook(options) {
+  // pupa is ESM only, need a dynamic import for CommonJS.
+  const { default: pupa } = await import("pupa");
   const { webhookUrl, ruleConfig, rule } = options;
 
   function webhookStructure() {
