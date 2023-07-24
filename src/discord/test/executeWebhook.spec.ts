@@ -48,7 +48,7 @@ describe("executeWebhook()", () => {
 
   it("should throws if there is no title AND no content", async() => {
     await assert.rejects(async() => {
-      await discord.executeWebhook({
+      await discord.execute({
         counter: 10,
         ruleConfig: { ...kValidRuleConfig, alert: { ...kValidRuleConfig.alert, template: {} } },
         webhookUrl: kDummyWebhoobURL
@@ -65,7 +65,7 @@ describe("executeWebhook()", () => {
       path: "/"
     }).reply(200, { foo: "bar" });
 
-    const { data } = await discord.executeWebhook({
+    const { data } = await discord.execute({
       counter: 10,
       ruleConfig: kValidRuleConfig,
       webhookUrl: kDummyWebhoobURL
@@ -80,7 +80,7 @@ describe("executeWebhook()", () => {
       path: "/"
     }).reply(400, { message: "Unable to send webhook" });
 
-    await assert.rejects(async() => await discord.executeWebhook({
+    await assert.rejects(async() => await discord.execute({
       counter: 10,
       ruleConfig: kValidRuleConfig,
       webhookUrl: kDummyWebhoobURL
@@ -96,7 +96,7 @@ describe("executeWebhook()", () => {
       path: "/"
     }).reply(200, { foo: "bar" });
 
-    await assert.rejects(async() => await discord.executeWebhook({
+    await assert.rejects(async() => await discord.execute({
       counter: 10,
       ruleConfig: {
         ...kValidRuleConfig,

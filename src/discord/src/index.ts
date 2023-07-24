@@ -7,7 +7,7 @@ import { ExecuteWebhookOptions, SigynRule } from "./types";
 // CONSTANTS
 const kWebhookUsername = "Sigyn Agent";
 
-async function webhookStructure(counter: number, config: SigynRule) {
+async function formatWebhook(counter: number, config: SigynRule) {
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
 
@@ -46,10 +46,10 @@ async function webhookStructure(counter: number, config: SigynRule) {
   };
 }
 
-export async function executeWebhook(options: ExecuteWebhookOptions) {
+export async function execute(options: ExecuteWebhookOptions) {
   const { webhookUrl, counter, ruleConfig } = options;
 
-  const body = await webhookStructure(counter, ruleConfig);
+  const body = await formatWebhook(counter, ruleConfig);
 
   return httpie.post<string>(webhookUrl, {
     body,
