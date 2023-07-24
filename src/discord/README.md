@@ -1,5 +1,5 @@
 <p align="center"><h1 align="center">
-  Discord
+  Discord notifier
 </h1></p>
 
 <p align="center">
@@ -42,88 +42,26 @@ $ yarn add @sigyn/discord
 
 ## 📚 Usage
 
-```ts
-import * as discord from "@sigyn/discord";
+Add the Discord notifier to your Sigyn config:
 
-const ruleConfig = {
-  name: "test1",
-  logql: "{app=\"foo\", env=\"prod\"} |= `One of the file names does not match what is expected`",
-  polling: "1m",
-  alert: {
-    on: {
-      count: 10,
-      interval: "5m"
+```json
+
+{
+  "notifiers": {
+    "discord": {
+      "webhookUrl": "https://discord.com/api/webhooks/xxx/yyy"
     },
-    template: {
-      title: "🚨 {ruleName} - Triggered {counter} times!",
-      content: [
-        "- LogQL: `{logql}`",
-        "- Threshold: **{count}**",
-        "- Interval: **{interval}**",
-        "- Polling: **{polling}**"
-      ]
-    }
-  }
-};
-await discord.executeWebhook({
-  counter: 10,
-  ruleConfig,
-  webhookUrl: "https://discord.com/api/webhooks/xxx/yyy"
-});
-```
-## API
-
-### executeWebhook(options: ExecuteWebhookOptions): Promise<httpie.RequestResponse<string>>
-
-Execute webhook, this method allow to send a `Sigyn` alert to your discord server.
-
-```ts
-interface ExecuteWebhookOptions {
-  webhookUrl: string;
-  ruleConfig: SigynRule;
-  counter: number;
-}
-
-interface SigynRule {
-  name: string;
-  logql: string;
-  polling: string;
-  alert: SigynAlert;
-}
-
-interface SigynAlert {
-  on: {
-    count: number;
-    interval: string;
+    ...
   },
-  template: SigynAlertTemplate;
+  "rules": [
+    ...
+  ]
 }
-
-interface SigynAlertTemplate {
-  title?: string;
-  content?: string[];
-}
-
 ```
-**Template**
-
-> **Note** `SigynAlertTemplate` **must** contains at least a `title` or a `content` line. 
-
-You can use `markdown` in the `content`.
-
-You can use theses variables in both the `title` or the `content` that will be rendered depending the rule config:
-- `{ruleName}` the rule's name
-- `{counter}` the rule's counter which triggered the alert
-- `{logql}` the rule's LogQL
-- `{count}` the maximum count threshold
-- `{interval}` the rule's interval
-- `{polling}` the rule's logs polling
-
-Theses variables could be hard written in the template but it also could be useless for dynamic config and default template (**TBC**).
 
 **Webhook URL**
 
-Using Discord webhooks is very simple: go to you server settings, **APPS** > **Integrations** > **Webhooks** then choose or create the webhook and click *Copy Webhook URL* button 🎉
+Using Discord webhooks is very simple: go to you server settings, **APPS** > **Integrations** > **Webhooks** then choose or create your webhook and click **Copy Webhook URL** button 🎉
 
 ## License
 MIT
