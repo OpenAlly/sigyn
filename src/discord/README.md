@@ -48,7 +48,7 @@ Add the Discord notifier to your Sigyn config:
 
 {
   "notifiers": {
-    "discord": {
+    "@sigyn/discord": {
       "webhookUrl": "https://discord.com/api/webhooks/xxx/yyy"
     },
     ...
