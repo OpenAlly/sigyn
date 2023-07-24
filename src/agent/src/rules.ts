@@ -1,14 +1,14 @@
 // Import Third-party Dependencies
 import { GrafanaLoki } from "@myunisoft/loki";
-import SQLite3 from "better-sqlite3";
 import dayjs from "dayjs";
 import { Logger } from "pino";
 import ms from "ms";
 
 // Import Internal Dependencies
-import { DbCounter, DbRule, SigynRule } from "./types";
-import { getDB } from "./database";
+import { DbCounter, DbRule, getDB } from "./database";
 import * as utils from "./utils";
+import { createAlert } from "./alert";
+import { SigynRule } from "./config";
 
 // CONSTANTS
 const kApi = new GrafanaLoki({
@@ -21,41 +21,42 @@ export interface RuleOptions {
 
 export class Rule {
   #config: SigynRule;
-  #db: SQLite3.Database;
   #logger: Logger;
 
   constructor(rule: SigynRule, options: RuleOptions) {
-    this.#logger = options.logger;
+    const { logger } = options;
+
+    this.#logger = logger;
     this.#config = rule;
-    this.#db = getDB();
   }
+
 
   #getRuleFromDatabase(): DbRule {
-    return this.#db.prepare("SELECT * FROM rules WHERE name = ?").get(this.#config.name) as DbRule;
+    return getDB().prepare("SELECT * FROM rules WHERE name = ?").get(this.#config.name) as DbRule;
   }
 
-  init() {
+  init(): void {
     const databaseRule = this.#getRuleFromDatabase();
 
     if (databaseRule === undefined) {
-      this.#db.prepare("INSERT INTO rules (name) VALUES (?)").run(this.#config.name);
+      getDB().prepare("INSERT INTO rules (name) VALUES (?)").run(this.#config.name);
 
       this.#logger.info(`[Database] New rule '${this.#config.name}' added`);
     }
   }
 
   async handleLogs(): Promise<void> {
+    const db = getDB();
     const logs = await kApi.queryRange(this.#config.logql, {
       start: this.#getQueryRangeStartUnixTimestamp()
     });
     const rule = this.#getRuleFromDatabase();
-
     const now = dayjs().unix();
     const lasttIntervalDate = utils.durationToDate(this.#config.alert.on.interval, "subtract");
     const timeThreshold = lasttIntervalDate.unix();
 
-    const previousCounters = this.#db.prepare("SELECT * FROM counters WHERE name = ? AND timestamp >= ?").all(
-      rule.name,
+    const previousCounters = db.prepare("SELECT * FROM counters WHERE ruleId = ? AND timestamp >= ?").all(
+      rule.id,
       timeThreshold
     ) as DbCounter[];
 
@@ -64,22 +65,21 @@ export class Rule {
 
     rule.counter -= substractCounter;
     rule.counter += logs.length;
-
-    this.#db.prepare("UPDATE rules SET counter = ? WHERE name = ?").run(
+    db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(
       rule.counter,
-      rule.name
+      rule.id
     );
 
     if (logs.length) {
-      this.#db.prepare("INSERT INTO counters (name, counter, timestamp) VALUES (?, ?, ?)").run(
-        rule.name,
+      db.prepare("INSERT INTO counters (ruleId, counter, timestamp) VALUES (?, ?, ?)").run(
+        rule.id,
         logs.length,
         now
       );
     }
 
-    this.#db.prepare("DELETE FROM counters WHERE name = ? AND timestamp < ?").run(
-      rule.name,
+    db.prepare("DELETE FROM counters WHERE ruleId = ? AND timestamp < ?").run(
+      rule.id,
       timeThreshold
     );
 
@@ -90,6 +90,11 @@ export class Rule {
 
 
     if (rule.counter >= alertThreshold) {
+      createAlert(rule, this.#config, this.#logger);
+
+      db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);
+      db.prepare("DELETE from counters WHERE ruleId = ?").run(rule.id);
+
       this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
     }
   }
@@ -98,7 +103,7 @@ export class Rule {
     const rule = this.#getRuleFromDatabase();
     const now = dayjs();
 
-    this.#db.prepare("UPDATE rules SET lastRunAt = ? WHERE name = ?").run(now.unix(), rule.name);
+    getDB().prepare("UPDATE rules SET lastRunAt = ? WHERE id = ?").run(now.unix(), rule.id);
 
     if (rule.lastRunAt) {
       const diff = Math.abs(dayjs.unix(rule.lastRunAt!).diff(now, "ms"));

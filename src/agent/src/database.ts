@@ -1,20 +1,47 @@
 // Import Node.js Dependencies
 import path from "node:path";
-import url from "node:url";
 import fs from "node:fs";
 
 // Import Third-party Dependencies
 import SQLite3 from "better-sqlite3";
 import { Logger } from "pino";
 
-// CONSTANTS
-const __filename = url.fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 const kDefaultDatabaseFilename = process.env.SIGYN_DB ?? "sigyn.sqlite3";
 const kDatabaseInitPath = path.join(__dirname, "../data/init-db.sql");
 
 let db: SQLite3.Database;
+
+export interface DbRule {
+  id: number;
+  name: string;
+  counter: number;
+  lastRunAt?: number;
+}
+
+export interface DbCounter {
+  id: number;
+  name: string;
+  counter: number;
+  timestamp: number;
+}
+
+export interface DbAlert {
+  id: number;
+  createdAt: number;
+}
+
+export interface DbNotifier {
+  id: number;
+  name: string;
+}
+
+export interface DbAlertNotif {
+  id: number;
+  alertId: number;
+  notifierId: number;
+  status: "pending" | "success" | "error";
+  retries: number;
+}
 
 export interface InitDbOptions {
   /**
