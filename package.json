@@ -10,7 +10,8 @@
   "license": "MIT",
   "workspaces": [
     "src/agent",
-    "src/discord"
+    "src/discord",
+    "src/slack"
   ],
   "devDependencies": {
     "@nodesecure/eslint-config": "^1.7.1",
