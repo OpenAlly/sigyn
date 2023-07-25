@@ -70,17 +70,10 @@ export class Rule {
       rule.id
     );
 
-    if (logs.length) {
-      db.prepare("INSERT INTO counters (ruleId, counter, timestamp) VALUES (?, ?, ?)").run(
-        rule.id,
-        logs.length,
-        now
-      );
-    }
-
-    db.prepare("DELETE FROM counters WHERE ruleId = ? AND timestamp < ?").run(
+    db.prepare("INSERT INTO counters (ruleId, counter, timestamp) VALUES (?, ?, ?)").run(
       rule.id,
-      timeThreshold
+      logs.length,
+      now
     );
 
     const alertThreshold = this.#config.alert.on.count;
@@ -89,7 +82,21 @@ export class Rule {
     this.#logger.info(`[${rule.name}](state: handle|previous: ${previousCounter}|new: ${logs.length}|next: ${rule.counter}|threshold: ${alertThreshold})`);
 
 
-    if (rule.counter >= alertThreshold) {
+    const [operator, value] = utils.ruleCountThresholdOperator(alertThreshold);
+
+    if (utils.ruleCountMatchOperator(operator, rule.counter, value)) {
+      if (operator.startsWith("<")) {
+        // we checking for a max value, so we want to wait the whole interval before sending an alert
+        const counters = db.prepare("SELECT * FROM counters WHERE ruleId = ? AND timestamp <= ?").all(
+          rule.id,
+          timeThreshold
+        ) as DbCounter[];
+
+        if (counters.length === 0) {
+          return;
+        }
+      }
+
       createAlert(rule, this.#config, this.#logger);
 
       db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);
@@ -97,6 +104,11 @@ export class Rule {
 
       this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
     }
+
+    db.prepare("DELETE FROM counters WHERE ruleId = ? AND timestamp < ?").run(
+      rule.id,
+      timeThreshold
+    );
   }
 
   #getQueryRangeStartUnixTimestamp(): number {

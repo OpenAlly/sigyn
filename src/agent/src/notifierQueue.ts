@@ -26,7 +26,7 @@ export class NotifierQueue extends EventEmitter {
   push(notifs: NotifierAlert) {
     this.#queue.push(notifs);
 
-    if (this.#inProgress++ === 0) {
+    if (this.#inProgress === 0) {
       this.emit(NOTIFIER_QUEUE_EVENTS.DEQUEUE, [...this.#dequeue()]);
 
       return;
@@ -58,6 +58,7 @@ export class NotifierQueue extends EventEmitter {
         break;
       }
 
+      this.#inProgress++;
       yield this.#queue.shift();
     }
   }
