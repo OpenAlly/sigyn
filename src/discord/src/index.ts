@@ -30,14 +30,19 @@ async function formatWebhook(counter: number, config: SigynRule) {
     throw new Error("Invalid rule template: one of the title or content is required.");
   }
 
-  const templateData = { ruleName, count, counter, interval, polling, logql };
+  // displaying backtick in code snippet needs code snippet to be surround by double backtick.
+  // if the logql ends with a backtick, we need to add a space after it otherwise the string
+  // ends with triple backtick and the code snippet is done.
+  const formattedLogQL = logql.includes("`") ? `\`\`${logql.endsWith("`") ? `${logql} ` : logql}\`\`` : `\`${logql}\``;
+  const formattedTitle = templateTitle.startsWith("#") ? templateTitle : `### ${templateTitle}`;
+  const templateData = { ruleName, count, counter, interval, polling, logql: formattedLogQL };
 
   const content: string[] = templateContent.map((content) => pupa(
     content,
     templateData
   ));
   if (templateTitle) {
-    content.unshift(pupa(templateTitle, templateData));
+    content.unshift(pupa(formattedTitle, templateData));
   }
 
   return {
