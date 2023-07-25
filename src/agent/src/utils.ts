@@ -9,6 +9,10 @@ import { SigynRule } from "./config";
 // CONSTANTS
 const kOnlyDigitsRegExp = /^\d+$/;
 const kOperatorValue = /^\s*([<>]=?)\s*(\d+)\s*$/;
+const kSigynNotifiers = new Set([
+  "discord",
+  "slack"
+]);
 
 export type RuleCounterOperator = ">" | ">=" | "<" | "<=";
 export type RuleCounterOperatorValue = [RuleCounterOperator, number];
@@ -62,4 +66,12 @@ export function ruleCountMatchOperator(operator: RuleCounterOperator, counter: n
     default:
       throw new Error(`Invalid operator: ${operator}`);
   }
+}
+
+export function getNotifierPackage(notifier: string) {
+  if (kSigynNotifiers.has(notifier)) {
+    return `@sigyn/${notifier}`;
+  }
+
+  return notifier;
 }

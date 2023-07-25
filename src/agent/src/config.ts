@@ -9,9 +9,14 @@ export interface SigynConfig {
 
 export interface SigynNotifiers {
   discord?: DiscordNotifier;
+  slack?: SlackNotifier;
 }
 
 export interface DiscordNotifier {
+  webhookUrl: string;
+}
+
+export interface SlackNotifier {
   webhookUrl: string;
 }
 

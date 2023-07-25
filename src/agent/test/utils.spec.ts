@@ -123,4 +123,18 @@ describe("Utils", () => {
       });
     });
   });
+
+  describe("getNotifierPackage()", () => {
+    it("should return '@sigyn/discord' when given 'discord'", () => {
+      assert.equal(utils.getNotifierPackage("discord"), "@sigyn/discord");
+    });
+
+    it("should return '@sigyn/slack' when given 'slack'", () => {
+      assert.equal(utils.getNotifierPackage("discord"), "@sigyn/discord");
+    });
+
+    it("should return the given notifier name when it is not a Sigyn notifier", () => {
+      assert.equal(utils.getNotifierPackage("foo"), "foo");
+    });
+  });
 });
