@@ -4,7 +4,7 @@ import { Logger } from "pino";
 
 // Import Internal Dependencies
 import { Rule } from "../rules";
-import { SigynRule } from "../types";
+import { SigynRule } from "../config";
 
 export interface AsyncTaskOptions {
   logger: Logger;
