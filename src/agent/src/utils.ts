@@ -69,9 +69,5 @@ export function ruleCountMatchOperator(operator: RuleCounterOperator, counter: n
 }
 
 export function getNotifierPackage(notifier: string) {
-  if (kSigynNotifiers.has(notifier)) {
-    return `@sigyn/${notifier}`;
-  }
-
-  return notifier;
+  return kSigynNotifiers.has(notifier) ? `@sigyn/${notifier}` : notifier;
 }
