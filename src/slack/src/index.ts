@@ -14,37 +14,45 @@ async function formatWebhook(counter: number, config: SigynRule) {
         count, interval
       },
       template: {
-        title: templateTitle = "",
-        content: templateContent = []
+        title = "",
+        content = []
       }
     },
     name: ruleName,
-    polling,
     logql
   } = config;
 
-  if (templateTitle === "" && templateContent.length === 0) {
+  if (title === "" && content.length === 0) {
     throw new Error("Invalid rule template: one of the title or content is required.");
   }
 
   // Slack doesn't support backtick escape in inline code
   const formattedLogQL = `\`${logql.replaceAll("`", "'")}\``;
   // Slack doesn't support header format
-  const escapedTitle = templateTitle.startsWith("#") ? templateTitle.replace(/^#*/, "").trimStart() : templateTitle;
-  const formattedTitle = `${escapedTitle.startsWith("*") ? escapedTitle : `*${escapedTitle}*`}\n\n`;
+  const formattedTitle = `*${title}*\n\n`;
 
-  const templateData = { ruleName, count, counter, interval, polling, logql: formattedLogQL };
+  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL };
+  const templateOptions = {
+    transform: ({ value, key }) => {
+      if (value === undefined) {
+        return value;
+      }
 
-  const content: string[] = templateContent.map((content) => pupa(
-    content.replaceAll("**", "*"),
-    templateData
+      return (key === "logql" ? value : `*${value}*`);
+    }
+  };
+
+  const formattedContent: string[] = content.map((text) => pupa(
+    text,
+    templateData,
+    templateOptions
   ));
-  if (templateTitle) {
-    content.unshift(pupa(formattedTitle.replaceAll("**", "*"), templateData));
+  if (title) {
+    formattedContent.unshift(pupa(formattedTitle, templateData));
   }
 
   return {
-    text: content.join("\n")
+    text: formattedContent.join("\n")
   };
 }
 

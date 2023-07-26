@@ -22,10 +22,9 @@ const kValidRuleConfig = {
     template: {
       title: "🚨 {ruleName} - Triggered {counter} times!",
       content: [
-        "- LogQL: `{logql}`",
-        "- Threshold: **{count}**",
-        "- Interval: **{interval}**",
-        "- Polling: **{polling}**"
+        "- LogQL: {logql}",
+        "- Threshold: {count}",
+        "- Interval: {interval}"
       ]
     }
   }
