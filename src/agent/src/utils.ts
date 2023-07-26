@@ -1,6 +1,7 @@
 // Import Third-party Dependencies
 import dayjs, { type Dayjs } from "dayjs";
 import ms from "ms";
+import cronParser from "cron-parser";
 
 // Import Internal Dependencies
 import { DbRule, getDB } from "./database";
@@ -8,19 +9,25 @@ import { SigynRule } from "./config";
 
 // CONSTANTS
 const kOnlyDigitsRegExp = /^\d+$/;
-const kOperatorValue = /^\s*([<>]=?)\s*(\d+)\s*$/;
 const kSigynNotifiers = new Set([
   "discord",
   "slack"
 ]);
+const kOperatorValueRegExp = /^\s*([<>]=?)\s*(\d+)\s*$/;
+const kCronExpressionRegExp = /(((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,6}/;
 
 export type RuleCounterOperator = ">" | ">=" | "<" | "<=";
 export type RuleCounterOperatorValue = [RuleCounterOperator, number];
+export type RulePolling = [isCron: boolean, polling: string];
 
-export function durationToDate(duration: string, operation: "subtract" | "add"): Dayjs {
-  const durationMs = ms(duration);
+export function durationOrCronToDate(durationOrCron: string, operation: "subtract" | "add"): Dayjs {
+  if (kCronExpressionRegExp.test(durationOrCron)) {
+    const cron = cronParser.parseExpression(durationOrCron).next();
 
-  return dayjs()[operation](durationMs, "ms");
+    return dayjs(cron[operation === "subtract" ? "prev" : "next"]().toString());
+  }
+
+  return dayjs()[operation](ms(durationOrCron), "ms");
 }
 
 export function cleanRulesInDb(configRules: SigynRule[]) {
@@ -42,7 +49,7 @@ export function ruleCountThresholdOperator(counter: number | string): RuleCounte
     return [">=", Number(counter)];
   }
 
-  const match = counter.replace(/\s/g, "").match(kOperatorValue);
+  const match = counter.replace(/\s/g, "").match(kOperatorValueRegExp);
 
   if (!match || match.length !== 3) {
     throw new Error("Invalid count threshold format.");
@@ -70,4 +77,23 @@ export function ruleCountMatchOperator(operator: RuleCounterOperator, counter: n
 
 export function getNotifierPackage(notifier: string) {
   return kSigynNotifiers.has(notifier) ? `@sigyn/${notifier}` : notifier;
+}
+
+export function getRulePollings(polling: string | string[]): RulePolling[] {
+  if (polling.length === 0) {
+    throw new Error("Missing polling value");
+  }
+
+  if (typeof polling === "string") {
+    return [[kCronExpressionRegExp.test(polling), polling]];
+  }
+
+  const allPollingsAreCron = polling.every((value) => kCronExpressionRegExp.test(value));
+
+  if (!allPollingsAreCron) {
+    // multi polling is only supported for cron expressions
+    throw new Error("All polling values must be cron expressions");
+  }
+
+  return polling.map<RulePolling>((value) => [true, value]);
 }

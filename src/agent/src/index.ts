@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import { ToadScheduler, SimpleIntervalJob } from "toad-scheduler";
+import { ToadScheduler, CronJob, SimpleIntervalJob } from "toad-scheduler";
 import { pino } from "pino";
 import ms from "ms";
 
@@ -37,9 +37,21 @@ export async function start(
     rule.init();
 
     const task = asyncTask(ruleConfig, { rule, logger: kLogger });
-    const job = new SimpleIntervalJob({ milliseconds: ms(ruleConfig.polling), runImmediately: true }, task);
+    const rulePollings = utils.getRulePollings(ruleConfig.polling);
 
-    kScheduler.addIntervalJob(job);
+    for (const [isCron, polling] of rulePollings) {
+      if (isCron) {
+        const job = new CronJob({ cronExpression: polling }, task);
+
+        kScheduler.addCronJob(job);
+
+        continue;
+      }
+
+      const job = new SimpleIntervalJob({ milliseconds: ms(ruleConfig.polling), runImmediately: true }, task);
+
+      kScheduler.addIntervalJob(job);
+    }
   }
 
   utils.cleanRulesInDb(rules);

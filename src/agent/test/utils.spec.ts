@@ -11,13 +11,13 @@ import * as utils from "../src/utils";
 describe("Utils", () => {
   describe("durationToDate()", () => {
     it("should add one year", () => {
-      const date = utils.durationToDate("1y", "add");
+      const date = utils.durationOrCronToDate("1y", "add");
 
       assert.equal(date.get("y"), dayjs().add(1, "y").get("y"));
     });
 
     it("should subtract one year", () => {
-      const date = utils.durationToDate("1y", "subtract");
+      const date = utils.durationOrCronToDate("1y", "subtract");
 
       assert.equal(date.get("y"), dayjs().subtract(1, "y").get("y"));
     });
@@ -135,6 +135,78 @@ describe("Utils", () => {
 
     it("should return the given notifier name when it is not a Sigyn notifier", () => {
       assert.equal(utils.getNotifierPackage("foo"), "foo");
+    });
+  });
+
+  describe("getRulePollings()", () => {
+    it("should return a cron polling given a valid cron expression", () => {
+      const [[isCron, polling]] = utils.getRulePollings("*/5 * * * *");
+
+      assert.equal(isCron, true);
+      assert.equal(polling, "*/5 * * * *");
+    });
+
+    it("should be a valid cron expression given a cron with seconds (non-standard)", () => {
+      const [[isCron, polling]] = utils.getRulePollings("* * * * * *");
+
+      assert.equal(isCron, true);
+      assert.equal(polling, "* * * * * *");
+    });
+
+    it("should return a list of cron polling given a list of valid cron expression", () => {
+      const pollings = utils.getRulePollings([
+        "*/10 * 15-15,38 * * *",
+        "*/30 * 0-14 * * *",
+        "*/30 * 15,39-23 * * *"
+      ]);
+
+      assert.equal(pollings.length, 3);
+
+      for (const [isCron] of pollings) {
+        assert.equal(isCron, true);
+      }
+    });
+
+    it("should not return a cron", () => {
+      const [[isCron, polling]] = utils.getRulePollings("5m");
+
+      assert.equal(isCron, false);
+      assert.equal(polling, "5m");
+    });
+
+    it("should throw when no polling given", () => {
+      assert.throws(() => {
+        utils.getRulePollings("");
+      }, {
+        name: "Error",
+        message: "Missing polling value"
+      });
+    });
+    it("should throw when given an empty list", () => {
+      assert.throws(() => {
+        utils.getRulePollings([]);
+      }, {
+        name: "Error",
+        message: "Missing polling value"
+      });
+    });
+
+    it("should throw when a polling in the list is not a valid cron expression", () => {
+      assert.throws(() => {
+        utils.getRulePollings(["foo"]);
+      }, {
+        name: "Error",
+        message: "All polling values must be cron expressions"
+      });
+    });
+
+    it("should throw when given a list with a single polling that is not a valid cron expression", () => {
+      assert.throws(() => {
+        utils.getRulePollings(["1m"]);
+      }, {
+        name: "Error",
+        message: "All polling values must be cron expressions"
+      });
     });
   });
 });
