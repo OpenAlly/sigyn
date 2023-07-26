@@ -3,6 +3,7 @@ import { GrafanaLoki } from "@myunisoft/loki";
 import dayjs from "dayjs";
 import { Logger } from "pino";
 import ms from "ms";
+import cronParser from "cron-parser";
 
 // Import Internal Dependencies
 import { DbCounter, DbRule, getDB } from "./database";
@@ -52,7 +53,7 @@ export class Rule {
     });
     const rule = this.#getRuleFromDatabase();
     const now = dayjs().unix();
-    const lasttIntervalDate = utils.durationToDate(this.#config.alert.on.interval, "subtract");
+    const lasttIntervalDate = utils.durationOrCronToDate(this.#config.alert.on.interval, "subtract");
     const timeThreshold = lasttIntervalDate.unix();
 
     const previousCounters = db.prepare("SELECT * FROM counters WHERE ruleId = ? AND timestamp >= ?").all(
@@ -117,15 +118,45 @@ export class Rule {
 
     getDB().prepare("UPDATE rules SET lastRunAt = ? WHERE id = ?").run(now.unix(), rule.id);
 
+    const [isCron, polling] = this.#getCurrentPolling();
+
+    if (isCron) {
+      const interval = cronParser.parseExpression(polling);
+      // skip the first previous interval as it's the current one
+      interval.prev();
+
+      return dayjs(interval.prev().toString()).unix();
+    }
+
     if (rule.lastRunAt) {
       const diff = Math.abs(dayjs.unix(rule.lastRunAt!).diff(now, "ms"));
-      const maxMsDiff = ms(this.#config.polling);
 
-      if (diff <= Number(maxMsDiff)) {
+      if (diff <= Number(ms(polling))) {
         return rule.lastRunAt;
       }
     }
 
-    return utils.durationToDate(this.#config.polling, "subtract").unix();
+    return utils.durationOrCronToDate(polling, "subtract").unix();
+  }
+
+  #getCurrentPolling(): utils.RulePolling {
+    const rulePollings = utils.getRulePollings(this.#config.polling);
+
+    if (rulePollings.length === 1 && rulePollings[0][0] === false) {
+      return rulePollings[0];
+    }
+
+    let currentPolling = rulePollings[0];
+
+    for (const [, polling] of rulePollings) {
+      const currentPollingDate = dayjs(cronParser.parseExpression(currentPolling[1]).next().toString());
+      const nextCronDate = dayjs(cronParser.parseExpression(polling).next().toString());
+
+      if (nextCronDate.isBefore(currentPollingDate)) {
+        currentPolling = [true, polling];
+      }
+    }
+
+    return currentPolling;
   }
 }
