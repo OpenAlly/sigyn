@@ -1,13 +1,11 @@
 // Import Third-party Dependencies
 import { Logger } from "pino";
-import { match } from "ts-pattern";
-import { Err, Ok } from "@openally/result";
 
 // Import Internal Dependencies
 import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "./database";
 import { NOTIFIER_QUEUE_EVENTS, NotifierQueue } from "./notifierQueue";
 import { SigynNotifiers, getConfig } from "./config";
-import * as discord from "./discord/discord";
+import * as utils from "./utils";
 
 // CONSTANTS
 const kPrivateInstancier = Symbol("instancier");
@@ -67,39 +65,32 @@ export class Notifier {
 
     const db = getDB();
     const config = getConfig();
-    const ruleConfig = config.rules.find((rule) => rule.name === alert.rule.name);
-    const notifierConfig = config.notifiers[notifier];
+    const ruleConfig = config.rules.find((rule) => rule.name === alert.rule.name)!;
+    const notifierConfig = config.notifiers[notifier]!;
 
-    const result = await match(notifier)
-      .with("discord", async() => {
-        try {
-          await discord.executeWebhook({ ...notifierConfig, ruleConfig, rule: alert.rule });
+    const notifierOptions = { ...notifierConfig, ruleConfig, counter: alert.rule.counter };
+    const notifierPackage = utils.getNotifierPackage(notifier);
 
-          return Ok(void 0);
-        }
-        catch (error) {
-          return Err(error);
-        }
-      })
-      .otherwise(() => Err(`Unknown notifier: ${notifier}`));
+    try {
+      const notifier = await import(notifierPackage);
+      await notifier.execute(notifierOptions);
 
-    if (result.ok) {
       db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
         "success", alert.notif.alertId
       );
 
       this.#logger.info(`[${alert.rule.name}](notify: success|notifier: ${alert.notifier})`);
     }
-    else {
-      alert.error = result.val;
+    catch (error) {
       db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
         "failed", alert.notif.alertId
       );
 
-      this.#logger.error(`[${alert.rule.name}](notify: error|message: ${alert.error!.message})`);
+      this.#logger.error(`[${alert.rule.name}](notify: error|message: ${error.message})`);
     }
-
-    this.#queue.emit(NOTIFIER_QUEUE_EVENTS.DONE);
+    finally {
+      this.#queue.emit(NOTIFIER_QUEUE_EVENTS.DONE);
+    }
   }
 
   #databaseNotifierId(notifier: string) {

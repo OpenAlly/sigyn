@@ -15,6 +15,6 @@
     "rootDir": "./src",
     "types": ["node"]
   },
-  "include": ["src", "src/discord/discord.ts"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }
