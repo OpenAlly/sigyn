@@ -10,6 +10,7 @@ export interface SigynConfig {
 export interface SigynNotifiers {
   discord?: DiscordNotifier;
   slack?: SlackNotifier;
+  teams?: TeamsNotifier;
 }
 
 export interface DiscordNotifier {
@@ -17,6 +18,10 @@ export interface DiscordNotifier {
 }
 
 export interface SlackNotifier {
+  webhookUrl: string;
+}
+
+export interface TeamsNotifier {
   webhookUrl: string;
 }
 

@@ -11,7 +11,8 @@
   "workspaces": [
     "src/agent",
     "src/discord",
-    "src/slack"
+    "src/slack",
+    "src/teams"
   ],
   "devDependencies": {
     "@nodesecure/eslint-config": "^1.7.1",

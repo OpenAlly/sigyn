@@ -11,7 +11,8 @@ import { SigynRule } from "./config";
 const kOnlyDigitsRegExp = /^\d+$/;
 const kSigynNotifiers = new Set([
   "discord",
-  "slack"
+  "slack",
+  "teams"
 ]);
 const kOperatorValueRegExp = /^\s*([<>]=?)\s*(\d+)\s*$/;
 const kCronExpressionRegExp = /(((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,6}/;
