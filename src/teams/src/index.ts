@@ -1,8 +1,12 @@
 // Import Third-party Dependencies
 import * as httpie from "@myunisoft/httpie";
+import { SigynRule } from "@sigyn/config";
 
-// Import Internal Dependencies
-import { ExecuteWebhookOptions, SigynRule } from "./types";
+interface ExecuteWebhookOptions {
+  webhookUrl: string;
+  ruleConfig: SigynRule;
+  counter: number;
+}
 
 async function formatWebhook(counter: number, config: SigynRule) {
   // pupa is ESM only, need a dynamic import for CommonJS.

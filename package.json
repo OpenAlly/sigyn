@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Grafana Loki Alerting Agent",
   "scripts": {
-    "build": "tsc -b"
+    "build": "npm run build --ws --if-present",
+    "test": "npm run test --ws --if-present"
   },
   "keywords": [],
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
@@ -12,7 +13,8 @@
     "src/agent",
     "src/discord",
     "src/slack",
-    "src/teams"
+    "src/teams",
+    "src/config"
   ],
   "devDependencies": {
     "@nodesecure/eslint-config": "^1.7.1",

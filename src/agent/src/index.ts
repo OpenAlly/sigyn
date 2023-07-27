@@ -1,4 +1,8 @@
+// Import Node.js Dependencies
+import path from "node:path";
+
 // Import Third-party Dependencies
+import { initConfig } from "@sigyn/config";
 import { ToadScheduler, CronJob, SimpleIntervalJob } from "toad-scheduler";
 import { pino } from "pino";
 import ms from "ms";
@@ -8,7 +12,6 @@ import { initDB } from "./database";
 import { asyncTask } from "./tasks/asyncTask";
 import { Rule } from "./rules";
 import * as utils from "./utils";
-import * as config from "./config";
 
 // CONSTANTS
 const kScheduler = new ToadScheduler();
@@ -26,7 +29,7 @@ export async function start(
 
   initDB(kLogger);
 
-  const { rules } = config.initConfig(location);
+  const { rules } = initConfig(path.join(location, "/config.json"));
 
   for (const ruleConfig of rules) {
     if (ruleConfig.disabled) {
