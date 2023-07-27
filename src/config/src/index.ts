@@ -13,7 +13,6 @@ export function initConfig(path: fs.PathOrFileDescriptor): SigynConfig {
 
   config = JSON.parse(rawConfig);
 
-  // TODO: verify configs format ?
   return config;
 }
 
