@@ -22,7 +22,6 @@ async function formatWebhook(counter: number, config: SigynRule) {
       }
     },
     name: ruleName,
-    polling,
     logql
   } = config;
 
@@ -34,13 +33,18 @@ async function formatWebhook(counter: number, config: SigynRule) {
   // if the logql ends with a backtick, we need to add a space after it otherwise the string
   // ends with triple backtick and the code snippet is done.
   const formattedLogQL = logql.includes("`") ? `\`\`${logql.endsWith("`") ? `${logql} ` : logql}\`\`` : `\`${logql}\``;
-  const formattedTitle = templateTitle.startsWith("#") ? templateTitle : `### ${templateTitle}`;
-  const templateData = { ruleName, count, counter, interval, polling, logql: formattedLogQL };
+  const formattedTitle = `### ${templateTitle}`;
+  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL };
+  const contentTemplateOptions = {
+    transform: ({ value }) => (value === undefined ? value : `**${value}**`)
+  };
 
   const content: string[] = templateContent.map((content) => pupa(
     content,
-    templateData
+    templateData,
+    contentTemplateOptions
   ));
+
   if (templateTitle) {
     content.unshift(pupa(formattedTitle, templateData));
   }
