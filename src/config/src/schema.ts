@@ -2,7 +2,48 @@
 import { JSONSchemaType } from "ajv";
 
 // Import Internal Dependencies
-import { SigynConfig } from "./types";
+import { SigynAlert, SigynConfig } from "./types";
+
+const ruleAlertSchema: JSONSchemaType<SigynAlert> = {
+  type: "object",
+  properties: {
+    on: {
+      type: "object",
+      properties: {
+        count: {
+          oneOf: [
+            { type: "number" },
+            { type: "string" }
+          ]
+        },
+        interval: { type: "string" }
+      },
+      required: ["count", "interval"],
+      additionalProperties: false
+    },
+    template: {
+      type: "object",
+      properties: {
+        title: {
+          type: "string",
+          nullable: true,
+          minLength: 1
+        },
+        content: {
+          type: "array",
+          items: { type: "string" },
+          nullable: true,
+          minItems: 1
+        }
+      },
+      anyOf: [
+        { required: ["title"] },
+        { required: ["content"] }
+      ]
+    }
+  },
+  required: ["on", "template"]
+};
 
 export const CONFIG_SCHEMA: JSONSchemaType<SigynConfig> = {
   type: "object",
@@ -16,46 +57,7 @@ export const CONFIG_SCHEMA: JSONSchemaType<SigynConfig> = {
           name: { type: "string", minLength: 1 },
           logql: { type: "string", minLength: 1 },
           polling: { type: "string", minLength: 1 },
-          alert: {
-            type: "object",
-            properties: {
-              on: {
-                type: "object",
-                properties: {
-                  count: {
-                    oneOf: [
-                      { type: "number" },
-                      { type: "string" }
-                    ]
-                  },
-                  interval: { type: "string" }
-                },
-                required: ["count", "interval"],
-                additionalProperties: false
-              },
-              template: {
-                type: "object",
-                properties: {
-                  title: {
-                    type: "string",
-                    nullable: true,
-                    minLength: 1
-                  },
-                  content: {
-                    type: "array",
-                    items: { type: "string" },
-                    nullable: true,
-                    minItems: 1
-                  }
-                },
-                anyOf: [
-                  { required: ["title"] },
-                  { required: ["content"] }
-                ]
-              }
-            },
-            required: ["on", "template"]
-          },
+          alert: ruleAlertSchema,
           disabled: { type: "boolean", nullable: true },
           notifiers: {
             type: "array",
