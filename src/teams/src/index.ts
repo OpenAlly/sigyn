@@ -27,16 +27,9 @@ async function formatWebhook(counter: number, config: SigynRule) {
   }
 
   const formattedLogQL = `\`${logql.replaceAll("`", "'")}\``;
-  // eslint-disable-next-line max-len
   const templateData = { ruleName, count, counter, interval, logql: formattedLogQL };
   const textTemplateOptions = {
-    transform: ({ value, key }) => {
-      if (value === undefined) {
-        return value;
-      }
-
-      return (key === "logql" ? value : `**${value}**`);
-    }
+    transform: ({ value, key }) => (value === undefined || key === "logql" ? value : `**${value}**`)
   };
 
   const content: string[] = templateContent.map((content) => pupa(
