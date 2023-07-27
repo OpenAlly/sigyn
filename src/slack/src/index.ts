@@ -33,13 +33,7 @@ async function formatWebhook(counter: number, config: SigynRule) {
 
   const templateData = { ruleName, count, counter, interval, logql: formattedLogQL };
   const templateOptions = {
-    transform: ({ value, key }) => {
-      if (value === undefined) {
-        return value;
-      }
-
-      return (key === "logql" ? value : `*${value}*`);
-    }
+    transform: ({ value, key }) => (value === undefined || key === "logql" ? value : `*${value}*`)
   };
 
   const formattedContent: string[] = content.map((text) => pupa(
