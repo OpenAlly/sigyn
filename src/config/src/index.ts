@@ -3,6 +3,7 @@ import fs from "node:fs";
 
 // Import Internal Dependencies
 import { SigynConfig, SigynRule, SigynAlert, SigynAlertTemplate } from "./types";
+import { validate } from "./validate";
 
 export { SigynConfig, SigynRule, SigynAlert, SigynAlertTemplate };
 
@@ -12,6 +13,8 @@ export function initConfig(path: fs.PathOrFileDescriptor): SigynConfig {
   const rawConfig = fs.readFileSync(path, "utf-8");
 
   config = JSON.parse(rawConfig);
+
+  validate(config);
 
   return config;
 }
