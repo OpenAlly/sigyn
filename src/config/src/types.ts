@@ -6,7 +6,7 @@ export interface SigynConfig {
 export interface SigynRule {
   name: string;
   logql: string;
-  polling: string;
+  polling: string | string[];
   alert: SigynAlert;
   disabled?: boolean;
   notifiers?: string[];
