@@ -1,11 +1,11 @@
 // Import Third-party Dependencies
+import { SigynRule } from "@sigyn/config";
 import dayjs, { type Dayjs } from "dayjs";
 import ms from "ms";
 import cronParser from "cron-parser";
 
 // Import Internal Dependencies
 import { DbRule, getDB } from "./database";
-import { SigynRule } from "./config";
 
 // CONSTANTS
 const kOnlyDigitsRegExp = /^\d+$/;

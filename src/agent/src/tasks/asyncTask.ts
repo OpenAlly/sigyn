@@ -1,10 +1,10 @@
 // Import Third-party Dependencies
+import { SigynRule } from "@sigyn/config";
 import { AsyncTask } from "toad-scheduler";
 import { Logger } from "pino";
 
 // Import Internal Dependencies
 import { Rule } from "../rules";
-import { SigynRule } from "../config";
 
 export interface AsyncTaskOptions {
   logger: Logger;

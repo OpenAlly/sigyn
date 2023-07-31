@@ -4,7 +4,7 @@ import { Logger } from "pino";
 // Import Internal Dependencies
 import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "./database";
 import { NOTIFIER_QUEUE_EVENTS, NotifierQueue } from "./notifierQueue";
-import { SigynNotifiers, getConfig } from "./config";
+import { getConfig } from "@sigyn/config";
 import * as utils from "./utils";
 
 // CONSTANTS
@@ -12,7 +12,7 @@ const kPrivateInstancier = Symbol("instancier");
 
 export interface NotifierAlert {
   rule: DbRule;
-  notifier: keyof SigynNotifiers;
+  notifier: string;
   notif: Pick<DbAlertNotif, "alertId" | "notifierId">;
   error?: Error;
 }

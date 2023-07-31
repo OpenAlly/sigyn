@@ -1,7 +1,6 @@
-export interface ExecuteWebhookOptions {
-  webhookUrl: string;
-  ruleConfig: SigynRule;
-  counter: number;
+export interface SigynConfig {
+  notifiers: Record<string, unknown>;
+  rules: SigynRule[]
 }
 
 export interface SigynRule {
@@ -9,11 +8,13 @@ export interface SigynRule {
   logql: string;
   polling: string | string[];
   alert: SigynAlert;
+  disabled?: boolean;
+  notifiers?: string[];
 }
 
 export interface SigynAlert {
   on: {
-    count: number;
+    count: string | number;
     interval: string;
   },
   template: SigynAlertTemplate;
