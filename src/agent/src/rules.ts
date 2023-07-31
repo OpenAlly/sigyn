@@ -98,12 +98,12 @@ export class Rule {
         }
       }
 
+      this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
+
       createAlert(rule, this.#config, this.#logger);
 
       db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);
       db.prepare("DELETE from counters WHERE ruleId = ?").run(rule.id);
-
-      this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
     }
 
     db.prepare("DELETE FROM counters WHERE ruleId = ? AND timestamp < ?").run(

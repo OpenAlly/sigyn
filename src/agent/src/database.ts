@@ -6,10 +6,11 @@ import fs from "node:fs";
 import SQLite3 from "better-sqlite3";
 import { Logger } from "pino";
 
+// CONSTANTS
 const kDefaultDatabaseFilename = process.env.SIGYN_DB ?? "sigyn.sqlite3";
 const kDatabaseInitPath = path.join(__dirname, "../data/init-db.sql");
 
-let db: SQLite3.Database;
+let db: SQLite3.Database | undefined;
 
 export interface DbRule {
   id: number;
@@ -50,9 +51,19 @@ export interface InitDbOptions {
    * If no SIGYN_DB env found, default to 'sigyn.sqlite3'.
    */
   databaseFilename?: string;
+  /**
+   * If the database is already initialized, allow to override it.
+   */
+  force?: boolean;
 }
 
 export function initDB(logger: Logger, options: InitDbOptions = {}): SQLite3.Database {
+  if (db && !options.force) {
+    // This is workaround to use the initialized DB from functional tests
+    // FIXME: inject DB in options ?
+    return db;
+  }
+
   const { databaseFilename = kDefaultDatabaseFilename } = options;
   db = new SQLite3(databaseFilename);
 
