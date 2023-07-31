@@ -42,7 +42,7 @@ $ yarn add @sigyn/teams
 
 ## 📚 Usage
 
-Add the teams notifier to your Sigyn config:
+Add the Teams notifier to your Sigyn config:
 
 ```json
 
