@@ -23,7 +23,8 @@ const kLogger = pino({
 });
 
 export async function start(
-  location = process.cwd()
+  location = process.cwd(),
+  logger = kLogger
 ) {
   kLogger.info(`Starting sigyn agent at '${location}'`);
 
@@ -36,10 +37,10 @@ export async function start(
       continue;
     }
 
-    const rule = new Rule(ruleConfig, { logger: kLogger });
+    const rule = new Rule(ruleConfig, { logger });
     rule.init();
 
-    const task = asyncTask(ruleConfig, { rule, logger: kLogger });
+    const task = asyncTask(ruleConfig, { rule, logger });
     const rulePollings = utils.getRulePollings(ruleConfig.polling);
 
     for (const [isCron, polling] of rulePollings) {
@@ -58,4 +59,6 @@ export async function start(
   }
 
   utils.cleanRulesInDb(rules);
+
+  return kScheduler;
 }

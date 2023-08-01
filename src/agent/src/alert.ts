@@ -15,12 +15,12 @@ export function createAlert(rule: DbRule, ruleConfig: SigynRule, logger: Logger)
   const globalNotifiers = Object.keys(getConfig().notifiers);
   const notifierNames = ruleNotifiers.length > 0 ? ruleNotifiers : globalNotifiers;
 
-  for (const notifierName of notifierNames) {
-    notifier.sendAlert({ rule, notifier: notifierName });
-  }
-
   getDB().prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)").run(
     rule.id,
     dayjs().unix()
   );
+
+  for (const notifierName of notifierNames) {
+    notifier.sendAlert({ rule, notifier: notifierName });
+  }
 }

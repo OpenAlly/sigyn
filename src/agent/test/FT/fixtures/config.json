@@ -1,0 +1,31 @@
+{
+  "notifiers": {
+    "slack": {
+      "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"
+    },
+    "discord": {
+      "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
+    }
+  },
+  "rules": [
+    {
+      "name": "test1",
+      "logql": "{app=\"foo\", env=\"preprod\"} |= `my super logql`",
+      "polling": "1s",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1m"
+        },
+        "template": {
+          "title": "🚨 {ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}",
+            "- Threshold: {count}",
+            "- Interval: {interval}"
+          ]
+        }
+      }
+    }
+  ]
+}

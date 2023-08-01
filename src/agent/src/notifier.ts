@@ -86,7 +86,7 @@ export class Notifier {
         "failed", alert.notif.alertId
       );
 
-      this.#logger.error(`[${alert.rule.name}](notify: error|message: ${error.message})`);
+      this.#logger.error(`[${alert.rule.name}](notify: error|notifier: ${alert.notifier}|message: ${error.message})`);
     }
     finally {
       this.#queue.emit(NOTIFIER_QUEUE_EVENTS.DONE);

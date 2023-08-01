@@ -19,7 +19,7 @@
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "dev": "npm run build -- --watch",
     "prepublishOnly": "npm run build",
-    "test": "glob -c \"tsx --test\" \"./test/**/*.spec.ts\"",
+    "test": "glob -c \"tsx -r dotenv/config --test\" \"./test/**/*.spec.ts\"",
     "coverage": "c8 -r html npm test",
     "lint": "cross-env eslint src/**/*.ts"
   },

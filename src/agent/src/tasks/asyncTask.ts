@@ -18,7 +18,7 @@ export function asyncTask(ruleConfig: SigynRule, options: AsyncTaskOptions) {
     try {
       logger.info(`[${ruleConfig.name}](state: polling start|polling: ${ruleConfig.polling}|query: ${ruleConfig.logql})`);
 
-      rule.handleLogs();
+      await rule.handleLogs();
     }
     catch (e) {
       logger.error(`[${ruleConfig.name}](error: ${e.message})`);
