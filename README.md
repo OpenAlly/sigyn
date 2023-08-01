@@ -1,5 +1,4 @@
-# sigyn
-Grafana Loki Alerting Agent
+<img align="center" alt="# Sigyn" src="https://user-images.githubusercontent.com/4438263/256920053-ae303fbe-537d-44d8-8a12-cea4b5c65ad8.png">
 
 ## Contributors ✨
 
