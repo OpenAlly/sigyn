@@ -49,7 +49,7 @@ Add the Slack notifier to your Sigyn config:
 {
   "notifiers": {
     "@sigyn/slack": {
-      "webhookUrl": "https://discord.com/api/webhooks/xxx/yyy"
+      "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"
     },
     ...
   },
