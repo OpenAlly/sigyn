@@ -28,50 +28,59 @@
 
 ## ⚙️ Configuration
 
-The **Sigyn** configuration object consists of two main properties: `rules` and `notifiers`. The `rules` property defines an array of rule objects, each representing a specific monitoring rule.
+The **Sigyn** configuration object consists of three main properties: `loki`, `rules` and `notifiers`.
+The `loki` property defines an object that allows configuring Loki API access.
+The `rules` property defines an array of rule objects, each representing a specific monitoring rule.
 The `notifiers` property is an object that allows configuring various notification methods.
 
 ### Schema Properties
 
-1. `rules` (Required, Array of Objects):
-   - This property holds an array of monitoring rules.
-   - Each rule object must have the following properties:
+1. `loki` (Object, Required):
+  - This object specifies the Loki API configuration.
 
-   | Property    | Type                   | Required | Description |
-   |-------------|------------------------|----------|-------------|
-   | `name`      | `string`               | ✔️       | The name of the rule. Must be unique between each rule. |
-   | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. |
-   | `polling`   | `string` or `string[]` | ✔️       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is usefull if you want a different polling the day and the night. |
-   | `alert`     | `object`               | ✔️       | An object defining the alerting configuration for the rule. |
-   | `disabled`  | `boolean`              | ❌       | Weither the rule is enabled, default to `false`. |
-   | `notifiers` | `string[]`             | ❌       | An array of strings representing the notifiers for the rule. |
+  | Property   | Type       | Required | Description |
+  |------------|------------|----------|-------------|
+  | `apiUrl`   | `string`   | ✔️       | The Loki API url |
 
-2. `alert` (Object, Required):
-   - This object specifies the alerting configuration for the rule.
-   - It must have the following properties:
+2. `rules` (Required, Array of Objects):
+  - This property holds an array of monitoring rules.
+  - Each rule object must have the following properties:
 
-   | Property   | Type     | Required | Description |
-   |------------|----------|----------|-------------|
-   | `on`       | `object` | ✔️       | An object specifying when the alert should trigger. |
-   | `template` | `object` | ✔️       | An object representing the notification template. |
+  | Property    | Type                   | Required | Description |
+  |-------------|------------------------|----------|-------------|
+  | `name`      | `string`               | ✔️       | The name of the rule. Must be unique between each rule. |
+  | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. |
+  | `polling`   | `string` or `string[]` | ✔️       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is usefull if you want a different polling the day and the night. |
+  | `alert`     | `object`               | ✔️       | An object defining the alerting configuration for the rule. |
+  | `disabled`  | `boolean`              | ❌       | Weither the rule is enabled, default to `false`. |
+  | `notifiers` | `string[]`             | ❌       | An array of strings representing the notifiers for the rule. It will enables all configured `notifiers` by default. |
 
-3. `on` (Object, Required):
-   - An object specifying when the alert should trigger.
-   - It must have the following properties:
+3. `rules.alert` (Object, Required):
+  - This object specifies the alerting configuration for the rule.
+  - It must have the following properties:
 
-   | Property   | Type                 | Required | Description |
-   |------------|----------------------|----------|-------------|
-   | `count`    | `number` or `string` | ✔️       | The count threshold of log that must triggers an alert. You can use a range string i.e. `<= 5`, `> 6`. |
-   | `interval` | `string`             | ✔️       | The time interval for the alerting condition. |
+  | Property   | Type     | Required | Description |
+  |------------|----------|----------|-------------|
+  | `on`       | `object` | ✔️       | An object specifying when the alert should trigger. |
+  | `template` | `object` | ✔️       | An object representing the notification template. |
 
-4. `template` (Object, Required):
-   - An object representing the notification template.
-   - It can have either of the following properties:
+4. `rules.alert.on` (Object, Required):
+  - An object specifying when the alert should trigger.
+  - It must have the following properties:
 
-   | Property   | Type       | Required | Description |
-   |------------|------------|----------|-------------|
-   | `title`    | `string`   | ❌       | The title of the notification template. |
-   | `content`  | `string[]` | ❌       | The content of the notification template. |
+  | Property   | Type                 | Required | Description |
+  |------------|----------------------|----------|-------------|
+  | `count`    | `number` or `string` | ✔️       | The count threshold of log that must triggers an alert. You can use a range string i.e. `<= 5`, `> 6`. |
+  | `interval` | `string`             | ✔️       | The time interval for the alerting condition. |
+
+5. `rules.alert.template` (Object, Required):
+  - An object representing the notification template.
+  - It can have either of the following properties:
+
+  | Property   | Type       | Required | Description |
+  |------------|------------|----------|-------------|
+  | `title`    | `string`   | ❌       | The title of the notification template. |
+  | `content`  | `string[]` | ❌       | The content of the notification template. |
 
 > **Note** At least one of `title` or `content` must be provided.
 
@@ -98,6 +107,9 @@ You can use any of theses variables, surrounding with `{}` (see example below):
 
 ```json
 {
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
   "notifiers": {
     "slack": {
       "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"

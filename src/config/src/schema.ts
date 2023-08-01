@@ -48,6 +48,13 @@ const ruleAlertSchema: JSONSchemaType<SigynAlert> = {
 export const CONFIG_SCHEMA: JSONSchemaType<SigynConfig> = {
   type: "object",
   properties: {
+    loki: {
+      type: "object",
+      properties: {
+        apiUrl: { type: "string", minLength: 1 }
+      },
+      required: ["apiUrl"]
+    },
     rules: {
       type: "array",
       uniqueItemProperties: ["name"],
@@ -59,7 +66,7 @@ export const CONFIG_SCHEMA: JSONSchemaType<SigynConfig> = {
           polling: {
             oneOf: [
               { type: "string", minLength: 1 },
-              { type: "array", items: { type: "string", minLength: 1 }, minLength: 1 }
+              { type: "array", items: { type: "string", minLength: 1 }, minItems: 1 }
             ]
           },
           alert: ruleAlertSchema,
@@ -78,6 +85,6 @@ export const CONFIG_SCHEMA: JSONSchemaType<SigynConfig> = {
       additionalProperties: true
     }
   },
-  required: ["rules", "notifiers"],
+  required: ["loki", "rules", "notifiers"],
   additionalProperties: false
 };

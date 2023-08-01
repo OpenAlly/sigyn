@@ -1,6 +1,11 @@
 export interface SigynConfig {
+  loki: LokiConfig;
   notifiers: Record<string, unknown>;
   rules: SigynRule[]
+}
+
+export interface LokiConfig {
+  apiUrl: string;
 }
 
 export interface SigynRule {
