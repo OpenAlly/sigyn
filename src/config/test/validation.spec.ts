@@ -7,6 +7,9 @@ import { validate } from "../src/validate";
 import { SigynConfig } from "../src/types";
 
 const kValidConfig: SigynConfig = {
+  loki: {
+    apiUrl: "http://localhost:3100"
+  },
   notifiers: {
     foo: {
       bar: "baz"
@@ -39,6 +42,44 @@ describe("Config validation", () => {
   it("should validate a valid config", () => {
     assert.doesNotThrow(() => {
       validate(kValidConfig);
+    });
+  });
+
+  it("given a config without loki", () => {
+    assert.throws(() => {
+      validate({
+        ...kValidConfig,
+        loki: undefined as any
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: : must have required property 'loki'"
+    });
+  });
+
+  it("given a config without loki apiUrl, it should throws", () => {
+    assert.throws(() => {
+      validate({
+        ...kValidConfig,
+        loki: {} as any
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /loki: must have required property 'apiUrl'"
+    });
+  });
+
+  it("loki apiUrl must be string", () => {
+    assert.throws(() => {
+      validate({
+        ...kValidConfig,
+        loki: {
+          apiUrl: 42 as any
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /loki/apiUrl: must be string"
     });
   });
 
@@ -296,7 +337,7 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule polling should not be empty", () => {
+  it("rule polling should not be empty string", () => {
     assert.throws(() => {
       validate({
         ...kValidConfig,
@@ -309,7 +350,58 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/polling: must NOT have fewer than 1 characters"
+      // eslint-disable-next-line max-len
+      message: "Invalid config: /rules/0/polling: must NOT have fewer than 1 characters, /rules/0/polling: must be array, /rules/0/polling: must match exactly one schema in oneOf"
+    });
+  });
+
+  it("rule polling should not be empty array", () => {
+    assert.throws(() => {
+      validate({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            polling: []
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      // eslint-disable-next-line max-len
+      message: "Invalid config: /rules/0/polling: must be string, /rules/0/polling: must NOT have fewer than 1 items, /rules/0/polling: must match exactly one schema in oneOf"
+    });
+  });
+
+  it("rule polling should not be empty string in array", () => {
+    assert.throws(() => {
+      validate({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            polling: ["* * * * *", ""]
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      // eslint-disable-next-line max-len
+      message: "Invalid config: /rules/0/polling: must be string, /rules/0/polling/1: must NOT have fewer than 1 characters, /rules/0/polling: must match exactly one schema in oneOf"
+    });
+  });
+
+  it("rule polling can be string array", () => {
+    assert.doesNotThrow(() => {
+      validate({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            polling: ["* * * * *"]
+          }
+        ]
+      });
     });
   });
 

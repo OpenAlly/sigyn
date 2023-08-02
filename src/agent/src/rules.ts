@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import { SigynRule } from "@sigyn/config";
+import { SigynRule, getConfig } from "@sigyn/config";
 import { GrafanaLoki } from "@myunisoft/loki";
 import dayjs from "dayjs";
 import ms from "ms";
@@ -11,10 +11,6 @@ import * as utils from "./utils";
 import { createAlert } from "./alert";
 import { Logger } from ".";
 
-// CONSTANTS
-const kApi = new GrafanaLoki({
-  remoteApiURL: "https://loki.myunisoft.fr"
-});
 
 export interface RuleOptions {
   logger: Logger;
@@ -48,7 +44,11 @@ export class Rule {
 
   async handleLogs(): Promise<void> {
     const db = getDB();
-    const logs = await kApi.queryRange(this.#config.logql, {
+    const lokiApi = new GrafanaLoki({
+      remoteApiURL: getConfig().loki.apiUrl
+    });
+
+    const logs = await lokiApi.queryRange(this.#config.logql, {
       start: this.#getQueryRangeStartUnixTimestamp()
     });
     const rule = this.#getRuleFromDatabase();
