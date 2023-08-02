@@ -41,7 +41,7 @@ describe("Sigyn Agent", () => {
 
     setGlobalDispatcher(kMockAgent);
 
-    const grafanaPool = kMockAgent.get("https://loki.myunisoft.fr");
+    const grafanaPool = kMockAgent.get("http://localhost:3100");
     const grafanaResponseOptions = { headers: { "Content-Type": "application/json" } };
     grafanaPool.intercept({
       path: () => true
