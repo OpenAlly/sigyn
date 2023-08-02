@@ -37,6 +37,8 @@ describe("Sigyn Agent", () => {
       fs.mkdirSync(".temp");
     }
 
+    process.env.GRAFANA_API_TOKEN = "toto";
+
     initDB(logger, { databaseFilename: ".temp/test-agent.sqlite3" });
 
     setGlobalDispatcher(kMockAgent);
