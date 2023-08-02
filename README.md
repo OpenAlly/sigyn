@@ -1,5 +1,87 @@
 <img align="center" alt="# Sigyn" src="https://user-images.githubusercontent.com/4438263/256920053-ae303fbe-537d-44d8-8a12-cea4b5c65ad8.png">
 
+<p align="center">
+  <h1 align="center">Sigyn</h1>
+</p>
+
+<p align="center">
+  Loki alerting agent monorepo
+</p>
+
+<p align="center">
+  <a href="https://github.com/MyUnisoft/sigyn">
+    <img src="https://img.shields.io/github/license/MyUnisoft/sigyn?style=for-the-badge" alt="license">
+  </a>
+  <a href="https://github.com/MyUnisoft/sigyn">
+    <img src="https://img.shields.io/maintenance/yes/2023?style=for-the-badge" alt="maintained">
+  </a>
+  <a href="https://api.securityscorecards.dev/projects/github.com/MyUnisoft/sigyn">
+    <img src="https://api.securityscorecards.dev/projects/github.com/MyUnisoft/sigyn/badge?style=for-the-badge" alt="ossf scorecard">
+  </a>
+  <a href="https://github.com/MyUnisoft/sigyn">
+    <img src="https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript" alt="typescript">
+  </a>
+  <a href="https://github.com/MyUnisoft/sigyn">
+    <img src="https://img.shields.io/static/v1?&label=module&message=ESM%20and%20CJS&color=9cf&style=for-the-badge" alt="esm-cjs">
+  </a>
+</p>
+
+## 🚧 Requirements
+- npm v7+ for [workspaces](https://docs.npmjs.com/cli/v7/using-npm/workspaces)
+
+## 📦 Available packages
+
+Click on one of the links to access the documentation of the package:
+
+### Core
+
+| name | package and link |
+| --- | --- |
+| agent | [@sigyn/agent](./src/agent) |
+| config | [@sigyn/config](./src/config) |
+
+### Notifiers
+| name | package and link |
+| --- | --- |
+| discord | [@sigyn/discord](./src/discord/) |
+| slack | [@sigyn/slack](./src/slack) |
+| teams | [@sigyn/teams](./src/teams) |
+
+These packages are available in the Node Package Repository and can be easily installed with [npm](https://docs.npmjs.com/getting-started/what-is-npm) or [yarn](https://yarnpkg.com).
+
+```bash
+$ npm i @sigyn/agent
+# or
+$ yarn add @sigyn/agent
+```
+
+## 🔨 Build
+To install and compile all workspaces, just run the following commands at the root
+
+```bash
+$ npm ci
+$ npm run build
+```
+
+## 🧪 Test
+Run test for all workspaces
+```bash
+npm run test
+```
+
+Or running test of a single workspace
+
+```bash
+$ npm run test -w <workspace>
+```
+
+## 📤 Publishing package
+Each package has its own `prepublishOnly` to build TypeScript source before publishing.
+
+```bash
+$ npm publish -w <workspace>
+```
+
 ## Contributors ✨
 
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
