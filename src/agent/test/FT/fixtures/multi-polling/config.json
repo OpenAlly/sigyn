@@ -1,4 +1,7 @@
 {
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
   "notifiers": {
     "slack": {
       "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"

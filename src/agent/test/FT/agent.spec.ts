@@ -37,11 +37,13 @@ describe("Sigyn Agent", () => {
       fs.mkdirSync(".temp");
     }
 
+    process.env.GRAFANA_API_TOKEN = "toto";
+
     initDB(logger, { databaseFilename: ".temp/test-agent.sqlite3" });
 
     setGlobalDispatcher(kMockAgent);
 
-    const grafanaPool = kMockAgent.get("https://loki.myunisoft.fr");
+    const grafanaPool = kMockAgent.get("http://localhost:3100");
     const grafanaResponseOptions = { headers: { "Content-Type": "application/json" } };
     grafanaPool.intercept({
       path: () => true
