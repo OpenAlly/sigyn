@@ -28,21 +28,33 @@
 
 ## ⚙️ Configuration
 
-The **Sigyn** configuration object consists of three main properties: `loki`, `rules` and `notifiers`.
+The **Sigyn** configuration object consists of theses properties: `loki`, `templates`, `rules` and `notifiers`.
+
+### Required
 The `loki` property defines an object that allows configuring Loki API access.
 The `rules` property defines an array of rule objects, each representing a specific monitoring rule.
 The `notifiers` property is an object that allows configuring various notification methods.
 
+### Optional
+The `templates` property defines an object that allows to reuse **template** in any rule.
+
 ### Schema Properties
 
-1. `loki` (Object, Required):
+- `loki` (Object, Required):
   - This object specifies the Loki API configuration.
 
   | Property   | Type       | Required | Description |
   |------------|------------|----------|-------------|
   | `apiUrl`   | `string`   | ✔️       | The Loki API url |
 
-2. `rules` (Required, Array of Objects):
+- `templates` (Object, Optional):
+  - This object specifies the Loki API configuration.
+
+  | Property           | Type     | Required | Description |
+  |--------------------|----------|----------|-------------|
+  | `[string: string]` | `object` | ✔️       | A record of template object that can have either of `title` or `content` properties (**See below**) |
+
+- `rules` (Required, Array of Objects):
   - This property holds an array of monitoring rules.
   - Each rule object must have the following properties:
 
@@ -55,16 +67,16 @@ The `notifiers` property is an object that allows configuring various notificati
   | `disabled`  | `boolean`              | ❌       | Weither the rule is enabled, default to `false`. |
   | `notifiers` | `string[]`             | ❌       | An array of strings representing the notifiers for the rule. It will enables all configured `notifiers` by default. |
 
-3. `rules.alert` (Object, Required):
+- `rules.alert` (Object, Required):
   - This object specifies the alerting configuration for the rule.
   - It must have the following properties:
 
   | Property   | Type     | Required | Description |
   |------------|----------|----------|-------------|
   | `on`       | `object` | ✔️       | An object specifying when the alert should trigger. |
-  | `template` | `object` | ✔️       | An object representing the notification template. |
+  | `template` | `object` or `string` | ✔️       | An object or a string representing the notification template. |
 
-4. `rules.alert.on` (Object, Required):
+- `rules.alert.on` (Object, Required):
   - An object specifying when the alert should trigger.
   - It must have the following properties:
 
@@ -73,8 +85,8 @@ The `notifiers` property is an object that allows configuring various notificati
   | `count`    | `number` or `string` | ✔️       | The count threshold of log that must triggers an alert. You can use a range string i.e. `<= 5`, `> 6`. |
   | `interval` | `string`             | ✔️       | The time interval for the alerting condition. |
 
-5. `rules.alert.template` (Object, Required):
-  - An object representing the notification template.
+- `rules.alert.template` (Object or String, Required):
+  - CAn be an object representing the notification template or a string refering to a root template.
   - It can have either of the following properties:
 
   | Property   | Type       | Required | Description |
@@ -110,6 +122,11 @@ You can use any of theses variables, surrounding with `{}` (see example below):
   "loki": {
     "apiUrl": "http://localhost:3100"
   },
+  "templates": {
+    "onlyTitle": {
+      "title": "🚨 {ruleName} - Triggered {counter} times!"
+    }
+  }
   "notifiers": {
     "slack": {
       "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"
@@ -142,6 +159,18 @@ You can use any of theses variables, surrounding with `{}` (see example below):
             "- Interval: {interval}"
           ]
         }
+      }
+    },
+    {
+      "name": "test2",
+      "logql": "{app=\"foo\", env=\"preprod\"} |= `your awesome logql`",
+      "polling": "30s",
+      "alert": {
+        "on": {
+          "count": "< 10",
+          "interval": "5m"
+        },
+        "template": "onlyTitle"
       }
     }
   ]

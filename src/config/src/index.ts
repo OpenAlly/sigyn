@@ -2,10 +2,10 @@
 import fs from "node:fs";
 
 // Import Internal Dependencies
-import { SigynConfig, LokiConfig, SigynRule, SigynAlert, SigynAlertTemplate } from "./types";
+import { SigynConfig, LokiConfig, SigynRule, NotifierFormattedSigynRule, SigynAlert, SigynAlertTemplate } from "./types";
 import { validate } from "./validate";
 
-export { SigynConfig, LokiConfig, SigynRule, SigynAlert, SigynAlertTemplate };
+export { SigynConfig, LokiConfig, SigynRule, NotifierFormattedSigynRule, SigynAlert, SigynAlertTemplate };
 
 let config: SigynConfig;
 
