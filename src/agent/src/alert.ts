@@ -1,6 +1,5 @@
 // Import Third-party Dependencies
 import dayjs from "dayjs";
-import { Logger } from "pino";
 
 // Import Third-party Dependencies
 import { SigynRule, getConfig } from "@sigyn/config";
@@ -8,6 +7,7 @@ import { SigynRule, getConfig } from "@sigyn/config";
 // Import Internal Dependencies
 import { DbRule, getDB } from "./database";
 import { Notifier } from "./notifier";
+import { Logger } from ".";
 
 export function createAlert(rule: DbRule, ruleConfig: SigynRule, logger: Logger) {
   const notifier = Notifier.getNotifier(logger);

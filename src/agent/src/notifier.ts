@@ -1,11 +1,11 @@
 // Import Third-party Dependencies
-import { Logger } from "pino";
+import { getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "./database";
 import { NOTIFIER_QUEUE_EVENTS, NotifierQueue } from "./notifierQueue";
-import { getConfig } from "@sigyn/config";
 import * as utils from "./utils";
+import { Logger } from ".";
 
 // CONSTANTS
 const kPrivateInstancier = Symbol("instancier");

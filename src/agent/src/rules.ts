@@ -2,7 +2,6 @@
 import { SigynRule } from "@sigyn/config";
 import { GrafanaLoki } from "@myunisoft/loki";
 import dayjs from "dayjs";
-import { Logger } from "pino";
 import ms from "ms";
 import cronParser from "cron-parser";
 
@@ -10,6 +9,7 @@ import cronParser from "cron-parser";
 import { DbCounter, DbRule, getDB } from "./database";
 import * as utils from "./utils";
 import { createAlert } from "./alert";
+import { Logger } from ".";
 
 // CONSTANTS
 const kApi = new GrafanaLoki({

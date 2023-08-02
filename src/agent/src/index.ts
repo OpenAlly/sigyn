@@ -22,9 +22,14 @@ const kLogger = pino({
   } : undefined
 });
 
+export interface Logger {
+  info: (message: string) => void;
+  error: (message: string) => void;
+}
+
 export async function start(
   location = process.cwd(),
-  logger = kLogger
+  logger: Logger = kLogger
 ) {
   kLogger.info(`Starting sigyn agent at '${location}'`);
 
