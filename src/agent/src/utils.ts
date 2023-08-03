@@ -6,6 +6,7 @@ import cronParser from "cron-parser";
 
 // Import Internal Dependencies
 import { DbRule, getDB } from "./database";
+import { DEFAULT_POLLING } from "./rules";
 
 // CONSTANTS
 const kOnlyDigitsRegExp = /^\d+$/;
@@ -80,11 +81,7 @@ export function getNotifierPackage(notifier: string) {
   return kSigynNotifiers.has(notifier) ? `@sigyn/${notifier}` : notifier;
 }
 
-export function getRulePollings(polling: string | string[]): RulePolling[] {
-  if (polling.length === 0) {
-    throw new Error("Missing polling value");
-  }
-
+export function getRulePollings(polling: SigynRule["polling"] = DEFAULT_POLLING): RulePolling[] {
   if (typeof polling === "string") {
     return [[kCronExpressionRegExp.test(polling), polling]];
   }

@@ -11,6 +11,8 @@ import * as utils from "./utils";
 import { createAlert } from "./alert";
 import { Logger } from ".";
 
+// CONSTANTS
+export const DEFAULT_POLLING = "1m";
 
 export interface RuleOptions {
   logger: Logger;

@@ -10,7 +10,7 @@ import ms from "ms";
 // Import Internal Dependencies
 import { initDB } from "./database";
 import { asyncTask } from "./tasks/asyncTask";
-import { Rule } from "./rules";
+import { DEFAULT_POLLING, Rule } from "./rules";
 import * as utils from "./utils";
 
 // CONSTANTS
@@ -57,7 +57,7 @@ export async function start(
         continue;
       }
 
-      const job = new SimpleIntervalJob({ milliseconds: ms(ruleConfig.polling), runImmediately: true }, task);
+      const job = new SimpleIntervalJob({ milliseconds: ms(ruleConfig.polling ?? DEFAULT_POLLING), runImmediately: true }, task);
 
       kScheduler.addIntervalJob(job);
     }
