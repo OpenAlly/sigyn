@@ -80,10 +80,12 @@ export const CONFIG_SCHEMA: JSONSchemaType<SigynConfig> = {
           name: { type: "string", minLength: 1 },
           logql: { type: "string", minLength: 1 },
           polling: {
+            type: ["null", "string", "array"],
             oneOf: [
               { type: "string", minLength: 1 },
               { type: "array", items: { type: "string", minLength: 1 }, minItems: 1 }
-            ]
+            ],
+            nullable: true
           },
           alert: ruleAlertSchema,
           disabled: { type: "boolean", nullable: true },
@@ -93,7 +95,7 @@ export const CONFIG_SCHEMA: JSONSchemaType<SigynConfig> = {
             nullable: true
           }
         },
-        required: ["name", "logql", "polling", "alert"]
+        required: ["name", "logql", "alert"]
       }
     },
     notifiers: {

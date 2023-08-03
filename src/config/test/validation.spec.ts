@@ -436,20 +436,17 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule polling should be required", () => {
-    assert.throws(() => {
+  it("rule polling should be optional", () => {
+    assert.doesNotThrow(() => {
       validate({
         ...kValidConfig,
         rules: [
           {
             ...kValidConfig.rules[0],
-            polling: undefined as any
+            polling: undefined
           }
         ]
       });
-    }, {
-      name: "Error",
-      message: "Invalid config: /rules/0: must have required property 'polling'"
     });
   });
 

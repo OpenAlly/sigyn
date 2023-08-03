@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 
 // Import Internal Dependencies
 import * as utils from "../src/utils";
+import { DEFAULT_POLLING } from "../src/rules";
 
 describe("Utils", () => {
   describe("durationToDate()", () => {
@@ -174,21 +175,11 @@ describe("Utils", () => {
       assert.equal(polling, "5m");
     });
 
-    it("should throw when no polling given", () => {
-      assert.throws(() => {
-        utils.getRulePollings("");
-      }, {
-        name: "Error",
-        message: "Missing polling value"
-      });
-    });
-    it("should throw when given an empty list", () => {
-      assert.throws(() => {
-        utils.getRulePollings([]);
-      }, {
-        name: "Error",
-        message: "Missing polling value"
-      });
+    it("should get default polling when no polling given", () => {
+      const [[isCron, polling]] = utils.getRulePollings();
+
+      assert.equal(isCron, false);
+      assert.equal(polling, DEFAULT_POLLING);
     });
 
     it("should throw when a polling in the list is not a valid cron expression", () => {

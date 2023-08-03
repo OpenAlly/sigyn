@@ -62,7 +62,7 @@ The `templates` property defines an object that allows to reuse **template** in 
   |-------------|------------------------|----------|-------------|
   | `name`      | `string`               | ✔️       | The name of the rule. Must be unique between each rule. |
   | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. |
-  | `polling`   | `string` or `string[]` | ✔️       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is usefull if you want a different polling the day and the night. |
+  | `polling`   | `string` or `string[]` | ❌       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is usefull if you want a different polling the day and the night. Default to  `1m`. |
   | `alert`     | `object`               | ✔️       | An object defining the alerting configuration for the rule. |
   | `disabled`  | `boolean`              | ❌       | Weither the rule is enabled, default to `false`. |
   | `notifiers` | `string[]`             | ❌       | An array of strings representing the notifiers for the rule. It will enables all configured `notifiers` by default. |
@@ -193,14 +193,19 @@ Returns the previously initialized **Sigyn** config.
 
 ```ts
 interface SigynConfig {
+  loki: LokiConfig;
   notifiers: Record<string, unknown>;
   rules: SigynRule[]
+}
+
+interface LokiConfig {
+  apiUrl: string;
 }
 
 interface SigynRule {
   name: string;
   logql: string;
-  polling: string;
+  polling?: string | string[];
   alert: SigynAlert;
   disabled?: boolean;
   notifiers?: string[];
@@ -208,7 +213,7 @@ interface SigynRule {
 
 interface SigynAlert {
   on: {
-    count: number;
+    count: string | number;
     interval: string;
   },
   template: SigynAlertTemplate;
