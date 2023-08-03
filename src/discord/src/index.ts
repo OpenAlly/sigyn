@@ -4,6 +4,8 @@ import { NotifierFormattedSigynRule } from "@sigyn/config";
 
 // CONSTANTS
 const kWebhookUsername = "Sigyn Agent";
+// https://gist.github.com/thomasbnt/b6f455e2c7d743b796917fa3c205f812
+const kEmbedColor = 15548997;
 
 interface ExecuteWebhookOptions {
   webhookUrl: string;
@@ -37,7 +39,6 @@ async function formatWebhook(counter: number, config: NotifierFormattedSigynRule
   // if the logql ends with a backtick, we need to add a space after it otherwise the string
   // ends with triple backtick and the code snippet is done.
   const formattedLogQL = logql.includes("`") ? `\`\`${logql.endsWith("`") ? `${logql} ` : logql}\`\`` : `\`${logql}\``;
-  const formattedTitle = `### ${templateTitle}`;
   const templateData = { ruleName, count, counter, interval, logql: formattedLogQL };
   const contentTemplateOptions = {
     transform: ({ value }) => (value === undefined ? value : `**${value}**`)
@@ -49,12 +50,12 @@ async function formatWebhook(counter: number, config: NotifierFormattedSigynRule
     contentTemplateOptions
   ));
 
-  if (templateTitle) {
-    content.unshift(pupa(formattedTitle, templateData));
-  }
-
   return {
-    content: content.join("\n"),
+    embeds: [{
+      title: pupa(templateTitle, templateData),
+      description: content.join("\n"),
+      color: kEmbedColor
+    }],
     username: kWebhookUsername
   };
 }
