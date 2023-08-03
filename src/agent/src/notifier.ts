@@ -68,6 +68,11 @@ export class Notifier {
     const ruleConfig = config.rules.find((rule) => rule.name === alert.rule.name)!;
     const notifierConfig = config.notifiers[notifier]!;
 
+    const ruleTemplate = ruleConfig.alert.template;
+    if (typeof ruleTemplate === "string") {
+      ruleConfig.alert.template = config.templates[ruleTemplate]!;
+    }
+
     const notifierOptions = { ...notifierConfig, ruleConfig, counter: alert.rule.counter };
     const notifierPackage = utils.getNotifierPackage(notifier);
 

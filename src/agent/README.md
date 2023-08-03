@@ -47,7 +47,6 @@ $ touch .env
 ```
 
 Add these variables:
-```
 
 ```Dotenv
 # Required

@@ -1,7 +1,8 @@
 export interface SigynConfig {
   loki: LokiConfig;
   notifiers: Record<string, unknown>;
-  rules: SigynRule[]
+  rules: SigynRule[];
+  templates?: Record<string, SigynAlertTemplate>;
 }
 
 export interface LokiConfig {
@@ -17,12 +18,16 @@ export interface SigynRule {
   notifiers?: string[];
 }
 
+export type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {
+  alert: Omit<SigynAlert, "template"> & { template: SigynAlertTemplate };
+}
+
 export interface SigynAlert {
   on: {
     count: string | number;
     interval: string;
   },
-  template: SigynAlertTemplate;
+  template: string | SigynAlertTemplate;
 }
 
 export interface SigynAlertTemplate {

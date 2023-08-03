@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // Import Node.js Dependencies
 import assert from "node:assert";
 import { describe, it } from "node:test";
@@ -102,6 +103,19 @@ describe("Config validation", () => {
     });
   });
 
+  it("given a root template with only title, it should validate", () => {
+    assert.doesNotThrow(() => {
+      validate({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            title: "foo"
+          }
+        }
+      });
+    });
+  });
+
   it("given a rule template with only content, it should validate", () => {
     assert.doesNotThrow(() => {
       validate({
@@ -117,6 +131,19 @@ describe("Config validation", () => {
             }
           }
         ]
+      });
+    });
+  });
+
+  it("given a root template with only cotnent, it should validate", () => {
+    assert.doesNotThrow(() => {
+      validate({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          }
+        }
       });
     });
   });
@@ -139,7 +166,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/template/title: must NOT have fewer than 1 characters"
+      message: "Invalid config: /rules/0/alert/template/title: must NOT have fewer than 1 characters, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
     });
   });
 
@@ -161,7 +188,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/template/content: must NOT have fewer than 1 items"
+      message: "Invalid config: /rules/0/alert/template/content: must NOT have fewer than 1 items, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
     });
   });
 
@@ -184,7 +211,24 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/template/title: must NOT have fewer than 1 characters"
+      message: "Invalid config: /rules/0/alert/template/title: must NOT have fewer than 1 characters, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
+    });
+  });
+
+  it("given a root template with empty title and valid content, it should throws", () => {
+    assert.throws(() => {
+      validate({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            title: "",
+            content: ["foo"]
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /templates/foo/title: must NOT have fewer than 1 characters"
     });
   });
 
@@ -198,7 +242,7 @@ describe("Config validation", () => {
             alert: {
               ...kValidConfig.rules[0].alert,
               template: {
-                title: "",
+                title: "test",
                 content: []
               }
             }
@@ -207,7 +251,24 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/template/title: must NOT have fewer than 1 characters"
+      message: "Invalid config: /rules/0/alert/template/content: must NOT have fewer than 1 items, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
+    });
+  });
+
+  it("given a root template with empty content and valid title, it should throws", () => {
+    assert.throws(() => {
+      validate({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            title: "test",
+            content: []
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /templates/foo/content: must NOT have fewer than 1 items"
     });
   });
 
@@ -227,8 +288,63 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
-      message: "Invalid config: /rules/0/alert/template: must have required property 'title', /rules/0/alert/template: must have required property 'content', /rules/0/alert/template: must match a schema in anyOf"
+      message: "Invalid config: /rules/0/alert/template: must have required property 'title', /rules/0/alert/template: must have required property 'content', /rules/0/alert/template: must match a schema in anyOf, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
+    });
+  });
+
+  it("given a root template without title and content, it should throws", () => {
+    assert.throws(() => {
+      validate({
+        ...kValidConfig,
+        templates: {
+          foo: {}
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /templates/foo: must have required property 'title', /templates/foo: must have required property 'content', /templates/foo: must match a schema in anyOf"
+    });
+  });
+
+  it("given root rule template, it should validate", () => {
+    assert.doesNotThrow(() => {
+      validate({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          }
+        },
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              template: "foo"
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("given an unknown root rule template, it should throws", () => {
+    assert.throws(() => {
+      validate({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              template: "foo"
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Template 'foo' not found"
     });
   });
 
@@ -350,7 +466,6 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
       message: "Invalid config: /rules/0/polling: must NOT have fewer than 1 characters, /rules/0/polling: must be array, /rules/0/polling: must match exactly one schema in oneOf"
     });
   });
@@ -368,7 +483,6 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
       message: "Invalid config: /rules/0/polling: must be string, /rules/0/polling: must NOT have fewer than 1 items, /rules/0/polling: must match exactly one schema in oneOf"
     });
   });
@@ -386,7 +500,6 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
       message: "Invalid config: /rules/0/polling: must be string, /rules/0/polling/1: must NOT have fewer than 1 characters, /rules/0/polling: must match exactly one schema in oneOf"
     });
   });
@@ -484,7 +597,6 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
       message: "Invalid config: /rules/0/alert/on/count: must be number, /rules/0/alert/on/count: must be string, /rules/0/alert/on/count: must match exactly one schema in oneOf"
     });
   });

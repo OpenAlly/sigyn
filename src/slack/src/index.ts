@@ -1,14 +1,14 @@
 // Import Third-party Dependencies
 import * as httpie from "@myunisoft/httpie";
-import { SigynRule } from "@sigyn/config";
+import { NotifierFormattedSigynRule } from "@sigyn/config";
 
 interface ExecuteWebhookOptions {
   webhookUrl: string;
-  ruleConfig: SigynRule;
+  ruleConfig: NotifierFormattedSigynRule;
   counter: number;
 }
 
-async function formatWebhook(counter: number, config: SigynRule) {
+async function formatWebhook(counter: number, config: NotifierFormattedSigynRule) {
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
 

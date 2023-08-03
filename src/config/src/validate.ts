@@ -16,8 +16,22 @@ export function validate(config: SigynConfig) {
   if (!validate(config)) {
     throw new Error(`Invalid config: ${buildValidationErrorMessage(validate.errors!)}`);
   }
+
+  validateTemplate(config);
 }
 
 function buildValidationErrorMessage(errors: ErrorObject[]) {
   return errors.map((err) => `${err.instancePath}: ${err.message}`).join(", ");
+}
+
+function validateTemplate(config: SigynConfig) {
+  for (const rule of config.rules) {
+    if (typeof rule.alert.template === "string") {
+      const template = config.templates?.[rule.alert.template];
+
+      if (template === undefined) {
+        throw new Error(`Template '${rule.alert.template}' not found`);
+      }
+    }
+  }
 }

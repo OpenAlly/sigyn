@@ -2,7 +2,28 @@
 import { JSONSchemaType } from "ajv";
 
 // Import Internal Dependencies
-import { SigynAlert, SigynConfig } from "./types";
+import { SigynAlert, SigynAlertTemplate, SigynConfig } from "./types";
+
+const templateSchema: JSONSchemaType<SigynAlertTemplate> = {
+  type: "object",
+  properties: {
+    title: {
+      type: "string",
+      nullable: true,
+      minLength: 1
+    },
+    content: {
+      type: "array",
+      items: { type: "string" },
+      nullable: true,
+      minItems: 1
+    }
+  },
+  anyOf: [
+    { required: ["title"] },
+    { required: ["content"] }
+  ]
+};
 
 const ruleAlertSchema: JSONSchemaType<SigynAlert> = {
   type: "object",
@@ -22,23 +43,9 @@ const ruleAlertSchema: JSONSchemaType<SigynAlert> = {
       additionalProperties: false
     },
     template: {
-      type: "object",
-      properties: {
-        title: {
-          type: "string",
-          nullable: true,
-          minLength: 1
-        },
-        content: {
-          type: "array",
-          items: { type: "string" },
-          nullable: true,
-          minItems: 1
-        }
-      },
-      anyOf: [
-        { required: ["title"] },
-        { required: ["content"] }
+      oneOf: [
+        templateSchema,
+        { type: "string", minLength: 1 }
       ]
     }
   },
@@ -54,6 +61,15 @@ export const CONFIG_SCHEMA: JSONSchemaType<SigynConfig> = {
         apiUrl: { type: "string", minLength: 1 }
       },
       required: ["apiUrl"]
+    },
+    templates: {
+      type: "object",
+      patternProperties: {
+        "^.*$": templateSchema
+      },
+      nullable: true,
+      additionalProperties: false,
+      required: []
     },
     rules: {
       type: "array",
