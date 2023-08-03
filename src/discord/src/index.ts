@@ -11,10 +11,10 @@ interface ExecuteWebhookOptions {
   webhookUrl: string;
   ruleConfig: NotifierFormattedSigynRule;
   counter: number;
-  labels?: Record<string, string>;
+  label?: Record<string, string>;
 }
 
-async function formatWebhook(counter: number, config: NotifierFormattedSigynRule, labels?: Record<string, string>) {
+async function formatWebhook(counter: number, config: NotifierFormattedSigynRule, label?: Record<string, string>) {
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
 
@@ -40,7 +40,7 @@ async function formatWebhook(counter: number, config: NotifierFormattedSigynRule
   // if the logql ends with a backtick, we need to add a space after it otherwise the string
   // ends with triple backtick and the code snippet is done.
   const formattedLogQL = logql.includes("`") ? `\`\`${logql.endsWith("`") ? `${logql} ` : logql}\`\`` : `\`${logql}\``;
-  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, ...labels };
+  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label };
   const contentTemplateOptions = {
     transform: ({ value }) => (value === undefined ? value : `**${value}**`)
   };
@@ -62,9 +62,9 @@ async function formatWebhook(counter: number, config: NotifierFormattedSigynRule
 }
 
 export async function execute(options: ExecuteWebhookOptions) {
-  const { webhookUrl, counter, ruleConfig, labels } = options;
+  const { webhookUrl, counter, ruleConfig, label } = options;
 
-  const body = await formatWebhook(counter, ruleConfig, labels);
+  const body = await formatWebhook(counter, ruleConfig, label);
 
   return httpie.post<string>(webhookUrl, {
     body,

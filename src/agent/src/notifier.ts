@@ -77,7 +77,7 @@ export class Notifier {
       ...notifierConfig,
       ruleConfig,
       counter: alert.rule.counter,
-      labels: utils.parseLogQLLabels(ruleConfig.logql)
+      label: utils.parseLogQLLabels(ruleConfig.logql)
     };
     const notifierPackage = utils.getNotifierPackage(notifier);
 
