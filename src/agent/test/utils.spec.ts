@@ -200,4 +200,13 @@ describe("Utils", () => {
       });
     });
   });
+
+  describe("parseLogQLLabels()", () => {
+    it("should parse labels", () => {
+      const logql = "{app=\"foo\", env=\"preprod\"} |= `my super logql`";
+      const labels = utils.parseLogQLLabels(logql);
+
+      assert.deepStrictEqual(labels, { app: "foo", env: "preprod" });
+    });
+  });
 });
