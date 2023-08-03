@@ -60,7 +60,7 @@ MODE=dev
 ### Add Sigyn config
 
 ```bash
-$ touch config.json
+$ touch sigyn.config.json
 ```
 
 Please see [here](../config/README.md#example-configuration) for config documentation

@@ -177,6 +177,21 @@ You can use any of theses variables, surrounding with `{}` (see example below):
 }
 ```
 
+## 🧠 Visual Studio Code JSON schema
+
+You can easily enjoy autocompletion & documentation from JSON schema for your `sigyn.config.json` on Visual Studio Code.
+
+1. Go in settings. <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> -> **Preferences: Open User Settings (JSON)**
+2. Add the JSON Schema:
+```json
+"json.schemas": [
+  {
+    "fileMatch": ["sigyn.config.json"],
+    "url":  "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schema.json"
+  }
+]
+```
+
 ## 🌐 API
 
 ### `initConfig(path: fs.PathOrFileDescriptor): SigynConfig`
