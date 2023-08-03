@@ -8,7 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/MyUnisoft/sigyn/src/agent">
-    <img src="https://img.shields.io/github/package-json/v/sigyn/agent?style=for-the-badge" alt="npm version">
+    <img src="https://img.shields.io/github/package-json/v/MyUnisoft/sigyn/main/src/agent?style=for-the-badge&label=version" alt="npm version">
   </a>
    <a href="https://github.com/MyUnisoft/sigyn/tree/main/src/agent">
     <img src="https://img.shields.io/npm/dw/@sigyn/discord?style=for-the-badge" alt="download">
