@@ -1,22 +1,6 @@
 {
   "type": "object",
   "properties": {
-    "loki": {
-      "title": "Specify the Loki API Configuration",
-      "description": "The Loki API configuration is used to query for log data.",
-      "type": "object",
-      "properties": {
-        "apiUrl": {
-          "title": "The Loki API url",
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "required": [
-        "apiUrl"
-      ],
-      "additionalProperties": false
-    },
     "templates": {
       "title": "Specify the Alert Templates",
       "description": "A record of template objects that can be used in the \"rules\" section.",
@@ -208,27 +192,10 @@
       "uniqueItemProperties": [
         "name"
       ]
-    },
-    "notifiers": {
-      "title": "Specify the notifiers configurations",
-      "description": "Each notifier has its own configuration",
-      "type": "object",
-      "additionalProperties": true
-    },
-    "extends": {
-      "title": "Specify the configuration to extend",
-      "description": "The path to the configuration to extend that can have either rules & templates.",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "nullable": true
     }
   },
   "required": [
-    "loki",
-    "rules",
-    "notifiers"
+    "rules"
   ],
   "additionalProperties": false
 }

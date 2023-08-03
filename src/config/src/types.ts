@@ -3,6 +3,7 @@ export interface SigynConfig {
   notifiers: Record<string, unknown>;
   rules: SigynRule[];
   templates?: Record<string, SigynAlertTemplate>;
+  extends?: string[];
 }
 
 export interface LokiConfig {
