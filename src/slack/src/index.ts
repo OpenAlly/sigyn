@@ -6,9 +6,10 @@ interface ExecuteWebhookOptions {
   webhookUrl: string;
   ruleConfig: NotifierFormattedSigynRule;
   counter: number;
+  label?: Record<string, string>;
 }
 
-async function formatWebhook(counter: number, config: NotifierFormattedSigynRule) {
+async function formatWebhook(counter: number, config: NotifierFormattedSigynRule, label?: Record<string, string>) {
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
 
@@ -35,7 +36,7 @@ async function formatWebhook(counter: number, config: NotifierFormattedSigynRule
   // Slack doesn't support header format
   const formattedTitle = `*${title}*\n\n`;
 
-  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL };
+  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label };
   const templateOptions = {
     transform: ({ value, key }) => (value === undefined || key === "logql" ? value : `*${value}*`)
   };
@@ -55,9 +56,9 @@ async function formatWebhook(counter: number, config: NotifierFormattedSigynRule
 }
 
 export async function execute(options: ExecuteWebhookOptions) {
-  const { webhookUrl, counter, ruleConfig } = options;
+  const { webhookUrl, counter, ruleConfig, label } = options;
 
-  const body = await formatWebhook(counter, ruleConfig);
+  const body = await formatWebhook(counter, ruleConfig, label);
 
   return httpie.post<string>(webhookUrl, {
     body,

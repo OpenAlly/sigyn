@@ -70,10 +70,15 @@ export class Notifier {
 
     const ruleTemplate = ruleConfig.alert.template;
     if (typeof ruleTemplate === "string") {
-      ruleConfig.alert.template = config.templates[ruleTemplate]!;
+      ruleConfig.alert.template = config.templates![ruleTemplate]!;
     }
 
-    const notifierOptions = { ...notifierConfig, ruleConfig, counter: alert.rule.counter };
+    const notifierOptions = {
+      ...notifierConfig,
+      ruleConfig,
+      counter: alert.rule.counter,
+      label: utils.parseLogQLLabels(ruleConfig.logql)
+    };
     const notifierPackage = utils.getNotifierPackage(notifier);
 
     try {
