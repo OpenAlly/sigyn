@@ -48,11 +48,11 @@ The `templates` property defines an object that allows to reuse **template** in 
   | `apiUrl`   | `string`   | ✔️       | The Loki API url |
 
 - `templates` (Object, Optional):
-  - This object specifies the Loki API configuration.
+  - This object specifies templates to be used in the `rules`.
 
-  | Property           | Type     | Required | Description |
-  |--------------------|----------|----------|-------------|
-  | `[string: string]` | `object` | ✔️       | A record of template object that can have either of `title` or `content` properties (**See below**) |
+  | Property       | Type     | Required | Description |
+  |----------------|----------|----------|-------------|
+  | `[key:string]` | `object` | ✔️       | A record of template object that can have either of `title` or `content` properties (**See below**) |
 
 - `rules` (Required, Array of Objects):
   - This property holds an array of monitoring rules.

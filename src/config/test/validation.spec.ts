@@ -463,7 +463,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/polling: must NOT have fewer than 1 characters, /rules/0/polling: must be array, /rules/0/polling: must match exactly one schema in oneOf"
+      message: "Invalid config: /rules/0/polling: must NOT have fewer than 1 characters, /rules/0/polling: must be array, /rules/0/polling: must match a schema in anyOf"
     });
   });
 
@@ -480,7 +480,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/polling: must be string, /rules/0/polling: must NOT have fewer than 1 items, /rules/0/polling: must match exactly one schema in oneOf"
+      message: "Invalid config: /rules/0/polling: must be string, /rules/0/polling: must NOT have fewer than 1 items, /rules/0/polling: must match a schema in anyOf"
     });
   });
 
@@ -497,7 +497,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/polling: must be string, /rules/0/polling/1: must NOT have fewer than 1 characters, /rules/0/polling: must match exactly one schema in oneOf"
+      message: "Invalid config: /rules/0/polling: must be string, /rules/0/polling/1: must NOT have fewer than 1 characters, /rules/0/polling: must match a schema in anyOf"
     });
   });
 

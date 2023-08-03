@@ -4,14 +4,14 @@ import ajvKeywords from "ajv-keywords";
 
 // Import Internal Dependencies
 import { SigynConfig } from "./types";
-import { CONFIG_SCHEMA } from "./schema";
+import configSchema from "./schema.json";
 
 // CONSTANTS
 const kAjv = new Ajv();
 ajvKeywords(kAjv);
 
 export function validate(config: SigynConfig) {
-  const validate = kAjv.compile(CONFIG_SCHEMA);
+  const validate = kAjv.compile(configSchema);
 
   if (!validate(config)) {
     throw new Error(`Invalid config: ${buildValidationErrorMessage(validate.errors!)}`);
