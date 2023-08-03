@@ -7,7 +7,7 @@
     "module": "ES2022",
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "resolveJsonModule": false,
+    "resolveJsonModule": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
