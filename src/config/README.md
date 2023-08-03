@@ -113,6 +113,20 @@ You can use any of theses variables, surrounding with `{}` (see example below):
 - `counter`
 - `interval`
 
+You can also use a label variable from your LogQL using `{label.x}`:
+```json
+{
+  ...
+  "logql": "{app=\"foo\", env=\"preprod\"} |= `my super logql`",
+  "template": {
+    "content": [
+      "app: {label.app} | env: {label.env}"
+    ]
+  }
+  ...
+}
+```
+
 > **Note** You **MUST NOT** use markdown in `title` or `content`, this is handled by notifiers.
 
 ### Example configuration
