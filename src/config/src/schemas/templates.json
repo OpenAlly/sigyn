@@ -1,0 +1,38 @@
+{
+  "$id": "sigyn://templates.json",
+  "title": "Specify the Alert Templates",
+  "description": "A record of template objects that can be used in the \"rules\" section.",
+  "type": "object",
+  "properties": {
+    "title": {
+      "title": "The title of the alert",
+      "description": "The behavior will depends on the notifiers. For example with Discord, the title will be used as the embed title. However with Slack, it's equivalent to leave the title and have it as the first content line.\nYou can use any of theses variables, surrounding with '{}':\n- ruleName\n- logql\n- counter\n- count\n- interval\nYou can also use a label variable from your LogQL using {label.x}",
+      "type": "string",
+      "nullable": true,
+      "minLength": 1
+    },
+    "content": {
+      "title": "The content of the alert",
+      "description": "An array of string.\nYou can use any of theses variables, surrounding with '{}':\n- ruleName\n- logql\n- counter\n- count\n- interval\nYou can also use a label variable from your LogQL using {label.x}",
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "nullable": true,
+      "minItems": 1
+    }
+  },
+  "anyOf": [
+    {
+      "required": [
+        "title"
+      ]
+    },
+    {
+      "required": [
+        "content"
+      ]
+    }
+  ],
+  "additionalProperties": false
+}

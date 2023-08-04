@@ -1,0 +1,117 @@
+{
+  "$id": "sigyn://rules.json",
+  "title": "Specify the Alert Rules",
+  "description": "An array of rule objects, each representing a specific monitoring rule.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "title": "The name of the rule",
+        "description": "Shall be unique and non-empty.",
+        "type": "string",
+        "minLength": 1
+      },
+      "logql": {
+        "title": "The logql used to fetch logs from Loki",
+        "type": "string",
+        "minLength": 1
+      },
+      "polling": {
+        "title": "The polling interval defines how often Sigyn will fetch logs from Loki",
+        "description": "Can be a duration string (e.g. '1m', '1h', '1d') or a cron expression (e.g. '* * * * *', '*/2 * * * *').\nMultiple polling is supported with cron expression only.\nIf not specified, the default value is '1m' (1 minute).",
+        "anyOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "minItems": 1
+          }
+        ]
+      },
+      "alert": {
+        "title": "The alert configuration",
+        "description": "Defines how Sigyn will trigger and send an alert.",
+        "type": "object",
+        "properties": {
+          "on": {
+            "title": "Defines how Sigyn will trigger an alert",
+            "type": "object",
+            "properties": {
+              "count": {
+                "title": "The number of logs to trigger an alert",
+                "description": "Can be a number or a range string (e.g. '< 4', '>= 5'). By default, the operator is '>=', it means that if no operator specified, the alert will be triggered when the number of logs is greater or equal to the count value.",
+                "oneOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "string"
+                  }
+                ]
+              },
+              "interval": {
+                "title": "The interval of time in which the logs will be counted",
+                "description": "A duration string (e.g. '1m', '1h', '1d').",
+                "type": "string"
+              }
+            },
+            "required": [
+              "count",
+              "interval"
+            ],
+            "additionalProperties": false
+          },
+          "template": {
+            "title": "The template used to send the alert",
+            "description": "Can be a string or an object.\nIf it's a string, it must be a reference to a root template key.\nIf it's an object, it will be used as the template itself.",
+            "oneOf": [
+              {
+                "$ref": "sigyn://templates.json"
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ]
+          }
+        },
+        "required": [
+          "on",
+          "template"
+        ],
+        "additionalProperties": false
+      },
+      "disabled": {
+        "title": "Disable the rule",
+        "description": "If true, the rule will be disabled.",
+        "type": "boolean",
+        "nullable": true
+      },
+      "notifiers": {
+        "title": "The notifiers used to send the alert",
+        "description": "An array of notifier names. Theses notifiers must be installed.\nSigyn notifiers can be unscopped (e.g. 'discord') or scopped (e.g. '@sigyn/discord').\nIf not specified, default to each notifiers configured.",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "nullable": true
+      }
+    },
+    "required": [
+      "name",
+      "logql",
+      "alert"
+    ],
+    "additionalProperties": false
+  },
+  "uniqueItemProperties": [
+    "name"
+  ]
+}

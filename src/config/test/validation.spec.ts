@@ -4,7 +4,7 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 
 // Import Internal Dependencies
-import { validate } from "../src/validate";
+import { validateConfig } from "../src/validate";
 import { SigynConfig } from "../src/types";
 
 const kValidConfig: SigynConfig = {
@@ -42,13 +42,13 @@ const kValidConfig: SigynConfig = {
 describe("Config validation", () => {
   it("should validate a valid config", () => {
     assert.doesNotThrow(() => {
-      validate(kValidConfig);
+      validateConfig(kValidConfig);
     });
   });
 
   it("given a config without loki", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         loki: undefined as any
       });
@@ -60,7 +60,7 @@ describe("Config validation", () => {
 
   it("given a config without loki apiUrl, it should throws", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         loki: {} as any
       });
@@ -72,7 +72,7 @@ describe("Config validation", () => {
 
   it("loki apiUrl must be string", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         loki: {
           apiUrl: 42 as any
@@ -86,7 +86,7 @@ describe("Config validation", () => {
 
   it("given a rule template with only title, it should validate", () => {
     assert.doesNotThrow(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -105,7 +105,7 @@ describe("Config validation", () => {
 
   it("given a root template with only title, it should validate", () => {
     assert.doesNotThrow(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         templates: {
           foo: {
@@ -118,7 +118,7 @@ describe("Config validation", () => {
 
   it("given a rule template with only content, it should validate", () => {
     assert.doesNotThrow(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -137,7 +137,7 @@ describe("Config validation", () => {
 
   it("given a root template with only cotnent, it should validate", () => {
     assert.doesNotThrow(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         templates: {
           foo: {
@@ -150,7 +150,7 @@ describe("Config validation", () => {
 
   it("given a rule template with empty title, it should throws", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -172,7 +172,7 @@ describe("Config validation", () => {
 
   it("given a rule template with empty content, it should throws", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -194,7 +194,7 @@ describe("Config validation", () => {
 
   it("given a rule template with empty title and valid content, it should throws", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -217,7 +217,7 @@ describe("Config validation", () => {
 
   it("given a root template with empty title and valid content, it should throws", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         templates: {
           foo: {
@@ -234,7 +234,7 @@ describe("Config validation", () => {
 
   it("given a rule template with empty content and valid title, it should throws", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -257,7 +257,7 @@ describe("Config validation", () => {
 
   it("given a root template with empty content and valid title, it should throws", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         templates: {
           foo: {
@@ -274,7 +274,7 @@ describe("Config validation", () => {
 
   it("given a rule template without title and content, it should throws", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -294,7 +294,7 @@ describe("Config validation", () => {
 
   it("given a root template without title and content, it should throws", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         templates: {
           foo: {}
@@ -308,7 +308,7 @@ describe("Config validation", () => {
 
   it("given root rule template, it should validate", () => {
     assert.doesNotThrow(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         templates: {
           foo: {
@@ -330,7 +330,7 @@ describe("Config validation", () => {
 
   it("given an unknown root rule template, it should throws", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -350,7 +350,7 @@ describe("Config validation", () => {
 
   it("rule name should be required", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -367,7 +367,7 @@ describe("Config validation", () => {
 
   it("rule name should not be empty", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -384,7 +384,7 @@ describe("Config validation", () => {
 
   it("rule name should be unique", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -404,7 +404,7 @@ describe("Config validation", () => {
 
   it("rule logql should be required", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -421,7 +421,7 @@ describe("Config validation", () => {
 
   it("rule logql should not be empty", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -438,7 +438,7 @@ describe("Config validation", () => {
 
   it("rule polling should be optional", () => {
     assert.doesNotThrow(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -452,7 +452,7 @@ describe("Config validation", () => {
 
   it("rule polling should not be empty string", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -469,7 +469,7 @@ describe("Config validation", () => {
 
   it("rule polling should not be empty array", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -486,7 +486,7 @@ describe("Config validation", () => {
 
   it("rule polling should not be empty string in array", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -503,7 +503,7 @@ describe("Config validation", () => {
 
   it("rule polling can be string array", () => {
     assert.doesNotThrow(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -517,7 +517,7 @@ describe("Config validation", () => {
 
   it("rule alert should be required", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -534,7 +534,7 @@ describe("Config validation", () => {
 
   it("rule alert property 'on' should be required", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -554,7 +554,7 @@ describe("Config validation", () => {
 
   it("rule alert property 'on.count' should be required", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -577,7 +577,7 @@ describe("Config validation", () => {
 
   it("rule alert property 'on.count' should be string or number", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -600,7 +600,7 @@ describe("Config validation", () => {
 
   it("rule alert property 'on.interval' should be required", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -623,7 +623,7 @@ describe("Config validation", () => {
 
   it("rule alert property 'on.interval' should be a string", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {
@@ -646,7 +646,7 @@ describe("Config validation", () => {
 
   it("rule alert property 'on' should not have additional properties", () => {
     assert.throws(() => {
-      validate({
+      validateConfig({
         ...kValidConfig,
         rules: [
           {

@@ -207,11 +207,11 @@ You can easily enjoy autocompletion & documentation from JSON schema for your `s
 "json.schemas": [
   {
     "fileMatch": ["*.sigyn.config.json"],
-    "url":  "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/extendedConfigSchema.json"
+    "url":  "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/extendedConfigSchema.json"
   },
   {
     "fileMatch": ["sigyn.config.json"],
-    "url":  "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schema.json"
+    "url":  "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/configSchema.json"
   }
 ]
 ```
@@ -232,14 +232,22 @@ Returns the previously initialized **Sigyn** config.
 
 Validate Sigyn configuration against an internal AJV Schema.
 
+### `validateExtendedConfig(config: ExtendedSigynConfig): void`
+
+Validate Sigyn extended configuration against an internal AJV Schema.
+
 ## 🖋️ Interfaces
 
 ```ts
 interface SigynConfig {
   loki: LokiConfig;
   notifiers: Record<string, unknown>;
-  rules: SigynRule[]
+  rules: SigynRule[];
+  templates?: Record<string, SigynAlertTemplate>;
+  extends?: string[];
 }
+
+type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
 
 interface LokiConfig {
   apiUrl: string;
@@ -254,12 +262,16 @@ interface SigynRule {
   notifiers?: string[];
 }
 
+type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {
+  alert: Omit<SigynAlert, "template"> & { template: SigynAlertTemplate };
+}
+
 interface SigynAlert {
   on: {
     count: string | number;
     interval: string;
   },
-  template: SigynAlertTemplate;
+  template: string | SigynAlertTemplate;
 }
 
 interface SigynAlertTemplate {

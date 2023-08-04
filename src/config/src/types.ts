@@ -6,6 +6,8 @@ export interface SigynConfig {
   extends?: string[];
 }
 
+export type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
+
 export interface LokiConfig {
   apiUrl: string;
 }

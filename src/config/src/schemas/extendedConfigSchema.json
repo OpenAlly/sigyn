@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "rules": {
+      "$ref": "sigyn://rules.json"
+    },
+    "templates": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "sigyn://templates.json"
+        }
+      }
+    }
+  },
+  "required": [
+    "rules"
+  ]
+}
