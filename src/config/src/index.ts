@@ -9,6 +9,8 @@ export { SigynConfig, LokiConfig, SigynRule, NotifierFormattedSigynRule, SigynAl
 
 let config: SigynConfig;
 
+export const validateConfig = validate;
+
 export function initConfig(path: fs.PathOrFileDescriptor): SigynConfig {
   const rawConfig = fs.readFileSync(path, "utf-8");
 

@@ -215,6 +215,10 @@ Returns the previously initialized **Sigyn** config.
 
 > **Note** If you try to get config while the config has not been initialied, it will throws.
 
+### `validateConfig(config: SigynConfig): void`
+
+Validate Sigyn configuration against an internal AJV Schema.
+
 ## 🖋️ Interfaces
 
 ```ts
