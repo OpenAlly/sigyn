@@ -29,11 +29,16 @@ The **Sigyn** configuration object consists of theses properties: `loki`, `templ
 
 ### Required
 The `loki` property defines an object that allows configuring Loki API access.
+
 The `rules` property defines an array of rule objects, each representing a specific monitoring rule.
+
 The `notifiers` property is an object that allows configuring various notification methods.
 
 ### Optional
 The `templates` property defines an object that allows to reuse **template** in any rule.
+
+The `extends` property defines an array of the configurations **paths** to extends from.
+Theses configurations can have only `rules` and `templates` properties which works the same way as the main configuration.
 
 ### Schema Properties
 
@@ -50,6 +55,10 @@ The `templates` property defines an object that allows to reuse **template** in 
   | Property       | Type     | Required | Description |
   |----------------|----------|----------|-------------|
   | `[key:string]` | `object` | ✔️       | A record of template object that can have either of `title` or `content` properties (**See below**) |
+
+- `extends` (String[], Optional):
+  - This array specifies the configuration paths to extends from.
+  - The paths can be either `foo` or `foo.sigyn.config.json` where the `foo` configuration file **must** be `foo.sigyn.config.json`.
 
 - `rules` (Required, Array of Objects):
   - This property holds an array of monitoring rules.
@@ -193,12 +202,16 @@ You can also use a label variable from your LogQL using `{label.x}`:
 You can easily enjoy autocompletion & documentation from JSON schema for your `sigyn.config.json` on Visual Studio Code.
 
 1. Go in settings. <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> -> **Preferences: Open User Settings (JSON)**
-2. Add the JSON Schema:
+2. Add the JSON Schemas:
 ```json
 "json.schemas": [
   {
+    "fileMatch": ["*.sigyn.config.json"],
+    "url":  "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/extendedConfigSchema.json"
+  },
+  {
     "fileMatch": ["sigyn.config.json"],
-    "url":  "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schema.json"
+    "url":  "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/configSchema.json"
   }
 ]
 ```
@@ -219,14 +232,22 @@ Returns the previously initialized **Sigyn** config.
 
 Validate Sigyn configuration against an internal AJV Schema.
 
+### `validateExtendedConfig(config: ExtendedSigynConfig): void`
+
+Validate Sigyn extended configuration against an internal AJV Schema.
+
 ## 🖋️ Interfaces
 
 ```ts
 interface SigynConfig {
   loki: LokiConfig;
   notifiers: Record<string, unknown>;
-  rules: SigynRule[]
+  rules: SigynRule[];
+  templates?: Record<string, SigynAlertTemplate>;
+  extends?: string[];
 }
+
+type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
 
 interface LokiConfig {
   apiUrl: string;
@@ -241,12 +262,16 @@ interface SigynRule {
   notifiers?: string[];
 }
 
+type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {
+  alert: Omit<SigynAlert, "template"> & { template: SigynAlertTemplate };
+}
+
 interface SigynAlert {
   on: {
     count: string | number;
     interval: string;
   },
-  template: SigynAlertTemplate;
+  template: string | SigynAlertTemplate;
 }
 
 interface SigynAlertTemplate {

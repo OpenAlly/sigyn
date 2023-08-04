@@ -1,0 +1,21 @@
+{
+  "templates": {
+    "foo": {
+      "title": "🚨 {ruleName} - Triggered {counter} times!"
+    }
+  },
+  "rules": [
+    {
+      "name": "fooRule",
+      "logql": "{app=\"foo\", env=\"preprod\"} |= `my super logql`",
+      "polling": "1s",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1m"
+        },
+        "template": "foo"
+      }
+    }
+  ]
+}

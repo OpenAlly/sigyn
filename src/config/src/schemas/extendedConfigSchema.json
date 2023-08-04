@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "rules": {
+      "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/rules.json"
+    },
+    "templates": {
+      "type": "object",
+      "patternProperties": {
+        "^.*$": {
+          "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/templates.json"
+        }
+      }
+    }
+  },
+  "required": [
+    "rules"
+  ]
+}
