@@ -17,31 +17,29 @@ export interface NotifierAlert {
   error?: Error;
 }
 
-/**
- * This is the global notifier.
- * We don't want a notifier per rule but a global notifier shared with each rules.
- */
-let notifier: Notifier;
-
 export class Notifier {
+  /**
+   * This is the global notifier.
+   * We don't want a notifier per rule but a global notifier shared with each rules.
+   */
+  private static shared: Notifier;
+
   #queue = new NotifierQueue();
   #logger: Logger;
 
   constructor(logger: Logger, instancier: symbol) {
     if (instancier !== kPrivateInstancier) {
-      throw new Error("Cannot instanciate NotifierQueue, use NotifierQueue.getNotifier instead");
+      throw new Error("Cannot instanciate NotifierQueue, use NotifierQueue.getSharedInstance instead");
     }
 
     this.#logger = logger;
     this.#queue.on(NOTIFIER_QUEUE_EVENTS.DEQUEUE, (alert) => this.#sendNotifications(alert));
   }
 
-  static getNotifier(logger: Logger): Notifier {
-    if (notifier === undefined) {
-      notifier = new Notifier(logger, kPrivateInstancier);
-    }
+  static getSharedInstance(logger: Logger): Notifier {
+    this.shared ??= new Notifier(logger, kPrivateInstancier);
 
-    return notifier;
+    return this.shared;
   }
 
   sendAlert(alert: Omit<NotifierAlert, "notif">) {
