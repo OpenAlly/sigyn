@@ -102,6 +102,22 @@
           "type": "string"
         },
         "nullable": true
+      },
+      "labelFilters": {
+        "title": "The label filters used to filter logs",
+        "description": "An array of label filters. Each label filter is a Loki label filter (e.g. '{job=\"my-job\"}').\nEach filter duplicates the rule with the updated LogQL.",
+        "type": "object",
+        "patternProperties": {
+          "^.*$": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          }
+        },
+        "minProperties": 1,
+        "nullable": true
       }
     },
     "required": [
