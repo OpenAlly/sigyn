@@ -16,14 +16,14 @@ describe("Utils", () => {
         },
         {
           name: "bar",
-          logql: "my super logql",
+          logql: "{{label.env}} |= `my super logql`",
           labelFilters: {
             env: ["prod", "dev"]
           }
         },
         {
           name: "baz",
-          logql: "{app=\"foo\"} |= `my super logql`",
+          logql: "{app=\"foo\", {label.env}} |= `my super logql`",
           labelFilters: {
             env: ["prod", "dev"]
           }
@@ -68,19 +68,12 @@ describe("Utils", () => {
     });
   });
 
-  describe("updateLogqlWithLabelFilters()", () => {
+  describe("fillLogqlLabelFilters()", () => {
     it("should add the label filter to a logql with existing labels", () => {
-      const logql = "{app=\"foo\"} |= `my super logql`";
+      const logql = "{app=\"foo\", {label.env}} |= `my super logql`";
 
-      const result = utils.updateLogqlWithLabelFilters(logql, "env", "prod");
+      const result = utils.fillLogqlLabelFilters(logql, "env", "prod");
       assert.equal(result, "{app=\"foo\", env=\"prod\"} |= `my super logql`");
-    });
-
-    it("should add the label filter to a logql without existing labels", () => {
-      const logql = "my super logql";
-
-      const result = utils.updateLogqlWithLabelFilters(logql, "env", "prod");
-      assert.equal(result, "{env=\"prod\"} |= `my super logql`");
     });
   });
 });

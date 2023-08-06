@@ -67,7 +67,7 @@ Theses configurations can have only `rules` and `templates` properties which wor
   | Property    | Type                   | Required | Description |
   |-------------|------------------------|----------|-------------|
   | `name`      | `string`               | ✔️       | The name of the rule. Must be unique between each rule. |
-  | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. |
+  | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. You can use `{label.x}` where `x` is provided in `labelFilters` (see example below) |
   | `polling`   | `string` or `string[]` | ❌       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is usefull if you want a different polling the day and the night. Default to  `1m`. |
   | `alert`     | `object`               | ✔️       | An object defining the alerting configuration for the rule. |
   | `disabled`  | `boolean`              | ❌       | Weither the rule is enabled, default to `false`. |
@@ -191,7 +191,7 @@ You can also use a label variable from your LogQL using `{label.x}`:
     },
     {
       "name": "test2",
-      "logql": "{app=\"foo\"} |= `your awesome logql`",
+      "logql": "{app=\"foo\", {label.env}} |= `your awesome logql`",
       "polling": "30s",
       "labelFilters": {
         "env": ["prod", "preprod"]

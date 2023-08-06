@@ -1,15 +1,12 @@
 // Import Internal Dependencies
 import { SigynRule } from "./types";
 
-// CONSTANTS
-const kLineContainsOperator = "|=";
-
 export function mergeRulesLabelFilters(rules: SigynRule[]) {
   return rules.flatMap((rule) => {
     if (rule.labelFilters) {
       return Object.entries(rule.labelFilters).flatMap(([label, values]) => values.map((value) => {
         const ruleName = `${rule.name} (${label} = ${value})`;
-        const logql = updateLogqlWithLabelFilters(rule.logql, label, value);
+        const logql = fillLogqlLabelFilters(rule.logql, label, value);
 
         return {
           ...rule,
@@ -23,17 +20,6 @@ export function mergeRulesLabelFilters(rules: SigynRule[]) {
   });
 }
 
-export function updateLogqlWithLabelFilters(logql: string, label: string, value: string) {
-  const labelFilter = `${label}="${value}"`;
-  const regex = new RegExp("{(.*)}(.*)", "g");
-  const match = regex.exec(logql);
-
-  if (match === null) {
-    return `{${label}="${value}"} ${kLineContainsOperator} \`${logql}\``;
-  }
-
-  const [, labels, query] = match;
-  const newLabels = labels.length === 0 ? labelFilter : `${labels}, ${labelFilter}`;
-
-  return `{${newLabels}}${query}`;
+export function fillLogqlLabelFilters(logql: string, label: string, value: string) {
+  return logql.replace(`{label.${label}}`, `${label}="${value}"`);
 }
