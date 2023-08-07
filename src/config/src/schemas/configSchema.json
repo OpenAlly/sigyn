@@ -42,6 +42,16 @@
         "type": "string"
       },
       "nullable": true
+    },
+    "missingLabelStrategy": {
+      "title": "Defines the behavior when a label value is missing. It's important to note that the label must exists in any case, this setting only defines the behavior when the value is missing.",
+      "description": "Default to 'ignore'. The rule will be skipped.",
+      "type": "string",
+      "enum": [
+        "ignore",
+        "error"
+      ],
+      "nullable": true
     }
   },
   "required": [

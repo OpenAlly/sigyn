@@ -741,78 +741,53 @@ it("rule property 'labelFilters' properties items must be string", () => {
   });
 });
 
-it("rule property 'missingLabelStrategy' should be optional", () => {
+it("property 'missingLabelStrategy' should be optional", () => {
   assert.doesNotThrow(() => {
     validateConfig({
       ...kValidConfig,
-      rules: [
-        {
-          ...kValidConfig.rules[0],
-          missingLabelStrategy: undefined
-        }
-      ]
+      missingLabelStrategy: undefined
     });
   });
 });
 
-it("rule property 'missingLabelStrategy' can be 'ignore'", () => {
+it("property 'missingLabelStrategy' can be 'ignore'", () => {
   assert.doesNotThrow(() => {
     validateConfig({
       ...kValidConfig,
-      rules: [
-        {
-          ...kValidConfig.rules[0],
-          missingLabelStrategy: "ignore"
-        }
-      ]
+      missingLabelStrategy: "ignore"
     });
   });
 });
 
-it("rule property 'missingLabelStrategy' can be 'error'", () => {
+it("property 'missingLabelStrategy' can be 'error'", () => {
   assert.doesNotThrow(() => {
     validateConfig({
       ...kValidConfig,
-      rules: [
-        {
-          ...kValidConfig.rules[0],
-          missingLabelStrategy: "error"
-        }
-      ]
+      missingLabelStrategy: "error"
     });
   });
 });
 
-it("rule property 'missingLabelStrategy' must be string", () => {
+it("property 'missingLabelStrategy' must be string", () => {
   assert.throws(() => {
     validateConfig({
       ...kValidConfig,
-      rules: [
-        {
-          ...kValidConfig.rules[0],
-          missingLabelStrategy: {} as any
-        }
-      ]
+      missingLabelStrategy: {} as any
     });
   }, {
     name: "Error",
-    message: "Invalid config: /rules/0/missingLabelStrategy: must be string"
+    message: "Invalid config: /missingLabelStrategy: must be string"
   });
 });
 
-it("rule property 'missingLabelStrategy' must be equal to one of the allowed values", () => {
+it("property 'missingLabelStrategy' must be equal to one of the allowed values", () => {
   assert.throws(() => {
     validateConfig({
       ...kValidConfig,
-      rules: [
-        {
-          ...kValidConfig.rules[0],
-          missingLabelStrategy: "foo" as any
-        }
-      ]
+      missingLabelStrategy: "foo" as any
     });
   }, {
     name: "Error",
-    message: "Invalid config: /rules/0/missingLabelStrategy: must be equal to one of the allowed values"
+    message: "Invalid config: /missingLabelStrategy: must be equal to one of the allowed values"
   });
 });

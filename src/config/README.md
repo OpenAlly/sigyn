@@ -60,6 +60,14 @@ Theses configurations can have only `rules` and `templates` properties which wor
   - This array specifies the configuration paths to extends from.
   - The paths can be either `foo` or `foo.sigyn.config.json` where the `foo` configuration file **must** be `foo.sigyn.config.json`.
 
+- `missingLabelStrategy` (String, Optional):
+  - This property defines whether Sigyn should throw if a given label value is not found via Loki API.
+
+  | Value    | Description |
+  |----------|-------------|
+  | `ignore` | (**Default**) Skip the rule creation for each unknown label |
+  | `error`  | Invalidate config and throws when an unknown label is given |
+
 - `rules` (Required, Array of Objects):
   - This property holds an array of monitoring rules.
   - Each rule object must have the following properties:
@@ -107,14 +115,6 @@ Theses configurations can have only `rules` and `templates` properties which wor
   | Property       | Type       | Required | Description |
   |----------------|------------|----------|-------------|
   | `[key:string]` | `string[]` | ✔️       | A list of label values |
-
-- `rule.missingLabelStrategy` (String, Optional):
-  - This property defines whether Sigyn should throw if a given label value is not found via Loki API.
-
-  | Value    | Description |
-  |----------|-------------|
-  | `ignore` | (**Default**) Skip the rule creation for each unknown label |
-  | `error`  | Invalidate config and throws when an unknown label is given |
 
 > **Note** At least one of `title` or `content` must be provided.
 
@@ -264,6 +264,7 @@ interface SigynConfig {
   rules: SigynRule[];
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
+  missingLabelStrategy?: "ignore" | "error";
 }
 
 type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
@@ -280,7 +281,6 @@ interface SigynRule {
   disabled?: boolean;
   notifiers?: string[];
   labelFilters?: Record<string, string[]>;
-  missingLabelStrategy?: "ignore" | "error";
 }
 
 type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {

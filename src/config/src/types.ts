@@ -4,6 +4,7 @@ export interface SigynConfig {
   rules: SigynRule[];
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
+  missingLabelStrategy?: "ignore" | "error";
 }
 
 export type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
@@ -20,7 +21,6 @@ export interface SigynRule {
   disabled?: boolean;
   notifiers?: string[];
   labelFilters?: Record<string, string[]>;
-  missingLabelStrategy?: "ignore" | "error";
 }
 
 export type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {

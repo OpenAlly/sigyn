@@ -16,7 +16,7 @@ export async function mergeRulesLabelFilters(config: SigynConfig): Promise<Sigyn
 
         return values.map((value) => {
           if (!labels.get(label)?.includes(value)) {
-            if (rule.missingLabelStrategy === "error") {
+            if (config.missingLabelStrategy === "error") {
               throw new Error(`Label '${label}' with value '${value}' not found`);
             }
 
