@@ -7,37 +7,50 @@ import { GrafanaLoki } from "@myunisoft/loki";
 export async function mergeRulesLabelFilters(config: SigynConfig): Promise<SigynRule[]> {
   const labels = await fetchRulesLabels(config);
 
-  return config.rules.map((rule) => {
-    if (rule.labelFilters) {
-      return Object.entries(rule.labelFilters).flatMap(([label, values]) => {
-        if (!labels.has(label)) {
-          throw new Error(`Label '${label}' not found`);
-        }
+  const mergedRules: SigynRule[] = [];
 
-        return values.map((value) => {
-          if (!labels.get(label)?.includes(value)) {
-            if (config.missingLabelStrategy === "error") {
-              throw new Error(`Label '${label}' with value '${value}' not found`);
-            }
+  for (const rule of config.rules) {
+    if (!rule.labelFilters) {
+      mergedRules.push(rule);
 
-            // skip rule if label value not found
-            return [];
-          }
-
-          const ruleName = `${rule.name} (${label} = ${value})`;
-          const logql = fillLogqlLabelFilters(rule.logql, label, value);
-
-          return {
-            ...rule,
-            name: ruleName,
-            logql
-          };
-        });
-      });
+      continue;
     }
 
-    return rule;
-  }).flat(2);
+    for (const { label, value } of getRuleLabelFilters(rule)) {
+      if (!labels.get(label)?.includes(value)) {
+        if (config.missingLabelStrategy === "error") {
+          throw new Error(`Label '${label}' with value '${value}' not found`);
+        }
+
+        // skip rule if label value not found
+        continue;
+      }
+
+      const ruleName = `${rule.name} (${label} = ${value})`;
+      const logql = fillLogqlLabelFilters(rule.logql, label, value);
+
+      mergedRules.push({
+        ...rule,
+        name: ruleName,
+        logql
+      });
+    }
+  }
+
+
+  return mergedRules;
+}
+
+function* getRuleLabelFilters(rule: SigynRule) {
+  if (!rule.labelFilters) {
+    return;
+  }
+
+  for (const [label, values] of Object.entries(rule.labelFilters)) {
+    for (const value of values) {
+      yield { label, value };
+    }
+  }
 }
 
 export async function fetchRulesLabels(config: Pick<SigynConfig, "loki" | "rules">) {
@@ -48,20 +61,22 @@ export async function fetchRulesLabels(config: Pick<SigynConfig, "loki" | "rules
   const labels = new Map<string, string[]>();
 
   for (const rule of config.rules) {
-    if (rule.labelFilters) {
-      for (const label of Object.keys(rule.labelFilters)) {
-        if (labels.has(label)) {
-          continue;
-        }
+    if (!rule.labelFilters) {
+      continue;
+    }
 
-        try {
-          const labelValues = await lokiApi.labelValues(label);
+    for (const label of Object.keys(rule.labelFilters)) {
+      if (labels.has(label)) {
+        continue;
+      }
 
-          labels.set(label, labelValues);
-        }
-        catch {
-          labels.set(label, []);
-        }
+      try {
+        const labelValues = await lokiApi.labelValues(label);
+
+        labels.set(label, labelValues);
+      }
+      catch {
+        labels.set(label, []);
       }
     }
   }
