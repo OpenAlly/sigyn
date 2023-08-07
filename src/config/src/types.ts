@@ -20,6 +20,7 @@ export interface SigynRule {
   disabled?: boolean;
   notifiers?: string[];
   labelFilters?: Record<string, string[]>;
+  missingLabelStrategy?: "ignore" | "error";
 }
 
 export type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {

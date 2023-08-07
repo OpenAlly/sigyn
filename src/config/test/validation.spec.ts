@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /* eslint-disable max-len */
 // Import Node.js Dependencies
 import assert from "node:assert";
@@ -737,5 +738,81 @@ it("rule property 'labelFilters' properties items must be string", () => {
   }, {
     name: "Error",
     message: "Invalid config: /rules/0/labelFilters/foo/1: must be string"
+  });
+});
+
+it("rule property 'missingLabelStrategy' should be optional", () => {
+  assert.doesNotThrow(() => {
+    validateConfig({
+      ...kValidConfig,
+      rules: [
+        {
+          ...kValidConfig.rules[0],
+          missingLabelStrategy: undefined
+        }
+      ]
+    });
+  });
+});
+
+it("rule property 'missingLabelStrategy' can be 'ignore'", () => {
+  assert.doesNotThrow(() => {
+    validateConfig({
+      ...kValidConfig,
+      rules: [
+        {
+          ...kValidConfig.rules[0],
+          missingLabelStrategy: "ignore"
+        }
+      ]
+    });
+  });
+});
+
+it("rule property 'missingLabelStrategy' can be 'error'", () => {
+  assert.doesNotThrow(() => {
+    validateConfig({
+      ...kValidConfig,
+      rules: [
+        {
+          ...kValidConfig.rules[0],
+          missingLabelStrategy: "error"
+        }
+      ]
+    });
+  });
+});
+
+it("rule property 'missingLabelStrategy' must be string", () => {
+  assert.throws(() => {
+    validateConfig({
+      ...kValidConfig,
+      rules: [
+        {
+          ...kValidConfig.rules[0],
+          missingLabelStrategy: {} as any
+        }
+      ]
+    });
+  }, {
+    name: "Error",
+    message: "Invalid config: /rules/0/missingLabelStrategy: must be string"
+  });
+});
+
+it("rule property 'missingLabelStrategy' must be equal to one of the allowed values", () => {
+  assert.throws(() => {
+    validateConfig({
+      ...kValidConfig,
+      rules: [
+        {
+          ...kValidConfig.rules[0],
+          missingLabelStrategy: "foo" as any
+        }
+      ]
+    });
+  }, {
+    name: "Error",
+    message: "Invalid config: /rules/0/missingLabelStrategy: must be equal to one of the allowed values"
   });
 });

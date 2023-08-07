@@ -18,7 +18,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "prepublishOnly": "npm run build",
-    "test": "glob -c \"tsx --test\" \"./test/**/*.spec.ts\"",
+    "test": "glob -c \"tsx -r dotenv/config --test\" \"./test/**/*.spec.ts\"",
     "coverage": "c8 -r html npm test",
     "lint": "cross-env eslint src/**/*.ts"
   },
@@ -29,7 +29,12 @@
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@myunisoft/loki": "^1.2.0",
     "ajv": "^8.12.0",
     "ajv-keywords": "^5.1.0"
+  },
+  "devDependencies": {
+    "@myunisoft/httpie": "^2.0.1",
+    "dotenv": "^16.3.1"
   }
 }

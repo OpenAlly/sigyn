@@ -108,6 +108,14 @@ Theses configurations can have only `rules` and `templates` properties which wor
   |----------------|------------|----------|-------------|
   | `[key:string]` | `string[]` | ✔️       | A list of label values |
 
+- `rule.missingLabelStrategy` (String, Optional):
+  - This property defines whether Sigyn should throw if a given label value is not found via Loki API.
+
+  | Value    | Description |
+  |----------|-------------|
+  | `ignore` | (**Default**) Skip the rule creation for each unknown label |
+  | `error`  | Invalidate config and throws when an unknown label is given |
+
 > **Note** At least one of `title` or `content` must be provided.
 
 **Notifiers**
@@ -229,7 +237,7 @@ You can easily enjoy autocompletion & documentation from JSON schema for your `s
 
 ## 🌐 API
 
-### `initConfig(path: fs.PathOrFileDescriptor): SigynConfig`
+### `initConfig(path: string | URL): Promise<SigynConfig>`
 
 Initialize **Sigyn** config given the path to the JSON config file.
 
@@ -271,6 +279,8 @@ interface SigynRule {
   alert: SigynAlert;
   disabled?: boolean;
   notifiers?: string[];
+  labelFilters?: Record<string, string[]>;
+  missingLabelStrategy?: "ignore" | "error";
 }
 
 type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {
