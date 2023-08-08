@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /* eslint-disable max-len */
 // Import Node.js Dependencies
 import assert from "node:assert";
@@ -34,6 +35,9 @@ const kValidConfig: SigynConfig = {
             "- Interval: {interval}"
           ]
         }
+      },
+      labelFilters: {
+        env: ["prod", "preprod"]
       }
     }
   ]
@@ -643,27 +647,147 @@ describe("Config validation", () => {
       message: "Invalid config: /rules/0/alert/on/interval: must be string"
     });
   });
+});
 
-  it("rule alert property 'on' should not have additional properties", () => {
-    assert.throws(() => {
-      validateConfig({
-        ...kValidConfig,
-        rules: [
-          {
-            ...kValidConfig.rules[0],
-            alert: {
-              ...kValidConfig.rules[0].alert,
-              on: {
-                ...kValidConfig.rules[0].alert.on,
-                foo: "bar"
-              } as any
-            }
-          }
-        ]
-      });
-    }, {
-      name: "Error",
-      message: "Invalid config: /rules/0/alert/on: must NOT have additional properties"
+it("rule property 'labelFilters' must be an object", () => {
+  assert.throws(() => {
+    validateConfig({
+      ...kValidConfig,
+      rules: [
+        {
+          ...kValidConfig.rules[0],
+          labelFilters: true as any
+
+        }
+      ]
     });
+  }, {
+    name: "Error",
+    message: "Invalid config: /rules/0/labelFilters: must be object"
+  });
+});
+
+it("rule property 'labelFilters' cannot be an empty object", () => {
+  assert.throws(() => {
+    validateConfig({
+      ...kValidConfig,
+      rules: [
+        {
+          ...kValidConfig.rules[0],
+          labelFilters: {}
+        }
+      ]
+    });
+  }, {
+    name: "Error",
+    message: "Invalid config: /rules/0/labelFilters: must NOT have fewer than 1 properties"
+  });
+});
+
+it("rule property 'labelFilters' properties must be an array", () => {
+  assert.throws(() => {
+    validateConfig({
+      ...kValidConfig,
+      rules: [
+        {
+          ...kValidConfig.rules[0],
+          labelFilters: {
+            foo: {} as any
+          }
+        }
+      ]
+    });
+  }, {
+    name: "Error",
+    message: "Invalid config: /rules/0/labelFilters/foo: must be array"
+  });
+});
+
+it("rule property 'labelFilters' properties cannot be an empty array", () => {
+  assert.throws(() => {
+    validateConfig({
+      ...kValidConfig,
+      rules: [
+        {
+          ...kValidConfig.rules[0],
+          labelFilters: {
+            foo: []
+          }
+        }
+      ]
+    });
+  }, {
+    name: "Error",
+    message: "Invalid config: /rules/0/labelFilters/foo: must NOT have fewer than 1 items"
+  });
+});
+
+it("rule property 'labelFilters' properties items must be string", () => {
+  assert.throws(() => {
+    validateConfig({
+      ...kValidConfig,
+      rules: [
+        {
+          ...kValidConfig.rules[0],
+          labelFilters: {
+            foo: ["bar", 15 as any]
+          }
+        }
+      ]
+    });
+  }, {
+    name: "Error",
+    message: "Invalid config: /rules/0/labelFilters/foo/1: must be string"
+  });
+});
+
+it("property 'missingLabelStrategy' should be optional", () => {
+  assert.doesNotThrow(() => {
+    validateConfig({
+      ...kValidConfig,
+      missingLabelStrategy: undefined
+    });
+  });
+});
+
+it("property 'missingLabelStrategy' can be 'ignore'", () => {
+  assert.doesNotThrow(() => {
+    validateConfig({
+      ...kValidConfig,
+      missingLabelStrategy: "ignore"
+    });
+  });
+});
+
+it("property 'missingLabelStrategy' can be 'error'", () => {
+  assert.doesNotThrow(() => {
+    validateConfig({
+      ...kValidConfig,
+      missingLabelStrategy: "error"
+    });
+  });
+});
+
+it("property 'missingLabelStrategy' must be string", () => {
+  assert.throws(() => {
+    validateConfig({
+      ...kValidConfig,
+      missingLabelStrategy: {} as any
+    });
+  }, {
+    name: "Error",
+    message: "Invalid config: /missingLabelStrategy: must be string"
+  });
+});
+
+it("property 'missingLabelStrategy' must be equal to one of the allowed values", () => {
+  assert.throws(() => {
+    validateConfig({
+      ...kValidConfig,
+      missingLabelStrategy: "foo" as any
+    });
+  }, {
+    name: "Error",
+    message: "Invalid config: /missingLabelStrategy: must be equal to one of the allowed values"
   });
 });

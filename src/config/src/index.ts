@@ -3,15 +3,16 @@ import fs from "node:fs";
 import path from "node:path";
 
 // Import Internal Dependencies
-import { SigynConfig, LokiConfig, SigynRule, NotifierFormattedSigynRule, SigynAlert, SigynAlertTemplate } from "./types";
+import { SigynConfig } from "./types";
 import { validateConfig, validateExtendedConfig } from "./validate";
+import * as utils from "./utils";
 
-export { SigynConfig, LokiConfig, SigynRule, NotifierFormattedSigynRule, SigynAlert, SigynAlertTemplate };
+export * from "./types";
 export { validateConfig, validateExtendedConfig };
 
 let config: SigynConfig;
 
-export function initConfig(configPath: string | URL): SigynConfig {
+export async function initConfig(configPath: string | URL): Promise<SigynConfig> {
   const rawConfig = fs.readFileSync(configPath, "utf-8");
 
   config = JSON.parse(rawConfig);
@@ -32,6 +33,8 @@ export function initConfig(configPath: string | URL): SigynConfig {
       }
 
       config.rules.push(...extendConfig.rules);
+
+      config.rules = await utils.mergeRulesLabelFilters(config);
     }
   }
 
@@ -47,3 +50,4 @@ export function getConfig(): SigynConfig {
 
   return config;
 }
+

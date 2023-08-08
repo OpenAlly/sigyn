@@ -60,6 +60,14 @@ Theses configurations can have only `rules` and `templates` properties which wor
   - This array specifies the configuration paths to extends from.
   - The paths can be either `foo` or `foo.sigyn.config.json` where the `foo` configuration file **must** be `foo.sigyn.config.json`.
 
+- `missingLabelStrategy` (String, Optional):
+  - This property defines whether Sigyn should throw if a given label value is not found via Loki API.
+
+  | Value    | Description |
+  |----------|-------------|
+  | `ignore` | (**Default**) Skip the rule creation for each unknown label |
+  | `error`  | Invalidate config and throws when an unknown label is given |
+
 - `rules` (Required, Array of Objects):
   - This property holds an array of monitoring rules.
   - Each rule object must have the following properties:
@@ -67,7 +75,7 @@ Theses configurations can have only `rules` and `templates` properties which wor
   | Property    | Type                   | Required | Description |
   |-------------|------------------------|----------|-------------|
   | `name`      | `string`               | ✔️       | The name of the rule. Must be unique between each rule. |
-  | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. |
+  | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. You can use `{label.x}` where `x` is provided in `labelFilters` (see example below) |
   | `polling`   | `string` or `string[]` | ❌       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is usefull if you want a different polling the day and the night. Default to  `1m`. |
   | `alert`     | `object`               | ✔️       | An object defining the alerting configuration for the rule. |
   | `disabled`  | `boolean`              | ❌       | Weither the rule is enabled, default to `false`. |
@@ -99,6 +107,14 @@ Theses configurations can have only `rules` and `templates` properties which wor
   |------------|------------|----------|-------------|
   | `title`    | `string`   | ❌       | The title of the notification template. |
   | `content`  | `string[]` | ❌       | The content of the notification template. |
+
+- `rule.labelFilters` (Object, Optional):
+  - This object specifies label filters to add for a given rule.
+  - Each key represents a label
+
+  | Property       | Type       | Required | Description |
+  |----------------|------------|----------|-------------|
+  | `[key:string]` | `string[]` | ✔️       | A list of label values |
 
 > **Note** At least one of `title` or `content` must be provided.
 
@@ -183,8 +199,11 @@ You can also use a label variable from your LogQL using `{label.x}`:
     },
     {
       "name": "test2",
-      "logql": "{app=\"foo\", env=\"preprod\"} |= `your awesome logql`",
+      "logql": "{app=\"foo\", {label.env}} |= `your awesome logql`",
       "polling": "30s",
+      "labelFilters": {
+        "env": ["prod", "preprod"]
+      },
       "alert": {
         "on": {
           "count": "< 10",
@@ -218,7 +237,7 @@ You can easily enjoy autocompletion & documentation from JSON schema for your `s
 
 ## 🌐 API
 
-### `initConfig(path: fs.PathOrFileDescriptor): SigynConfig`
+### `initConfig(path: string | URL): Promise<SigynConfig>`
 
 Initialize **Sigyn** config given the path to the JSON config file.
 
@@ -245,6 +264,7 @@ interface SigynConfig {
   rules: SigynRule[];
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
+  missingLabelStrategy?: "ignore" | "error";
 }
 
 type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
@@ -260,6 +280,7 @@ interface SigynRule {
   alert: SigynAlert;
   disabled?: boolean;
   notifiers?: string[];
+  labelFilters?: Record<string, string[]>;
 }
 
 type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {

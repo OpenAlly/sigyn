@@ -1,14 +1,36 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
-import { describe, it } from "node:test";
+import { after, before, describe, it } from "node:test";
 import path from "node:path";
+
+// Import Third-party Dependencies
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 
 // Import Internal Dependencies
 import { initConfig } from "../src";
 
+// CONSTANTS
+const kLokiFixtureApiUrl = "http://localhost:3100";
+const kMockAgent = new MockAgent();
+const kGlobalDispatcher = getGlobalDispatcher();
+
 describe("Extended configs", () => {
-  it("should extends the config", () => {
-    const config = initConfig(path.join(__dirname, "fixtures/extended-configs/sigyn.config.json"));
+  before(() => {
+    process.env.GRAFANA_API_TOKEN = "toto";
+    setGlobalDispatcher(kMockAgent);
+
+    const pool = kMockAgent.get(kLokiFixtureApiUrl);
+    pool.intercept({
+      path: () => true
+    }).reply(200);
+  });
+
+  after(() => {
+    setGlobalDispatcher(kGlobalDispatcher);
+  });
+
+  it("should extends the config", async() => {
+    const config = await initConfig(path.join(__dirname, "fixtures/extended-configs/sigyn.config.json"));
 
     assert.deepEqual(config.templates!, {
       main: {

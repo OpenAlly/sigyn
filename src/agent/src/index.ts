@@ -35,7 +35,7 @@ export async function start(
 
   initDB(kLogger);
 
-  const { rules } = initConfig(path.join(location, "/sigyn.config.json"));
+  const { rules } = await initConfig(path.join(location, "/sigyn.config.json"));
 
   for (const ruleConfig of rules) {
     if (ruleConfig.disabled) {
