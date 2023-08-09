@@ -17,9 +17,9 @@ import * as utils from "./utils";
 const kScheduler = new ToadScheduler();
 const kLogger = pino({
   level: "info",
-  transport: process.env.MODE === "dev" ? {
+  transport: {
     target: "pino-pretty"
-  } : undefined
+  }
 });
 
 export interface Logger {
