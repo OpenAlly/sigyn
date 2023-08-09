@@ -50,8 +50,6 @@ Add these variables:
 GRAFANA_API_TOKEN=your_token
 # Default to sigyn.sqlite3
 SIGYN_DB=your_db
-# Optional. When using default logger (pino), it enables pino-pretty transport if MODE is dev 
-MODE=dev
 ```
 
 ### Add Sigyn config
