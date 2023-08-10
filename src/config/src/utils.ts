@@ -26,8 +26,11 @@ export async function mergeRulesLabelFilters(config: SigynConfig): Promise<Sigyn
         continue;
       }
 
-      const ruleName = `${rule.name} (${label} = ${value})`;
-      const logql = fillLogqlLabelFilters(rule.logql, label, value);
+      const ruleName = rule.name.includes(`{label.${label}}`) ?
+        rule.name.replace(`{label.${label}}`, `${value}`) :
+        `${rule.name} (${label} = ${value})`;
+
+      const logql = rule.logql.replace(`{label.${label}}`, `"${value}"`);
 
       mergedRules.push({
         ...rule,
@@ -82,8 +85,4 @@ export async function fetchRulesLabels(config: Pick<SigynConfig, "loki" | "rules
   }
 
   return labels;
-}
-
-export function fillLogqlLabelFilters(logql: string, label: string, value: string) {
-  return logql.replace(`{label.${label}}`, `${label}="${value}"`);
 }
