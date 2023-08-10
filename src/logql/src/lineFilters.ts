@@ -102,21 +102,20 @@ export class LineFilters extends Map<LineFilterOperator, string[]> {
   }
 
   toString() {
-    const lineContains = this.lineContains()
-      .map((value, index) => `${index === 0 ? kLineFilterOperators.lineContains.operator : ""} \`${value}\``)
-      .join(` ${kLineFilterOperators.lineContains.operator} `);
+    function serializeExpression(values: string[], operator: string) {
+      return values.map((value) => `${operator} \`${value}\``).join(` ${operator} `);
+    }
 
-    const lineDoesNotContain = this.lineDoesNotContain()
-      .map((value, index) => `${index === 0 ? kLineFilterOperators.lineDoesNotContain.operator : ""} \`${value}\``)
-      .join(` ${kLineFilterOperators.lineDoesNotContain.operator} `);
-
-    const lineContainsRegexMatch = this.lineContainsRegexMatch()
-      .map((value, index) => `${index === 0 ? kLineFilterOperators.lineContainsRegexMatch.operator : ""} \`${value}\``)
-      .join(` ${kLineFilterOperators.lineContainsRegexMatch.operator} `);
-
-    const lineDoesNotContainRegexMatch = this.lineDoesNotContainRegexMatch()
-      .map((value, index) => `${index === 0 ? kLineFilterOperators.lineDoesNotContainRegexMatch.operator : ""} \`${value}\``)
-      .join(` ${kLineFilterOperators.lineDoesNotContainRegexMatch.operator} `);
+    const lineContains = serializeExpression(this.lineContains(), kLineFilterOperators.lineContains.operator);
+    const lineDoesNotContain = serializeExpression(this.lineDoesNotContain(), kLineFilterOperators.lineDoesNotContain.operator);
+    const lineContainsRegexMatch = serializeExpression(
+      this.lineContainsRegexMatch(),
+      kLineFilterOperators.lineContainsRegexMatch.operator
+    );
+    const lineDoesNotContainRegexMatch = serializeExpression(
+      this.lineDoesNotContainRegexMatch(),
+      kLineFilterOperators.lineDoesNotContainRegexMatch.operator
+    );
 
     return `${lineContains} ${lineDoesNotContain} ${lineContainsRegexMatch} ${lineDoesNotContainRegexMatch}`;
   }
