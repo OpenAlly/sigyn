@@ -84,18 +84,28 @@ export class Rule {
     // eslint-disable-next-line max-len
     this.#logger.info(`[${rule.name}](state: handle|previous: ${previousCounter}|new: ${logs.length}|next: ${rule.counter}|threshold: ${alertThreshold})`);
 
-
     const [operator, value] = utils.ruleCountThresholdOperator(alertThreshold);
 
     if (utils.ruleCountMatchOperator(operator, rule.counter, value)) {
       if (operator.startsWith("<")) {
         // we checking for a max value, so we want to wait the whole interval before sending an alert
-        const counters = db.prepare("SELECT * FROM counters WHERE ruleId = ? AND timestamp <= ?").all(
+        const counters = db.prepare("SELECT * FROM counters WHERE ruleId = ? AND timestamp >= ?").all(
           rule.id,
           timeThreshold
         ) as DbCounter[];
 
-        if (counters.length === 0) {
+        const diffPolling = dayjs().unix() - utils.durationOrCronToDate(this.#config.polling, "subtract").unix();
+        const diffInterval = dayjs().unix() - timeThreshold;
+        const expectedCounterCount = Math.ceil(diffInterval / diffPolling);
+
+        // check it fetch since the rule interval (i.e if interval is 1m and we fetch every 30s, we want to check there is at least 2 counters)
+        if (counters.length < expectedCounterCount) {
+          return;
+        }
+
+        const countInInterval = counters.reduce((acc, cur) => acc + cur.counter, 0);
+
+        if (!utils.ruleCountMatchOperator(operator, countInInterval, value)) {
           return;
         }
       }
