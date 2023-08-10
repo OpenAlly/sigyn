@@ -45,6 +45,30 @@ export class LogQL {
     }
   }
 
+  lineEq(value: string) {
+    this.lineFilters.add(value, "lineContains");
+
+    return this;
+  }
+
+  lineNotEq(value: string) {
+    this.lineFilters.add(value, "lineDoesNotContain");
+
+    return this;
+  }
+
+  lineRegEq(value: string) {
+    this.lineFilters.add(value, "lineContainsRegexMatch");
+
+    return this;
+  }
+
+  lineRegNotEq(value: string) {
+    this.lineFilters.add(value, "lineDoesNotContainRegexMatch");
+
+    return this;
+  }
+
   toString() {
     return `
       ${this.streamSelector.toString()}

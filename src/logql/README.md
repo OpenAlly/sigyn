@@ -44,9 +44,9 @@ $ yarn add @sigyn/logql
 import { LogQL } from "@sigyn/logql";
 
 const logql = new LogQL("foo");
-logql.addLineContains("bar");
-logql.addLineDoesNotContain("baz");
-logql.addLabel("env", "prod");
+logql.streamSelector.set("env", "prod");
+logql.lineEq("bar");
+logql.lineNotEq("baz");
 
 // {env=\"prod\"} |= `foo` |= `bar` != `baz`
 console.log(logql.toString());
@@ -58,9 +58,9 @@ import { LogQL } from "@sigyn/logql";
 
 const logql = new LogQL("{app=\"foo\", env=\"preprod\"} |= `foo` != `bar`");
 
-console.log(logql.lineDoesNotContains)
-console.log(logql.lineContains);
-console.log(logql.labels());
+console.log([...logql.streamSelector.entries()]);
+console.log(logql.lineFilters.lineContains());
+console.log(logql.lineFilters.lineDoesNotContain());
 ```
 
 ## 🌐 API
@@ -94,6 +94,22 @@ Initializes a new instance of the `LogQL` class.
 ---
 
 **Methods**
+
+- `lineEq(value: string): LogQL`
+
+Add a **lineContains** (`|=`) line filter.
+
+- `lineNotEq(value: string): LogQL`
+
+Add a **lineDoesNotContain** (`!=`) line filter.
+
+- `lineRegEq(value: string): LogQL`
+
+Add a **lineContainsRegexMatch** (`|~`)
+
+- `lineRegNotEq(value: string): LogQL`
+
+Add a **lineDoesNotContainRegexMatch** (`!~`) line filter.
 
 - `toString(): string`
 
