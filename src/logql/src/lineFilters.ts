@@ -22,20 +22,26 @@ export type LineFilterOperator = keyof typeof kLineFilterOperators;
 
 export class LineFilters extends Map<LineFilterOperator, string[]> {
   constructor(init?: string | LineFilters) {
-    if (init instanceof LineFilters) {
-      return init;
-    }
-
     super();
 
+    if (init instanceof LineFilters) {
+      this.#clone(init);
+
+      return;
+    }
+
     if (!init) {
-      return this;
+      return;
     }
 
     if (typeof init === "string") {
       this.#parse(init);
+    }
+  }
 
-      return this;
+  #clone(lineFilters: LineFilters) {
+    for (const [operator, values] of lineFilters) {
+      this.set(operator, values);
     }
   }
 

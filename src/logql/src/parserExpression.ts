@@ -16,14 +16,24 @@ export class ParserExpression {
 
   constructor(init?: string | ParserExpression) {
     if (init instanceof ParserExpression) {
-      return init;
+      this.#clone(init);
+
+      return;
     }
 
     if (!init) {
-      return this;
+      return;
     }
 
     this.#parse(init);
+  }
+
+  #clone(parserExpression: ParserExpression) {
+    this.json = parserExpression.json;
+    this.logfmt = parserExpression.logfmt;
+    this.pattern = parserExpression.pattern;
+    this.regexp = parserExpression.regexp;
+    this.unpack = parserExpression.unpack;
   }
 
   #parse(query: string) {

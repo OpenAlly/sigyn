@@ -29,19 +29,19 @@ export class LogQL {
     }
 
     if (init instanceof StreamSelector) {
-      this.streamSelector = init;
+      this.streamSelector = new StreamSelector(init);
     }
 
     if (init instanceof LineFilters) {
-      this.lineFilters = init;
+      this.lineFilters = new LineFilters(init);
     }
 
     if (init instanceof LabelFilters) {
-      this.labelFilters = init;
+      this.labelFilters = new LabelFilters(init);
     }
 
     if (init instanceof ParserExpression) {
-      this.parserExpression = init;
+      this.parserExpression = new ParserExpression(init);
     }
   }
 

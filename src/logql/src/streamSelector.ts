@@ -12,20 +12,22 @@ export type LabelValue = Partial<StreamSelectorValue> & Pick<StreamSelectorValue
 
 export class StreamSelector extends Map<string, StreamSelectorValue> {
   constructor(init?: string | string[] | Iterable<[string, string]> | StreamSelector) {
-    if (init instanceof StreamSelector) {
-      return init;
-    }
-
     super();
 
+    if (init instanceof StreamSelector) {
+      this.#clone(init);
+
+      return;
+    }
+
     if (!init) {
-      return this;
+      return;
     }
 
     if (typeof init === "string") {
       this.#parse(init);
 
-      return this;
+      return;
     }
 
     for (const query of init) {
@@ -37,6 +39,12 @@ export class StreamSelector extends Map<string, StreamSelectorValue> {
 
       const [key, value] = query;
       super.set(key, { value, operator: "=" });
+    }
+  }
+
+  #clone(streamSelector: StreamSelector) {
+    for (const [labelKey, labelValue] of streamSelector) {
+      this.set(labelKey, labelValue);
     }
   }
 

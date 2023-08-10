@@ -14,20 +14,30 @@ export type LabelValue = Partial<LabelFilter> & Pick<LabelFilter, "value">
 
 export class LabelFilters extends Map<string, LabelFilter[]> {
   constructor(init?: string | LabelFilters) {
-    if (init instanceof LabelFilters) {
-      return init;
-    }
-
     super();
 
+    if (init instanceof LabelFilters) {
+      this.#clone(init);
+
+      return;
+    }
+
     if (!init) {
-      return this;
+      return;
     }
 
     if (typeof init === "string") {
       this.#parse(init);
 
-      return this;
+      return;
+    }
+  }
+
+  #clone(labelFilters: LabelFilters) {
+    for (const [labelKey, labelValues] of labelFilters) {
+      for (const labelValue of labelValues) {
+        this.#set(labelKey, labelValue);
+      }
     }
   }
 
