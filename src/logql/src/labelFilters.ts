@@ -53,7 +53,7 @@ export class LabelFilters extends Map<string, LabelFilter[]> {
 
     for (const [, key, operator, value] of query.matchAll(regex)) {
       this.#set(key, {
-        value: isNaN(Number(value)) ? value.replaceAll(/["`]/g, "") : Number(value),
+        value: Number.isNaN(Number(value)) ? value.replaceAll(/["`]/g, "") : Number(value),
         operator: operator as LabelFilterOperator
       });
     }
