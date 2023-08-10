@@ -86,10 +86,10 @@ Initializes a new instance of the `LogQL` class.
 
 **Properties**
 
-- `get streamSelector()` - see [StreamSelector](./#StreamSelector)
-- `get lineFilters()` - see [LineFilters](./#LineFilters)
-- `get labelFilters()` - see [LabelFilters](./#LabelFilters)
-- `get parserExpression()` - see [ParserExpression](./#ParserExpression)
+- `streamSelector` - see [StreamSelector](./#StreamSelector)
+- `lineFilters` - see [LineFilters](./#LineFilters)
+- `labelFilters` - see [LabelFilters](./#LabelFilters)
+- `parserExpression` - see [ParserExpression](./#ParserExpression)
 
 ---
 
