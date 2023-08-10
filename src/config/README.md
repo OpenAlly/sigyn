@@ -108,6 +108,8 @@ Theses configurations can have only `rules` and `templates` properties which wor
   | `title`    | `string`   | ❌       | The title of the notification template. |
   | `content`  | `string[]` | ❌       | The content of the notification template. |
 
+> **Note** At least one of `title` or `content` must be provided.
+
 - `rule.labelFilters` (Object, Optional):
   - This object specifies label filters to add for a given rule.
   - Each key represents a label
@@ -115,8 +117,6 @@ Theses configurations can have only `rules` and `templates` properties which wor
   | Property       | Type       | Required | Description |
   |----------------|------------|----------|-------------|
   | `[key:string]` | `string[]` | ✔️       | A list of label values |
-
-> **Note** At least one of `title` or `content` must be provided.
 
 **Notifiers**
 
@@ -198,8 +198,8 @@ You can also use a label variable from your LogQL using `{label.x}`:
       }
     },
     {
-      "name": "test2",
-      "logql": "{app=\"foo\", {label.env}} |= `your awesome logql`",
+      "name": "My rule on env: {label.env}",
+      "logql": "{app=\"foo\", env={label.env}} |= `your awesome logql`",
       "polling": "30s",
       "labelFilters": {
         "env": ["prod", "preprod"]

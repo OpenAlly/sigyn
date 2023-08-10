@@ -33,11 +33,10 @@ export async function initConfig(configPath: string | URL): Promise<SigynConfig>
       }
 
       config.rules.push(...extendConfig.rules);
-
-      config.rules = await utils.mergeRulesLabelFilters(config);
     }
   }
 
+  config.rules = await utils.mergeRulesLabelFilters(config);
   validateConfig(config);
 
   return config;
