@@ -3,7 +3,7 @@ import { getConfig, AlertSeverity } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "./database";
-import { NOTIFIER_QUEUE_EVENTS, NotifierQueue } from "./notifierQueue";
+import { NotifierQueue } from "./notifierQueue";
 import * as utils from "./utils";
 import { Logger } from ".";
 
@@ -34,7 +34,10 @@ export class Notifier {
     }
 
     this.#logger = logger;
-    this.#queue.on(NOTIFIER_QUEUE_EVENTS.DEQUEUE, (alert) => this.#sendNotifications(alert));
+    this.#queue.on(
+      NotifierQueue.DEQUEUE,
+      (notificationAlerts: NotifierAlert[]) => this.#sendNotifications(notificationAlerts)
+    );
   }
 
   static getSharedInstance(logger: Logger): Notifier {
@@ -55,8 +58,10 @@ export class Notifier {
     this.#queue.push({ ...alert, notif: { alertId, notifierId } });
   }
 
-  async #sendNotifications(alerts: NotifierAlert[]) {
-    await Promise.allSettled(alerts.map((alert) => this.#sendNotification(alert)));
+  async #sendNotifications(notificationAlerts: NotifierAlert[]) {
+    await Promise.allSettled(
+      notificationAlerts.map((alert) => this.#sendNotification(alert))
+    );
   }
 
   async #sendNotification(alert: NotifierAlert) {
@@ -99,7 +104,7 @@ export class Notifier {
       this.#logger.error(`[${alert.rule.name}](notify: error|notifier: ${alert.notifier}|message: ${error.message})`);
     }
     finally {
-      this.#queue.emit(NOTIFIER_QUEUE_EVENTS.DONE);
+      this.#queue.done();
     }
   }
 
