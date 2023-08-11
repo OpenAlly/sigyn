@@ -27,6 +27,71 @@
 
 The **Sigyn** configuration object consists of theses properties: `loki`, `templates`, `rules` and `notifiers`.
 
+### Example configuration
+
+```json
+{
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
+  "templates": {
+    "onlyTitle": {
+      "title": "{ruleName} - Triggered {counter} times!"
+    }
+  }
+  "notifiers": {
+    "slack": {
+      "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"
+    },
+    "discord": {
+      "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
+    },
+    "teams": {
+      "webhookUrl": "https://bizoffice9447.webhook.office.com/webhookb2/aaa/bbb"
+    }
+  },
+  "rules": [
+    {
+      "name": "test1",
+      "logql": "{app=\"foo\", env=\"preprod\"} |= `your awesome logql`",
+      "polling": [
+        "*/10 * 0-15 * * *",
+        "*/30 * 16-23 * * *"
+      ],
+      "alert": {
+        "on": {
+          "count": "10",
+          "interval": "5m"
+        },
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}",
+            "- Threshold: {count}",
+            "- Interval: {interval}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "My rule on env: {label.env}",
+      "logql": "{app=\"foo\", env={label.env}} |= `your awesome logql`",
+      "polling": "30s",
+      "labelFilters": {
+        "env": ["prod", "preprod"]
+      },
+      "alert": {
+        "on": {
+          "count": "< 10",
+          "interval": "5m"
+        },
+        "template": "onlyTitle"
+      }
+    }
+  ]
+}
+```
+
 ### Required
 The `loki` property defines an object that allows configuring Loki API access.
 
@@ -169,71 +234,6 @@ You can also use a label variable from your LogQL using `{label.x}`:
 ```
 
 > **Note** You **MUST NOT** use markdown in `title` or `content`, this is handled by notifiers.
-
-### Example configuration
-
-```json
-{
-  "loki": {
-    "apiUrl": "http://localhost:3100"
-  },
-  "templates": {
-    "onlyTitle": {
-      "title": "🚨 {ruleName} - Triggered {counter} times!"
-    }
-  }
-  "notifiers": {
-    "slack": {
-      "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"
-    },
-    "discord": {
-      "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
-    },
-    "teams": {
-      "webhookUrl": "https://bizoffice9447.webhook.office.com/webhookb2/aaa/bbb"
-    }
-  },
-  "rules": [
-    {
-      "name": "test1",
-      "logql": "{app=\"foo\", env=\"preprod\"} |= `your awesome logql`",
-      "polling": [
-        "*/10 * 0-15 * * *",
-        "*/30 * 16-23 * * *"
-      ],
-      "alert": {
-        "on": {
-          "count": "10",
-          "interval": "5m"
-        },
-        "template": {
-          "title": "🚨 {ruleName} - Triggered {counter} times!",
-          "content": [
-            "- LogQL: {logql}",
-            "- Threshold: {count}",
-            "- Interval: {interval}"
-          ]
-        }
-      }
-    },
-    {
-      "name": "My rule on env: {label.env}",
-      "logql": "{app=\"foo\", env={label.env}} |= `your awesome logql`",
-      "polling": "30s",
-      "labelFilters": {
-        "env": ["prod", "preprod"]
-      },
-      "alert": {
-        "on": {
-          "count": "< 10",
-          "interval": "5m"
-        },
-        "template": "onlyTitle"
-      }
-    }
-  ]
-}
-```
 
 ## 🧠 Visual Studio Code JSON schema
 
