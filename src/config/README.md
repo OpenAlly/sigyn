@@ -40,6 +40,17 @@ The `templates` property defines an object that allows to reuse **template** in 
 The `extends` property defines an array of the configurations **paths** to extends from.
 Theses configurations can have only `rules` and `templates` properties which works the same way as the main configuration.
 
+The `missingLabelStrategy` defines the behavior when **Sigyn** detects an unknown label value. 
+- `ignore` Default. Skip the rule creation for the given label.
+- `error` Fails config validation (Sigyn agent will not start).
+
+The `defaultSeverity` defines the rule alert severities when not specified. Severity 3 (`error`) by default.<br>
+**Allowed values:**
+- `1` | `"1"` | `critical` |
+- `2` | `"2"` | `error` | `major` |
+- `3` | `"3"` | `warning` | `minor` |
+- `4` | `"4"` | `information` | `info` | `low`;
+
 ### Schema Properties
 
 - `loki` (Object, Required):
@@ -100,13 +111,21 @@ Theses configurations can have only `rules` and `templates` properties which wor
   | `interval` | `string`             | ✔️       | The time interval for the alerting condition. |
 
 - `rules.alert.template` (Object or String, Required):
-  - CAn be an object representing the notification template or a string refering to a root template.
+  - Can be an object representing the notification template or a string refering to a root template.
   - It can have either of the following properties:
 
   | Property   | Type       | Required | Description |
   |------------|------------|----------|-------------|
   | `title`    | `string`   | ❌       | The title of the notification template. |
   | `content`  | `string[]` | ❌       | The content of the notification template. |
+
+- `rules.alert.severity` (String or Number, Optional):
+  - If not specified, the default value is `config.defaultSeverity`, if not specified the default is Severity 3 (`error`). Theses severities change the alert UI sent by the notifiers.
+  **Allowed values:**
+  - `1` | `"1"` | `critical` |
+  - `2` | `"2"` | `error` | `major` |
+  - `3` | `"3"` | `warning` | `minor` |
+  - `4` | `"4"` | `information` | `info` | `low`;
 
 > **Note** At least one of `title` or `content` must be provided.
 

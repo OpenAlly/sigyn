@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import { SigynRule } from "@sigyn/config";
+import { SigynRule, AlertSeverity, getConfig } from "@sigyn/config";
 import dayjs, { type Dayjs } from "dayjs";
 import ms from "ms";
 import cronParser from "cron-parser";
@@ -17,6 +17,7 @@ const kSigynNotifiers = new Set([
 ]);
 const kOperatorValueRegExp = /^\s*([<>]=?)\s*(\d+)\s*$/;
 const kCronExpressionRegExp = /(((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,6}/;
+const kDefaultSeverity = 2;
 
 export type RuleCounterOperator = ">" | ">=" | "<" | "<=";
 export type RuleCounterOperatorValue = [RuleCounterOperator, number];
@@ -126,4 +127,33 @@ export function parseLogQLLabels(logql: string): Record<string, string> {
   }
 
   return labels;
+}
+
+export function getSeverity(sev: undefined | AlertSeverity): Extract<AlertSeverity, 1 | 2 | 3 | 4> {
+  const { defaultSeverity = kDefaultSeverity } = getConfig();
+
+  switch (sev) {
+    case 1:
+    case "1":
+    case "critical":
+      return 1;
+    case 2:
+    case "2":
+    case "error":
+    case "major":
+      return 2;
+    case 3:
+    case "3":
+    case "warning":
+    case "minor":
+      return 3;
+    case 4:
+    case "4":
+    case "information":
+    case "info":
+    case "low":
+      return 4;
+    default:
+      return getSeverity(defaultSeverity);
+  }
 }

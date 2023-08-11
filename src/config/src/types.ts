@@ -5,6 +5,7 @@ export interface SigynConfig {
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
   missingLabelStrategy?: "ignore" | "error";
+  defaultSeverity?: AlertSeverity
 }
 
 export type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
@@ -27,12 +28,19 @@ export type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {
   alert: Omit<SigynAlert, "template"> & { template: SigynAlertTemplate };
 }
 
+export type AlertSeverity =
+  1 | "1" | "critical" |
+  2 | "2" | "error" | "major" |
+  3 | "3" | "warning" | "minor" |
+  4 | "4" | "information" | "info" | "low";
+
 export interface SigynAlert {
   on: {
     count: string | number;
     interval: string;
   },
   template: string | SigynAlertTemplate;
+  severity?: AlertSeverity;
 }
 
 export interface SigynAlertTemplate {

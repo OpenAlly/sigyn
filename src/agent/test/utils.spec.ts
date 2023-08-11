@@ -1,8 +1,10 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
-import { describe, it } from "node:test";
+import { before, describe, it } from "node:test";
+import path from "node:path";
 
 // Import Third-party Dependencies
+import { initConfig, AlertSeverity } from "@sigyn/config";
 import dayjs from "dayjs";
 
 // Import Internal Dependencies
@@ -207,6 +209,44 @@ describe("Utils", () => {
       const labels = utils.parseLogQLLabels(logql);
 
       assert.deepStrictEqual(labels, { app: "foo", env: "preprod" });
+    });
+  });
+
+  describe("getSeverity()", () => {
+    before(async() => {
+      await initConfig(path.join(__dirname, "FT/fixtures/sigyn.config.json"));
+    });
+
+    const sev1: AlertSeverity[] = [1, "1", "critical"];
+    for (const sev of sev1) {
+      it(`should return 1 when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), 1);
+      });
+    }
+
+    const sev2: AlertSeverity[] = [2, "2", "error", "major"];
+    for (const sev of sev2) {
+      it(`should return 2 when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), 2);
+      });
+    }
+
+    const sev3: AlertSeverity[] = [3, "3", "warning", "minor"];
+    for (const sev of sev3) {
+      it(`should return 3 when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), 3);
+      });
+    }
+    const sev4: AlertSeverity[] = [4, "4", "information", "info", "low"];
+
+    for (const sev of sev4) {
+      it(`should return 4 when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), 4);
+      });
+    }
+
+    it("Default sevirity should be 2 (Error)", () => {
+      assert.equal(utils.getSeverity(undefined), 2);
     });
   });
 });
