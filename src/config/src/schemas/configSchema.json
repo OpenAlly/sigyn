@@ -52,6 +52,21 @@
         "error"
       ],
       "nullable": true
+    },
+    "defaultSeverity": {
+      "title": "The default severity of the alerts",
+      "description": "There are 4 levels of severity:\n- Sev1: Critical. Possible values: 'critical'.\n- Sev2: Error. Possible values: 'error', 'major'.\n- Sev3: Warning. Possible values: 'warning', 'minor'.\n- Sev4: Information. Possible values: 'information' | 'info' | 'low'. If not specified, the default value is 'error'.",
+      "type": "string",
+      "enum": [
+        "critical",
+        "error",
+        "major",
+        "warning",
+        "minor",
+        "information",
+        "info",
+        "low"
+      ]
     }
   },
   "required": [

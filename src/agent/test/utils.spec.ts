@@ -1,15 +1,39 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
-import { describe, it } from "node:test";
+import { after, before, describe, it } from "node:test";
+import path from "node:path";
 
 // Import Third-party Dependencies
+import { initConfig, AlertSeverity } from "@sigyn/config";
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 import dayjs from "dayjs";
 
 // Import Internal Dependencies
 import * as utils from "../src/utils";
 import { DEFAULT_POLLING } from "../src/rules";
 
+// CONSTANTS
+const kDummyUrl = "http://localhost:3000";
+const kMockAgent = new MockAgent();
+const kGlobalDispatcher = getGlobalDispatcher();
+
 describe("Utils", () => {
+  before(async() => {
+    process.env.GRAFANA_API_TOKEN = "toto";
+    setGlobalDispatcher(kMockAgent);
+
+    const pool = kMockAgent.get(kDummyUrl);
+    pool.intercept({
+      path: (path) => path.includes("env")
+    }).reply(200, { data: ["prod", "dev"] }, { headers: { "Content-Type": "application/json" } }).persist();
+
+    await initConfig(path.join(__dirname, "FT/fixtures/sigyn.config.json"));
+  });
+
+  after(() => {
+    setGlobalDispatcher(kGlobalDispatcher);
+  });
+
   describe("durationToDate()", () => {
     it("should add one year", () => {
       const date = utils.durationOrCronToDate("1y", "add");
@@ -207,6 +231,40 @@ describe("Utils", () => {
       const labels = utils.parseLogQLLabels(logql);
 
       assert.deepStrictEqual(labels, { app: "foo", env: "preprod" });
+    });
+  });
+
+  describe("getSeverity()", () => {
+    const sev1: AlertSeverity[] = ["critical"];
+    for (const sev of sev1) {
+      it(`should return 'critical' when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), "critical");
+      });
+    }
+
+    const sev2: AlertSeverity[] = ["error", "major"];
+    for (const sev of sev2) {
+      it(`should return 'error' when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), "error");
+      });
+    }
+
+    const sev3: AlertSeverity[] = ["warning", "minor"];
+    for (const sev of sev3) {
+      it(`should return 'warning' when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), "warning");
+      });
+    }
+
+    const sev4: AlertSeverity[] = ["information", "info", "low"];
+    for (const sev of sev4) {
+      it(`should return 'info' when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), "info");
+      });
+    }
+
+    it("Default sevirity should be 'error'", () => {
+      assert.equal(utils.getSeverity(undefined), "error");
     });
   });
 });

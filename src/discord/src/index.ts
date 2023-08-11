@@ -5,16 +5,30 @@ import { NotifierFormattedSigynRule } from "@sigyn/config";
 // CONSTANTS
 const kWebhookUsername = "Sigyn Agent";
 // https://gist.github.com/thomasbnt/b6f455e2c7d743b796917fa3c205f812
-const kEmbedColor = 15548997;
+const kEmbedColor = {
+  critical: 15548997,
+  error: 15105570,
+  warning: 16776960,
+  info: 16777215
+};
+const kSeverityEmoji = {
+  critical: "💥",
+  error: "❗️",
+  warning: "⚠️",
+  info: "📢"
+};
 
 interface ExecuteWebhookOptions {
   webhookUrl: string;
   ruleConfig: NotifierFormattedSigynRule;
   counter: number;
   label?: Record<string, string>;
+  severity: "critical" | "error" | "warning" | "info";
 }
 
-async function formatWebhook(counter: number, config: NotifierFormattedSigynRule, label?: Record<string, string>) {
+async function formatWebhook(options: ExecuteWebhookOptions) {
+  const { counter, ruleConfig, label, severity } = options;
+
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
 
@@ -30,7 +44,7 @@ async function formatWebhook(counter: number, config: NotifierFormattedSigynRule
     },
     name: ruleName,
     logql
-  } = config;
+  } = ruleConfig;
 
   if (templateTitle === "" && templateContent.length === 0) {
     throw new Error("Invalid rule template: one of the title or content is required.");
@@ -53,20 +67,18 @@ async function formatWebhook(counter: number, config: NotifierFormattedSigynRule
 
   return {
     embeds: [{
-      title: pupa(templateTitle, templateData),
+      title: pupa(`${kSeverityEmoji[severity]} ${templateTitle}`, templateData),
       description: content.join("\n"),
-      color: kEmbedColor
+      color: kEmbedColor[severity]
     }],
     username: kWebhookUsername
   };
 }
 
 export async function execute(options: ExecuteWebhookOptions) {
-  const { webhookUrl, counter, ruleConfig, label } = options;
+  const body = await formatWebhook(options);
 
-  const body = await formatWebhook(counter, ruleConfig, label);
-
-  return httpie.post<string>(webhookUrl, {
+  return httpie.post<string>(options.webhookUrl, {
     body,
     headers: {
       "content-type": "application/json"

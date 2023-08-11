@@ -80,6 +80,21 @@
                 "minLength": 1
               }
             ]
+          },
+          "severity": {
+            "title": "The severity of the alert",
+            "description": "There are 4 levels of severity:\n- Sev1: Critical. Possible values: 'critical'.\n- Sev2: Error. Possible values: 'error', 'major'.\n- Sev3: Warning. Possible values: 'warning', 'minor'.\n- Sev4: Information. Possible values: 'information' | 'info' | 'low'.\nIf not specified, the default value is `config.defaultSeverity`, if not specified the default value is 'error'.\n Theses severities change the alert UI sent by the notifiers.",
+            "type": "string",
+            "enum": [
+              "critical",
+              "error",
+              "major",
+              "warning",
+              "minor",
+              "information",
+              "info",
+              "low"
+            ]
           }
         },
         "required": [
