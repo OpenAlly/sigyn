@@ -17,7 +17,8 @@ const kExpectedTablesColumns = {
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
     { name: "name", dflt_value: null, type: "TEXT", pk: 0, notnull: 1 },
     { name: "counter", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 },
-    { name: "lastRunAt", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 }
+    { name: "lastRunAt", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "throttleCount", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 }
   ],
   counters: [
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },

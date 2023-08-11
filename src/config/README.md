@@ -192,6 +192,15 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   - `warning` | `minor`
   - `information` | `info` | `low`
 
+- `rules.alert.throttle` (Object, Optional):
+  - Can be an object representing the maximum amount of alert in a given interval.
+  - It must have the following properties:
+
+  | Property   | Type       | Required | Description |
+  |------------|------------|----------|-------------|
+  | `interval` | `string`   | ✔️       | The throttle duration (e.g. `1m`, `1h`) after sending an alert. |
+  | `count`    | `number`   | ❌       | The count threshold to bypass throttle, default to `0` (never send alert before the end of interval). |
+
 > **Note** At least one of `title` or `content` must be provided.
 
 - `rule.labelFilters` (Object, Optional):

@@ -2,10 +2,11 @@ PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS rules
   (
-    id        INTEGER PRIMARY KEY,
-    name      TEXT UNIQUE NOT NULL,
-    counter   INTEGER DEFAULT 0,
-    lastRunAt INTEGER
+    id            INTEGER PRIMARY KEY,
+    name          TEXT UNIQUE NOT NULL,
+    counter       INTEGER DEFAULT 0,
+    throttleCount INTEGER DEFAULT 0,
+    lastRunAt     INTEGER
   );
 
 CREATE TABLE IF NOT EXISTS counters

@@ -694,6 +694,132 @@ describe("Config validation", () => {
     });
   });
 
+  it("rule alert property 'throttle' can be set", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              throttle: {
+                interval: "1m",
+                count: 5
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule alert property 'throttle' must be an object", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              throttle: "hello" as any
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/throttle: must be object"
+    });
+  });
+
+  it("rule alert property 'throttle.count' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              throttle: {
+                interval: "1m"
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule alert property 'throttle.interval' should be required", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              throttle: {
+                interval: undefined as any
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/throttle: must have required property 'interval'"
+    });
+  });
+
+  it("rule alert property 'throttle.interval' must be a duration", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              throttle: {
+                interval: 5 as any
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/throttle/interval: must be string"
+    });
+  });
+
+  it("rule alert property 'throttle.count' must be a number", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              throttle: {
+                interval: "1m",
+                count: "5" as any
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/throttle/count: must be number"
+    });
+  });
+
   it("rule property 'labelFilters' must be an object", () => {
     assert.throws(() => {
       validateConfig({

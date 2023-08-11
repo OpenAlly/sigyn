@@ -41,6 +41,10 @@ export interface SigynAlert {
   },
   template: string | SigynAlertTemplate;
   severity?: AlertSeverity;
+  throttle?: {
+    count?: number;
+    interval: string;
+  };
 }
 
 export interface SigynAlertTemplate {

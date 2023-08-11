@@ -94,7 +94,7 @@ export class Rule {
           timeThreshold
         ) as DbCounter[];
 
-        const diffPolling = dayjs().unix() - utils.durationOrCronToDate(this.#config.polling, "subtract").unix();
+        const diffPolling = dayjs().unix() - utils.durationOrCronToDate(this.#getCurrentPolling()[1], "subtract").unix();
         const diffInterval = dayjs().unix() - timeThreshold;
         const expectedCounterCount = Math.ceil(diffInterval / diffPolling);
 
@@ -108,6 +108,39 @@ export class Rule {
         if (!utils.ruleCountMatchOperator(operator, countInInterval, value)) {
           return;
         }
+      }
+
+      if (this.#config.alert.throttle) {
+        const { interval, count = 0 } = this.#config.alert.throttle;
+        const intervalDate = utils.durationOrCronToDate(interval, "subtract").unix();
+        const ruleAlertsCount = db.prepare("SELECT * FROM alerts WHERE ruleId = ? AND createdAt >= ?").all(
+          rule.id,
+          intervalDate
+        ).length;
+
+        if (count === 0 && ruleAlertsCount > 0) {
+          this.#logger.error(`[${rule.name}](state: throttle|count: ${count}|actual: ${ruleAlertsCount})`);
+
+          return;
+        }
+
+        if (ruleAlertsCount > 0 && (ruleAlertsCount + rule.throttleCount) < count) {
+          db.prepare("UPDATE rules SET throttleCount = ? WHERE id = ?").run(
+            rule.throttleCount + 1,
+            rule.id
+          );
+          db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);
+          db.prepare("DELETE from counters WHERE ruleId = ? AND timestamp <= ?").run(rule.id, intervalDate);
+
+          // eslint-disable-next-line max-len
+          this.#logger.error(`[${rule.name}](state: throttle|count: ${count}|actual: ${ruleAlertsCount}|throttle: ${rule.throttleCount})`);
+
+          return;
+        }
+
+        db.prepare("UPDATE rules SET throttleCount = 0 WHERE id = ?").run(
+          rule.id
+        );
       }
 
       this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
