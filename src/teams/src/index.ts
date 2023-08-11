@@ -1,13 +1,13 @@
 // Import Third-party Dependencies
 import * as httpie from "@myunisoft/httpie";
-import { AlertSeverity, NotifierFormattedSigynRule } from "@sigyn/config";
+import { NotifierFormattedSigynRule } from "@sigyn/config";
 
 // CONSTANTS
 const kSeverityEmoji = {
-  1: "💥",
-  2: "❗️",
-  3: "⚠️",
-  4: "📢"
+  critical: "💥",
+  error: "❗️",
+  warning: "⚠️",
+  info: "📢"
 };
 
 interface ExecuteWebhookOptions {
@@ -15,7 +15,7 @@ interface ExecuteWebhookOptions {
   ruleConfig: NotifierFormattedSigynRule;
   counter: number;
   label: Record<string, string>;
-  severity: Extract<AlertSeverity, 1 | 2 | 3 | 4>;
+  severity: "critical" | "error" | "warning" | "info";
 }
 
 async function formatWebhook(options: ExecuteWebhookOptions) {

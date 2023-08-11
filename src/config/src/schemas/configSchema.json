@@ -55,29 +55,14 @@
     },
     "defaultSeverity": {
       "title": "The default severity of the alerts",
-      "description": "There are 4 levels of severity:\n- Sev1: Critical. Possible values: 1, '1', 'critical'.\n- Sev2: Error. Possible values: 2, '2', 'error', 'major'.\n- Sev3: Warning. Possible values: 3, '3', 'warning', 'minor'.\n- Sev4: Information. Possible values: 4, '4', 'information' | 'info' | 'low'. If not specified, the default value is 'error'.",
-      "oneOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "number"
-        }
-      ],
+      "description": "There are 4 levels of severity:\n- Sev1: Critical. Possible values: 'critical'.\n- Sev2: Error. Possible values: 'error', 'major'.\n- Sev3: Warning. Possible values: 'warning', 'minor'.\n- Sev4: Information. Possible values: 'information' | 'info' | 'low'. If not specified, the default value is 'error'.",
+      "type": "string",
       "enum": [
-        1,
-        "1",
         "critical",
-        2,
-        "2",
         "error",
         "major",
-        3,
-        "3",
         "warning",
         "minor",
-        4,
-        "4",
         "information",
         "info",
         "low"

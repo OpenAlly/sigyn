@@ -219,34 +219,34 @@ describe("Utils", () => {
 
     const sev1: AlertSeverity[] = [1, "1", "critical"];
     for (const sev of sev1) {
-      it(`should return 1 when given ${sev}`, () => {
-        assert.equal(utils.getSeverity(sev), 1);
+      it(`should return 'critical' when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), "critical");
       });
     }
 
-    const sev2: AlertSeverity[] = [2, "2", "error", "major"];
+    const sev2: AlertSeverity[] = ["error", "major"];
     for (const sev of sev2) {
-      it(`should return 2 when given ${sev}`, () => {
-        assert.equal(utils.getSeverity(sev), 2);
+      it(`should return 'error' when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), "error");
       });
     }
 
-    const sev3: AlertSeverity[] = [3, "3", "warning", "minor"];
+    const sev3: AlertSeverity[] = ["warning", "minor"];
     for (const sev of sev3) {
-      it(`should return 3 when given ${sev}`, () => {
-        assert.equal(utils.getSeverity(sev), 3);
+      it(`should return 'warning' when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), "warning");
       });
     }
-    const sev4: AlertSeverity[] = [4, "4", "information", "info", "low"];
 
+    const sev4: AlertSeverity[] = ["information", "info", "low"];
     for (const sev of sev4) {
-      it(`should return 4 when given ${sev}`, () => {
-        assert.equal(utils.getSeverity(sev), 4);
+      it(`should return 'info' when given ${sev}`, () => {
+        assert.equal(utils.getSeverity(sev), "info");
       });
     }
 
-    it("Default sevirity should be 2 (Error)", () => {
-      assert.equal(utils.getSeverity(undefined), 2);
+    it("Default sevirity should be 'error'", () => {
+      assert.equal(utils.getSeverity(undefined), "error");
     });
   });
 });

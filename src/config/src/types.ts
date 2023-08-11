@@ -29,10 +29,10 @@ export type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {
 }
 
 export type AlertSeverity =
-  1 | "1" | "critical" |
-  2 | "2" | "error" | "major" |
-  3 | "3" | "warning" | "minor" |
-  4 | "4" | "information" | "info" | "low";
+  "critical" |
+  "error" | "major" |
+  "warning" | "minor" |
+  "information" | "info" | "low";
 
 export interface SigynAlert {
   on: {

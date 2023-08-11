@@ -17,7 +17,7 @@ const kSigynNotifiers = new Set([
 ]);
 const kOperatorValueRegExp = /^\s*([<>]=?)\s*(\d+)\s*$/;
 const kCronExpressionRegExp = /(((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,6}/;
-const kDefaultSeverity = 2;
+const kDefaultSeverity = "error";
 
 export type RuleCounterOperator = ">" | ">=" | "<" | "<=";
 export type RuleCounterOperatorValue = [RuleCounterOperator, number];
@@ -129,30 +129,22 @@ export function parseLogQLLabels(logql: string): Record<string, string> {
   return labels;
 }
 
-export function getSeverity(sev: undefined | AlertSeverity): Extract<AlertSeverity, 1 | 2 | 3 | 4> {
+export function getSeverity(sev: undefined | AlertSeverity): "critical" | "error" | "warning" | "info" {
   const { defaultSeverity = kDefaultSeverity } = getConfig();
 
   switch (sev) {
-    case 1:
-    case "1":
     case "critical":
-      return 1;
-    case 2:
-    case "2":
+      return sev;
     case "error":
     case "major":
-      return 2;
-    case 3:
-    case "3":
+      return "error";
     case "warning":
     case "minor":
-      return 3;
-    case 4:
-    case "4":
+      return "warning";
     case "information":
     case "info":
     case "low":
-      return 4;
+      return "info";
     default:
       return getSeverity(defaultSeverity);
   }

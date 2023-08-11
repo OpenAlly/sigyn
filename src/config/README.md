@@ -46,10 +46,10 @@ The `missingLabelStrategy` defines the behavior when **Sigyn** detects an unknow
 
 The `defaultSeverity` defines the rule alert severities when not specified. Severity 3 (`error`) by default.<br>
 **Allowed values:**
-- `1` | `"1"` | `critical` |
-- `2` | `"2"` | `error` | `major` |
-- `3` | `"3"` | `warning` | `minor` |
-- `4` | `"4"` | `information` | `info` | `low`;
+- `critical`
+- `error` | `major`
+- `warning` | `minor`
+- `information` | `info` | `low`
 
 ### Schema Properties
 
@@ -122,10 +122,10 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
 - `rules.alert.severity` (String or Number, Optional):
   - If not specified, the default value is `config.defaultSeverity`, if not specified the default is Severity 3 (`error`). Theses severities change the alert UI sent by the notifiers.
   **Allowed values:**
-  - `1` | `"1"` | `critical` |
-  - `2` | `"2"` | `error` | `major` |
-  - `3` | `"3"` | `warning` | `minor` |
-  - `4` | `"4"` | `information` | `info` | `low`;
+  - `critical`
+  - `error` | `major`
+  - `warning` | `minor`
+  - `information` | `info` | `low`
 
 > **Note** At least one of `title` or `content` must be provided.
 
