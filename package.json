@@ -14,7 +14,8 @@
     "src/agent",
     "src/discord",
     "src/slack",
-    "src/teams"
+    "src/teams",
+    "src/logql"
   ],
   "devDependencies": {
     "@nodesecure/eslint-config": "^1.7.1",
