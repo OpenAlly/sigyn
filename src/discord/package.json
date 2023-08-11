@@ -1,6 +1,6 @@
 {
   "name": "@sigyn/discord",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Send Sigyn alerts to Discord via webhook",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
