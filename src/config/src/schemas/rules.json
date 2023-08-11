@@ -95,6 +95,26 @@
               "info",
               "low"
             ]
+          },
+          "throttle": {
+            "title": "The alert throttle",
+            "description": "Can be useful to avoid spam",
+            "type": "object",
+            "properties": {
+              "count": {
+                "title": "The number of alert to unlock the interval, default to 0",
+                "type": "number",
+                "nullable": true
+              },
+              "interval": {
+                "title": "The interval of time to pause alert",
+                "description": "A duration string (e.g. '1m', '1h', '1d').",
+                "type": "string"
+              }
+            },
+            "required": [
+              "interval"
+            ]
           }
         },
         "required": [

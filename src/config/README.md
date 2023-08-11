@@ -152,7 +152,7 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   |-------------|------------------------|----------|-------------|
   | `name`      | `string`               | ✔️       | The name of the rule. Must be unique between each rule. |
   | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. You can use `{label.x}` where `x` is provided in `labelFilters` (see example below) |
-  | `polling`   | `string` or `string[]` | ❌       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is usefull if you want a different polling the day and the night. Default to  `1m`. |
+  | `polling`   | `string` or `string[]` | ❌       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is useful if you want a different polling the day and the night. Default to  `1m`. |
   | `alert`     | `object`               | ✔️       | An object defining the alerting configuration for the rule. |
   | `disabled`  | `boolean`              | ❌       | Weither the rule is enabled, default to `false`. |
   | `notifiers` | `string[]`             | ❌       | An array of strings representing the notifiers for the rule. It will enables all configured `notifiers` by default. |
@@ -191,6 +191,15 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   - `error` | `major`
   - `warning` | `minor`
   - `information` | `info` | `low`
+
+- `rules.alert.throttle` (Object, Optional):
+  - Can be an object representing the maximum amount of alert in a given interval.
+  - It must have the following properties:
+
+  | Property   | Type       | Required | Description |
+  |------------|------------|----------|-------------|
+  | `interval` | `string`   | ✔️       | The throttle duration (e.g. `1m`, `1h`) after sending an alert. |
+  | `count`    | `number`   | ❌       | The count threshold to bypass throttle, default to `0` (never send alert before the end of interval). |
 
 > **Note** At least one of `title` or `content` must be provided.
 

@@ -17,6 +17,7 @@ export interface DbRule {
   name: string;
   counter: number;
   lastRunAt?: number;
+  throttleCount: number;
 }
 
 export interface DbCounter {
