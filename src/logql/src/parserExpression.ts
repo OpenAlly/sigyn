@@ -16,24 +16,11 @@ export class ParserExpression {
 
   constructor(init?: string | ParserExpression) {
     if (init instanceof ParserExpression) {
-      this.#clone(init);
-
-      return;
+      Object.assign(this, init);
     }
-
-    if (!init) {
-      return;
+    else if (init) {
+      this.#parse(init);
     }
-
-    this.#parse(init);
-  }
-
-  #clone(parserExpression: ParserExpression) {
-    this.json = parserExpression.json;
-    this.logfmt = parserExpression.logfmt;
-    this.pattern = parserExpression.pattern;
-    this.regexp = parserExpression.regexp;
-    this.unpack = parserExpression.unpack;
   }
 
   #parse(query: string) {
@@ -41,27 +28,25 @@ export class ParserExpression {
     this.#parseAttribute(query, "logfmt");
     this.#parseArrayAttribute(query, "pattern");
     this.#parseArrayAttribute(query, "regexp");
-    this.#parseUnpack(query);
+
+    this.unpack = query.includes("| unpack");
   }
 
   #parseAttribute(query: string, attribute: "json" | "logfmt") {
     const regex = new RegExp(`[,|] ${attribute}(?: )?( [^|]+)?(?:[|,]|$)`, "g");
-    const match = [...query.matchAll(regex)];
 
+    const match = [...query.matchAll(regex)];
     if (match.length === 0) {
       return;
     }
 
     this[attribute] = {};
-
     const [, rawValue] = match[0];
-
     if (rawValue === undefined) {
       return;
     }
 
     const rawValueRegex = new RegExp(/(([^, =]+)=?([^, =]*))/g);
-
     for (const [,, key, value] of rawValue.matchAll(rawValueRegex)) {
       this[attribute]![key] = value ? value.replace(/(^"|"$)/g, "") : key;
     }
@@ -69,36 +54,25 @@ export class ParserExpression {
 
   #parseArrayAttribute(query: string, attribute: "pattern" | "regexp") {
     const regex = new RegExp(`\\| ${attribute} ([\`"'][^\`"]+[\`"']) ?(?=[|,]|$)`, "g");
-    const match = [...query.matchAll(regex)];
 
+    const match = [...query.matchAll(regex)];
     if (match.length === 0) {
       return;
     }
 
     this[attribute] = [];
-
     for (const [, rawValue] of match) {
       this[attribute]!.push(rawValue.trim().replace(/(^`|`$|^"|"$)/g, ""));
     }
   }
 
-
-  #parseUnpack(query: string) {
-    this.unpack = query.includes("| unpack");
-  }
-
   toJson(params?: string | Record<string, string>) {
-    if (this.json === null) {
-      this.json = {};
-    }
+    this.json ??= {};
 
     if (typeof params === "string") {
       this.json[params] = params;
-
-      return this;
     }
-
-    if (params) {
+    else if (params) {
       Object.assign(this.json, params);
     }
 
@@ -106,17 +80,12 @@ export class ParserExpression {
   }
 
   toLogfmt(params?: string | Record<string, string>) {
-    if (this.logfmt === null) {
-      this.logfmt = {};
-    }
+    this.logfmt ??= {};
 
     if (typeof params === "string") {
       this.logfmt[params] = params;
-
-      return this;
     }
-
-    if (params) {
+    else if (params) {
       Object.assign(this.logfmt, params);
     }
 
@@ -124,33 +93,19 @@ export class ParserExpression {
   }
 
   toPattern(params: string | string[]) {
-    if (this.pattern === null) {
-      this.pattern = [];
-    }
-
-    if (typeof params === "string") {
-      this.pattern.push(params);
-
-      return this;
-    }
-
-    this.pattern.push(...params);
+    this.pattern ??= [];
+    this.pattern.push(
+      ...(typeof params === "string" ? [params] : params)
+    );
 
     return this;
   }
 
   toRegexp(params: string | string[]) {
-    if (this.regexp === null) {
-      this.regexp = [];
-    }
-
-    if (typeof params === "string") {
-      this.regexp.push(params);
-
-      return this;
-    }
-
-    this.regexp.push(...params);
+    this.regexp ??= [];
+    this.regexp.push(
+      ...(typeof params === "string" ? [params] : params)
+    );
 
     return this;
   }
