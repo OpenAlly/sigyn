@@ -98,7 +98,7 @@
           },
           "throttle": {
             "title": "The alert throttle",
-            "description": "Can be usefull to avoid spam",
+            "description": "Can be useful to avoid spam",
             "type": "object",
             "properties": {
               "count": {
