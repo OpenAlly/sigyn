@@ -48,7 +48,7 @@ export function cleanRulesInDb(configRules: SigynRule[]) {
 
 export function ruleCountThresholdOperator(counter: number | string): RuleCounterOperatorValue {
   if (typeof counter === "number" || kOnlyDigitsRegExp.test(counter)) {
-    return [">=", Number(counter)];
+    return [Number(counter) === 0 ? "<=" : ">=", Number(counter)];
   }
 
   const match = counter.replace(/\s/g, "").match(kOperatorValueRegExp);
