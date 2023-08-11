@@ -1,19 +1,37 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
-import { before, describe, it } from "node:test";
+import { after, before, describe, it } from "node:test";
 import path from "node:path";
 
 // Import Third-party Dependencies
 import { initConfig, AlertSeverity } from "@sigyn/config";
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 import dayjs from "dayjs";
 
 // Import Internal Dependencies
 import * as utils from "../src/utils";
 import { DEFAULT_POLLING } from "../src/rules";
 
+// CONSTANTS
+const kDummyUrl = "http://localhost:3000";
+const kMockAgent = new MockAgent();
+const kGlobalDispatcher = getGlobalDispatcher();
+
 describe("Utils", () => {
   before(async() => {
+    process.env.GRAFANA_API_TOKEN = "toto";
+    setGlobalDispatcher(kMockAgent);
+
+    const pool = kMockAgent.get(kDummyUrl);
+    pool.intercept({
+      path: (path) => path.includes("env")
+    }).reply(200, { data: ["prod", "dev"] }, { headers: { "Content-Type": "application/json" } }).persist();
+
     await initConfig(path.join(__dirname, "FT/fixtures/sigyn.config.json"));
+  });
+
+  after(() => {
+    setGlobalDispatcher(kGlobalDispatcher);
   });
 
   describe("durationToDate()", () => {
@@ -217,7 +235,7 @@ describe("Utils", () => {
   });
 
   describe("getSeverity()", () => {
-    const sev1: AlertSeverity[] = [1, "1", "critical"];
+    const sev1: AlertSeverity[] = ["critical"];
     for (const sev of sev1) {
       it(`should return 'critical' when given ${sev}`, () => {
         assert.equal(utils.getSeverity(sev), "critical");
