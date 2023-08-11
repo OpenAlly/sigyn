@@ -12,6 +12,10 @@ import * as utils from "../src/utils";
 import { DEFAULT_POLLING } from "../src/rules";
 
 describe("Utils", () => {
+  before(async() => {
+    await initConfig(path.join(__dirname, "FT/fixtures/sigyn.config.json"));
+  });
+
   describe("durationToDate()", () => {
     it("should add one year", () => {
       const date = utils.durationOrCronToDate("1y", "add");
@@ -213,10 +217,6 @@ describe("Utils", () => {
   });
 
   describe("getSeverity()", () => {
-    before(async() => {
-      await initConfig(path.join(__dirname, "FT/fixtures/sigyn.config.json"));
-    });
-
     const sev1: AlertSeverity[] = [1, "1", "critical"];
     for (const sev of sev1) {
       it(`should return 'critical' when given ${sev}`, () => {
