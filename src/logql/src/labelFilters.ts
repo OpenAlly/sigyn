@@ -18,18 +18,9 @@ export class LabelFilters extends Map<string, LabelFilter[]> {
 
     if (init instanceof LabelFilters) {
       this.#clone(init);
-
-      return;
     }
-
-    if (!init) {
-      return;
-    }
-
-    if (typeof init === "string") {
+    else if (init) {
       this.#parse(init);
-
-      return;
     }
   }
 

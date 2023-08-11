@@ -26,15 +26,8 @@ export class LineFilters extends Map<LineFilterOperator, string[]> {
 
     if (init instanceof LineFilters) {
       this.#clone(init);
-
-      return;
     }
-
-    if (!init) {
-      return;
-    }
-
-    if (typeof init === "string") {
+    else if (init) {
       this.#parse(init);
     }
   }
@@ -92,11 +85,10 @@ export class LineFilters extends Map<LineFilterOperator, string[]> {
     if (super.has(operator)) {
       const previousValues = super.get(operator)!;
       super.set(operator, [...previousValues, value]);
-
-      return this;
     }
-
-    super.set(operator, [value]);
+    else {
+      super.set(operator, [value]);
+    }
 
     return this;
   }

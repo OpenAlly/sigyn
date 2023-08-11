@@ -10,7 +10,9 @@ export class LogQL {
   labelFilters = new LabelFilters();
   parserExpression = new ParserExpression();
 
-  constructor(init?: string | string[] | StreamSelector | LineFilters | LabelFilters | ParserExpression) {
+  constructor(
+    init?: string | string[] | StreamSelector | LineFilters | LabelFilters | ParserExpression
+  ) {
     if (typeof init === "string") {
       this.streamSelector = new StreamSelector(init);
       this.lineFilters = new LineFilters(init);
