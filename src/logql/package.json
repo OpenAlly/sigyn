@@ -1,6 +1,6 @@
 {
   "name": "@sigyn/logql",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Parse and serialize LogQL queries",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
