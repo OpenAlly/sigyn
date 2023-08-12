@@ -1,6 +1,5 @@
 // Import Node.js Dependencies
 import fs from "node:fs";
-import EventEmitter from "node:events";
 
 // Import Third-party Dependencies
 import dayjs from "dayjs";
@@ -28,7 +27,7 @@ export function mockGrafanaApiResponse(logs: string[]) {
       result: [
         {
           values: [
-            logs.map((log) => [dayjs().unix(), log])
+            logs.map((log) => [dayjs().valueOf(), log])
           ]
         }
       ]
@@ -52,11 +51,11 @@ export function getRuleAlertNotifs(ruleName: string) {
   });
 }
 
-export class MockLogger extends EventEmitter {
+export class MockLogger {
   info(message: string) {
-    this.emit("info", message);
+    console.log("📢", message);
   }
   error(message: string) {
-    this.emit("err", message);
+    console.log("❗", message);
   }
 }

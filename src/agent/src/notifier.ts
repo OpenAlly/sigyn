@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import { getConfig, AlertSeverity } from "@sigyn/config";
+import { getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "./database";
@@ -15,7 +15,6 @@ export interface NotifierAlert {
   notifier: string;
   notif: Pick<DbAlertNotif, "alertId" | "notifierId">;
   error?: Error;
-  severity: Extract<AlertSeverity, 1 | 2 | 3 | 4>;
 }
 
 export class Notifier {

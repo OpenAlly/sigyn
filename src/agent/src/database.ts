@@ -4,7 +4,9 @@ import fs from "node:fs";
 
 // Import Third-party Dependencies
 import SQLite3 from "better-sqlite3";
-import { Logger } from "pino";
+
+// Import Internal Dependencies
+import { Logger } from ".";
 
 // CONSTANTS
 const kDefaultDatabaseFilename = process.env.SIGYN_DB ?? "sigyn.sqlite3";

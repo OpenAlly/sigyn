@@ -9,7 +9,7 @@ import { DbRule, getDB } from "./database";
 import { Notifier } from "./notifier";
 import { Logger } from ".";
 
-export function createAlert(rule: DbRule, ruleConfig: SigynRule, logger: Logger) {
+export function createRuleAlert(rule: DbRule, ruleConfig: SigynRule, logger: Logger) {
   const notifier = Notifier.getSharedInstance(logger);
   const ruleNotifiers = ruleConfig.notifiers ?? [];
   const globalNotifiers = Object.keys(getConfig().notifiers);
@@ -17,7 +17,7 @@ export function createAlert(rule: DbRule, ruleConfig: SigynRule, logger: Logger)
 
   getDB().prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)").run(
     rule.id,
-    dayjs().unix()
+    dayjs().valueOf()
   );
 
   for (const notifierName of notifierNames) {
