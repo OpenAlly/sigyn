@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 // Import Third-party Dependencies
 import { SigynRule, getConfig } from "@sigyn/config";
 import { GrafanaLoki } from "@myunisoft/loki";
@@ -47,51 +48,46 @@ export class Rule {
 
   async handleLogs(): Promise<void> {
     const db = getDB();
+
     const lokiApi = new GrafanaLoki({
       remoteApiURL: getConfig().loki.apiUrl
     });
-
     const logs = await lokiApi.queryRange(this.#config.logql, {
       start: this.#getQueryRangeStartUnixTimestamp()
     });
+
     const rule = this.#getRuleFromDatabase();
     const now = dayjs().unix();
-    const lasttIntervalDate = utils.durationOrCronToDate(this.#config.alert.on.interval, "subtract");
-    const timeThreshold = lasttIntervalDate.unix();
+    const timeThreshold = utils
+      .durationOrCronToDate(this.#config.alert.on.interval, "subtract")
+      .unix();
 
-    const previousCounters = db.prepare("SELECT * FROM counters WHERE ruleId = ? AND timestamp >= ?").all(
+    const countersInThresholdInterval = db.prepare("SELECT * FROM counters WHERE ruleId = ? AND timestamp >= ?").all(
       rule.id,
       timeThreshold
     ) as DbCounter[];
+    const accumulatedCounters = countersInThresholdInterval.reduce((acc, cur) => acc + cur.counter, 0);
 
-    const previousCounter = previousCounters.reduce((acc, cur) => acc + cur.counter, 0);
-    const substractCounter = (rule.counter - previousCounter);
-
-    rule.counter -= substractCounter;
+    rule.counter -= rule.counter - accumulatedCounters;
     rule.counter += logs.length;
     db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(
       rule.counter,
       rule.id
     );
-
     db.prepare("INSERT INTO counters (ruleId, counter, timestamp) VALUES (?, ?, ?)").run(
       rule.id,
       logs.length,
       now
     );
-
-    const alertThreshold = this.#config.alert.on.count;
-
-    // eslint-disable-next-line max-len
-    this.#logger.info(`[${rule.name}](state: handle|previous: ${previousCounter}|new: ${logs.length}|next: ${rule.counter}|threshold: ${alertThreshold})`);
-
-    const [operator, value] = utils.ruleCountThresholdOperator(alertThreshold);
-
     db.prepare("DELETE FROM counters WHERE ruleId = ? AND timestamp < ?").run(
       rule.id,
       timeThreshold
     );
 
+    const alertThreshold = this.#config.alert.on.count;
+    this.#logger.info(`[${rule.name}](state: handle|previous: ${accumulatedCounters}|new: ${logs.length}|next: ${rule.counter}|threshold: ${alertThreshold})`);
+
+    const [operator, value] = utils.ruleCountThresholdOperator(alertThreshold);
     if (!utils.ruleCountMatchOperator(operator, rule.counter, value)) {
       return;
     }
@@ -112,12 +108,10 @@ export class Rule {
       }
 
       const countInInterval = counters.reduce((acc, cur) => acc + cur.counter, 0);
-
       if (!utils.ruleCountMatchOperator(operator, countInInterval, value)) {
         return;
       }
     }
-
 
     const cancelAlert = this.#checkThrottle(rule, db);
     if (cancelAlert) {
@@ -125,7 +119,6 @@ export class Rule {
     }
 
     this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
-
     createAlert(rule, this.#config, this.#logger);
 
     db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);
@@ -158,7 +151,6 @@ export class Rule {
       db.prepare("UPDATE rules SET counter = 0 WHERE id = ?").run(rule.id);
       db.prepare("DELETE from counters WHERE ruleId = ? AND timestamp <= ?").run(rule.id, intervalDate);
 
-      // eslint-disable-next-line max-len
       this.#logger.error(`[${rule.name}](state: throttle|count: ${count}|actual: ${ruleAlertsCount}|throttle: ${rule.throttleCount})`);
 
       return true;
