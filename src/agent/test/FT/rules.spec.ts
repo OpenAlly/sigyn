@@ -34,11 +34,15 @@ async function pollingIn100ms(rule: Rule, logs: string[]): Promise<boolean> {
 
   const timeToHandleLogsInMs = Math.floor(performance.now() - t0);
 
-  if (timeToHandleLogsInMs > 100) {
-    throw new Error("timeToHandleLogsInMs > 100");
+  if (timeToHandleLogsInMs > 119) {
+    // 119ms is the max time to have tests to pass since we do series a 5 polls
+    // (120 * 5 would make 600 and would break the intended behavior), we must be bellow 600ms
+    throw new Error(`timeToHandleLogsInMs > 100 (${timeToHandleLogsInMs}`);
   }
 
-  await timers.setTimeout(100 - timeToHandleLogsInMs);
+  if (timeToHandleLogsInMs < 100) {
+    await timers.setTimeout(100 - timeToHandleLogsInMs);
+  }
 
   return createAlert;
 }
