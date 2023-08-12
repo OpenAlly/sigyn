@@ -37,7 +37,7 @@ async function pollingIn100ms(rule: Rule, logs: string[]): Promise<boolean> {
   if (timeToHandleLogsInMs > 119) {
     // 119ms is the max time to have tests to pass since we do series a 5 polls
     // (120 * 5 would make 600 and would break the intended behavior), we must be bellow 600ms
-    throw new Error(`timeToHandleLogsInMs > 100 (${timeToHandleLogsInMs}`);
+    throw new Error(`timeToHandleLogsInMs > 119 (${timeToHandleLogsInMs}`);
   }
 
   if (timeToHandleLogsInMs < 100) {
@@ -58,13 +58,8 @@ function createAlertInDB(rule: DbRule): void {
 describe("Sigyn Rule", () => {
   before(async() => {
     // we create a temp folder to store the test database
-    if (fs.existsSync(".temp")) {
-      fs.rmSync(".temp", { recursive: true });
-      fs.mkdirSync(".temp");
-    }
-    else {
-      fs.mkdirSync(".temp");
-    }
+    fs.rmSync(".temp", { recursive: true, force: true });
+    fs.mkdirSync(".temp");
 
     process.env.GRAFANA_API_TOKEN = "toto";
     setGlobalDispatcher(kMockAgent);
