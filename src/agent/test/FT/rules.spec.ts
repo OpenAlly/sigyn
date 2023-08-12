@@ -4,11 +4,12 @@ import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
 import timers from "node:timers/promises";
-import { before, describe, it } from "node:test";
+import { after, before, describe, it } from "node:test";
 
 // Import Third-party Dependencies
 import dayjs from "dayjs";
 import { SigynConfig, SigynRule, initConfig } from "@sigyn/config";
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 
 // Import Internal Dependencies
 import { DbRule, getDB, initDB } from "../../src/database";
@@ -17,8 +18,10 @@ import { Rule } from "../../src/rules";
 
 // CONSTANTS
 const kMultiPollingConfigLocation = path.join(__dirname, "/fixtures/multi-polling/sigyn.config.json");
-
-const logger = new MockLogger();
+const kLokiFixtureApiUrl = "http://localhost:3100";
+const kMockAgent = new MockAgent();
+const kGlobalDispatcher = getGlobalDispatcher();
+const kLogger = new MockLogger();
 
 function getRule(rule: SigynRule): DbRule {
   return getDB().prepare("SELECT * FROM rules WHERE name = ?").get(rule.name) as DbRule;
@@ -59,8 +62,21 @@ describe("Sigyn Rule", () => {
       fs.mkdirSync(".temp");
     }
 
-    initDB(logger, { databaseFilename: ".temp/test-agent.sqlite3" });
+    process.env.GRAFANA_API_TOKEN = "toto";
+    setGlobalDispatcher(kMockAgent);
+
+    const pool = kMockAgent.get(kLokiFixtureApiUrl);
+    pool.intercept({
+      path: () => true
+    }).reply(200);
+
+    initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
   });
+
+  after(() => {
+    setGlobalDispatcher(kGlobalDispatcher);
+  });
+
 
   describe("A rule with polling = '100ms', alert.on.count = 5 and alert.on.interval = '500ms'", () => {
     let config: SigynConfig;
@@ -72,7 +88,7 @@ describe("Sigyn Rule", () => {
     describe("When receiving one new log on each polling within the interval limit", () => {
       it("should send alert on 5th polling and reset count", async() => {
         const ruleConfig = config.rules[0];
-        const rule = new Rule(ruleConfig, { logger });
+        const rule = new Rule(ruleConfig, { logger: kLogger });
         rule.init();
         assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -95,7 +111,7 @@ describe("Sigyn Rule", () => {
     describe("When receiving one new log on each polling outside the interval limit", () => {
       it("should not send alert", async() => {
         const ruleConfig = config.rules[0];
-        const rule = new Rule(ruleConfig, { logger });
+        const rule = new Rule(ruleConfig, { logger: kLogger });
         rule.init();
         assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -128,7 +144,7 @@ describe("Sigyn Rule", () => {
     describe("When receiving 5 new logs on first polling", () => {
       it("should send alert and reset count", async() => {
         const ruleConfig = config.rules[0];
-        const rule = new Rule(ruleConfig, { logger });
+        const rule = new Rule(ruleConfig, { logger: kLogger });
         // need to reset counter because previous test has set it to 4 and didn't triggers alert so counter has not been reset
         resetRuleCounter(ruleConfig);
 
@@ -146,7 +162,7 @@ describe("Sigyn Rule", () => {
       describe("When receiving less logs than throttle.count within the interval", () => {
         it("should send a first alert", async() => {
           const ruleConfig = config.rules[0];
-          const rule = new Rule(ruleConfig, { logger });
+          const rule = new Rule(ruleConfig, { logger: kLogger });
 
           assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -163,7 +179,7 @@ describe("Sigyn Rule", () => {
         it("should not send another alert whithin interval and with less logs than count threshold", async() => {
           for (let i = 0; i < 5; i++) {
             const ruleConfig = config.rules[0];
-            const rule = new Rule(ruleConfig, { logger });
+            const rule = new Rule(ruleConfig, { logger: kLogger });
 
             assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -177,7 +193,7 @@ describe("Sigyn Rule", () => {
 
         it("should send another alert whithin interval and with more logs than count threshold", async() => {
           const ruleConfig = config.rules[0];
-          const rule = new Rule(ruleConfig, { logger });
+          const rule = new Rule(ruleConfig, { logger: kLogger });
 
           assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -194,7 +210,7 @@ describe("Sigyn Rule", () => {
       it("should send a first alert", async() => {
         const ruleConfig = { ...config.rules[0], alert: { ...config.rules[0].alert, throttle: undefined } };
 
-        const rule = new Rule(ruleConfig, { logger });
+        const rule = new Rule(ruleConfig, { logger: kLogger });
 
         assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -211,7 +227,7 @@ describe("Sigyn Rule", () => {
       it("should send each another alert", async() => {
         for (let i = 0; i < 3; i++) {
           const ruleConfig = { ...config.rules[0], alert: { ...config.rules[0].alert, throttle: undefined } };
-          const rule = new Rule(ruleConfig, { logger });
+          const rule = new Rule(ruleConfig, { logger: kLogger });
 
           assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -237,7 +253,7 @@ describe("Sigyn Rule", () => {
             throttle: undefined
           }
         };
-        const rule = new Rule(ruleConfig, { logger });
+        const rule = new Rule(ruleConfig, { logger: kLogger });
 
         assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -272,7 +288,7 @@ describe("Sigyn Rule", () => {
             throttle: undefined
           }
         };
-        const rule = new Rule(ruleConfig, { logger });
+        const rule = new Rule(ruleConfig, { logger: kLogger });
 
         assert.equal(getRule(ruleConfig).counter, 0);
 
