@@ -26,6 +26,7 @@ export class Notifier {
 
   #queue = new NotifierQueue();
   #logger: Logger;
+  #notifiersId = new Map<string, number>();
 
   constructor(logger: Logger, instancier: symbol) {
     if (instancier !== kPrivateInstancier) {
@@ -108,15 +109,22 @@ export class Notifier {
   }
 
   #databaseNotifierId(notifier: string) {
+    if (this.#notifiersId.has(notifier)) {
+      return this.#notifiersId.get(notifier)!;
+    }
+
     const db = getDB();
     const dbNotifier = db.prepare("SELECT id FROM notifiers WHERE name = ?").get(notifier) as Pick<DbNotifier, "id">;
 
     if (dbNotifier) {
+      this.#notifiersId.set(notifier, dbNotifier.id);
+
       return dbNotifier.id;
     }
 
     const { lastInsertRowid } = db.prepare("INSERT INTO notifiers (name) VALUES (?)").run(notifier);
+    this.#notifiersId.set(notifier, Number(lastInsertRowid));
 
-    return lastInsertRowid as number;
+    return Number(lastInsertRowid);
   }
 }
