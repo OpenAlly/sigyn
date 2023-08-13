@@ -1,8 +1,10 @@
 // Import Node.js Dependencies
 import path from "node:path";
+import timers from "node:timers/promises";
 
 // Import Third-party Dependencies
 import { initConfig } from "@sigyn/config";
+import { GrafanaLoki } from "@myunisoft/loki";
 import { ToadScheduler, CronJob, SimpleIntervalJob } from "toad-scheduler";
 import { pino } from "pino";
 import ms from "ms";
@@ -32,10 +34,15 @@ export async function start(
   logger: Logger = kLogger
 ) {
   kLogger.info(`Starting sigyn agent at '${location}'`);
-
   initDB(kLogger);
 
-  const { rules } = await initConfig(path.join(location, "/sigyn.config.json"));
+  const { rules, loki } = await initConfig(
+    path.join(location, "/sigyn.config.json")
+  );
+
+  const lokiApi = new GrafanaLoki({
+    remoteApiURL: loki.apiUrl
+  });
 
   for (const ruleConfig of rules) {
     if (ruleConfig.disabled) {
@@ -45,7 +52,7 @@ export async function start(
     const rule = new Rule(ruleConfig, { logger });
     rule.init();
 
-    const task = asyncTask(ruleConfig, { rule, logger });
+    const task = asyncTask(ruleConfig, { rule, logger, lokiApi });
     const rulePollings = utils.getRulePollings(ruleConfig.polling);
 
     for (const [isCron, polling] of rulePollings) {
@@ -53,14 +60,23 @@ export async function start(
         const job = new CronJob({ cronExpression: polling }, task);
 
         kScheduler.addCronJob(job);
-
-        continue;
       }
+      else {
+        const job = new SimpleIntervalJob({
+          milliseconds: ms(ruleConfig.polling ?? DEFAULT_POLLING),
+          runImmediately: true
+        }, task);
 
-      const job = new SimpleIntervalJob({ milliseconds: ms(ruleConfig.polling ?? DEFAULT_POLLING), runImmediately: true }, task);
-
-      kScheduler.addIntervalJob(job);
+        // Run the job at the next loop iteration
+        setImmediate(() => kScheduler.addIntervalJob(job));
+      }
     }
+
+    /**
+     * Avoid scheduling all rules at the same time
+     * Doing so will avoid the loop to starve
+     */
+    await timers.setTimeout(200);
   }
 
   utils.cleanRulesInDb(rules);
