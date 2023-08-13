@@ -54,7 +54,7 @@ export class Rule {
 
     const accumulatedCounters = (db
       .prepare("SELECT SUM(counter) as totalCounter FROM counters WHERE ruleId = ? AND timestamp >= ?")
-      .get(rule.id, timeThreshold) as { totalCounter: number }).totalCounter;
+      .get(rule.id, timeThreshold) as { totalCounter: number }).totalCounter ?? 0;
 
     // rule.counter has may not been updated yet, so we need to substract the diff with accumulatedCounters
     // i.e rule.counter = 10, but we have 5 counters in the DB within the interval, so we need to substract 5 to the rule.counter
