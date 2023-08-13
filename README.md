@@ -34,6 +34,12 @@ Click on one of the links to access the documentation of the package:
 | agent | [@sigyn/agent](./src/agent) |
 | config | [@sigyn/config](./src/config) |
 
+### Utils
+
+| name | package and link |
+| --- | --- |
+| logql | [@sigyn/logql](./src/logql) |
+
 ### Notifiers
 | name | package and link |
 | --- | --- |
