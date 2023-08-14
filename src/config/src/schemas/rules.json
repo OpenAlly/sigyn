@@ -35,6 +35,15 @@
           }
         ]
       },
+      "pollingStrategy": {
+        "title": "The polling strategy defines how Sigyn will fetch logs from Loki",
+        "description": "Can be 'unbounded' or 'bounded'.\nIf not specified, the default value is 'unbounded'.\nNote: this option has no effect if polling is not a cron expression.",
+        "type": "string",
+        "enum": [
+          "unbounded",
+          "bounded"
+        ]
+      },
       "alert": {
         "title": "The alert configuration",
         "description": "Defines how Sigyn will trigger and send an alert.",

@@ -8,6 +8,7 @@ import { after, before, describe, it } from "node:test";
 
 // Import Third-party Dependencies
 import dayjs from "dayjs";
+import MockDate from "mockdate";
 import { SigynConfig, SigynRule, initConfig } from "@sigyn/config";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 
@@ -55,7 +56,7 @@ function createAlertInDB(rule: DbRule): void {
   getDB().prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)").run(rule.id, dayjs().valueOf());
 }
 
-describe("Sigyn Rule", () => {
+describe("Rule.walkOnLogs()", () => {
   before(async() => {
     // we create a temp folder to store the test database
     fs.rmSync(".temp", { recursive: true, force: true });
@@ -313,3 +314,86 @@ describe("Sigyn Rule", () => {
   });
 });
 
+describe("Rule.getQueryRangeStartUnixTimestamp()", () => {
+  let config: SigynConfig;
+
+  before(async() => {
+    config = await initConfig(kMultiPollingConfigLocation);
+  });
+
+  describe("Given a cron polling '* 7-20 * * *' with a bounded polling strategy", () => {
+    before(() => {
+      config.rules[0].polling = "* 7-20 * * *";
+      config.rules[0].pollingStrategy = "bounded";
+    });
+
+    const expected = [
+      ["01-01-2023 18:00:00", "01-01-2023 17:59:00"],
+      ["01-01-2023 17:32:00", "01-01-2023 17:31:00"],
+      ["01-01-2023 20:00:00", "01-01-2023 19:59:00"],
+      ["01-01-2023 13:27:00", "01-01-2023 13:26:00"],
+      ["01-01-2023 7:01:00", "01-01-2023 7:00:00"],
+      ["01-01-2023 9:10:00", "01-01-2023 9:09:00"],
+      ["01-01-2023 12:17:00", "01-01-2023 12:16:00"],
+      ["01-01-2023 15:55:00", "01-01-2023 15:54:00"]
+    ];
+
+    for (const [date, expectedResultDate] of expected) {
+      it(`should return the previous interval (${expectedResultDate}) when date is ${date}`, () => {
+        MockDate.set(date);
+
+        const rule = new Rule(config.rules[0], { logger: kLogger });
+        const start = rule.getQueryRangeStartUnixTimestamp();
+
+        assert.equal(start, dayjs(expectedResultDate).unix());
+      });
+    }
+
+    it("should return null when date is 01-01-2023 07:00:00", () => {
+      MockDate.set("01-01-2023 07:00:00");
+
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      const start = rule.getQueryRangeStartUnixTimestamp();
+
+      assert.equal(start, null);
+    });
+  });
+
+  describe("Given a cron polling '* 7-20 * * *' with an unbounded polling strategy", () => {
+    before(() => {
+      config.rules[0].polling = "* 7-20 * * *";
+      config.rules[0].pollingStrategy = "unbounded";
+    });
+
+    const expected = [
+      ["01-01-2023 18:00:00", "01-01-2023 17:59:00"],
+      ["01-01-2023 17:32:00", "01-01-2023 17:31:00"],
+      ["01-01-2023 20:00:00", "01-01-2023 19:59:00"],
+      ["01-01-2023 13:27:00", "01-01-2023 13:26:00"],
+      ["01-01-2023 7:01:00", "01-01-2023 7:00:00"],
+      ["01-01-2023 9:10:00", "01-01-2023 9:09:00"],
+      ["01-01-2023 12:17:00", "01-01-2023 12:16:00"],
+      ["01-01-2023 15:55:00", "01-01-2023 15:54:00"]
+    ];
+
+    for (const [date, expectedResultDate] of expected) {
+      it(`should return the previous interval (${expectedResultDate}) when date is ${date}`, () => {
+        MockDate.set(date);
+
+        const rule = new Rule(config.rules[0], { logger: kLogger });
+        const start = rule.getQueryRangeStartUnixTimestamp();
+
+        assert.equal(start, dayjs(expectedResultDate).unix());
+      });
+    }
+
+    it("should return previous polling when date is 01-01-2023 07:00:00", () => {
+      MockDate.set("01-01-2023 07:00:00");
+
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      const start = rule.getQueryRangeStartUnixTimestamp();
+
+      assert.equal(start, dayjs("12-31-2022 20:59:00").unix());
+    });
+  });
+});

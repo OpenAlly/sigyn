@@ -526,6 +526,65 @@ describe("Config validation", () => {
     });
   });
 
+  it("rule pollingStrategy should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            pollingStrategy: undefined
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule pollingStrategy can be 'unbounded'", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            pollingStrategy: "unbounded"
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule pollingStrategy can be 'bounded'", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            pollingStrategy: "bounded"
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule pollingStrategy cannot be anything else", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            pollingStrategy: "all" as any
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/pollingStrategy: must be equal to one of the allowed values"
+    });
+  });
+
   it("rule alert should be required", () => {
     assert.throws(() => {
       validateConfig({

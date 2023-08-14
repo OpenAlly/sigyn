@@ -18,6 +18,7 @@ export interface SigynRule {
   name: string;
   logql: string;
   polling?: string | string[];
+  pollingStrategy?: "bounded" | "unbounded";
   alert: SigynAlert;
   disabled?: boolean;
   notifiers?: string[];
