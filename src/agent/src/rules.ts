@@ -149,7 +149,7 @@ export class Rule {
     return false;
   }
 
-  getQueryRangeStartUnixTimestamp(): number {
+  getQueryRangeStartUnixTimestamp(): null | number {
     const rule = this.getRuleFromDatabase();
     const now = dayjs();
 
@@ -158,9 +158,13 @@ export class Rule {
     const [isCron, polling] = this.#getCurrentPolling();
 
     if (isCron) {
+      if (this.#config.pollingStrategy === "bounded") {
+        if (this.#shouldSkipCron(polling)) {
+          return null;
+        }
+      }
+
       const interval = cronParser.parseExpression(polling);
-      // skip the first previous interval as it's the current one
-      interval.prev();
 
       return dayjs(interval.prev().toString()).unix();
     }
@@ -175,6 +179,27 @@ export class Rule {
     }
 
     return utils.durationOrCronToDate(polling, "subtract").unix();
+  }
+
+  /**
+   * Whether the current cron should be skipped.
+   *
+   * For instance, given "* 7-20 * * *", at 7am we should skip polling if strategy is bounded.
+   * Otherwise, it would fetch logs from 8:59pm to 7am which is not what we want with bounded strategy.
+   *
+   * The next one will not be skipped i.e. at 7:01 it will fetch logs from 7:00 to 7:01 so each logs in the cron range are fetched.
+   * **Note: this function pretends the polling strategy to be bounded.**
+   */
+  #shouldSkipCron(polling: string) {
+    const cron = cronParser.parseExpression(polling);
+    const nextDate = dayjs(cron.next().toString());
+    const currentDate = dayjs(cron.prev().toString());
+    const previousDate = dayjs(cron.prev().toString());
+
+    const previousDiff = Math.abs(previousDate.diff(currentDate, "ms"));
+    const nextDiff = Math.abs(currentDate.diff(nextDate, "ms"));
+
+    return nextDiff < previousDiff;
   }
 
   #getCurrentPolling(): utils.RulePolling {

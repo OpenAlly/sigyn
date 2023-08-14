@@ -153,6 +153,7 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   | `name`      | `string`               | ✔️       | The name of the rule. Must be unique between each rule. |
   | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. You can use `{label.x}` where `x` is provided in `labelFilters` (see example below) |
   | `polling`   | `string` or `string[]` | ❌       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is useful if you want a different polling the day and the night. Default to  `1m`. |
+  | `pollingStrategy` | `bounded` or `unbounded` | ❌ | **For CRON polling only**. Defines how Sigyn should fetch logs given a range. For instance, given `* 7-20 * * *` at `7:00` it will fetch logs since `20:59` last day with `unbounded` strategy. It will skip and wait the next poll given a `bounded` strategy.
   | `alert`     | `object`               | ✔️       | An object defining the alerting configuration for the rule. |
   | `disabled`  | `boolean`              | ❌       | Weither the rule is enabled, default to `false`. |
   | `notifiers` | `string[]`             | ❌       | An array of strings representing the notifiers for the rule. It will enables all configured `notifiers` by default. |

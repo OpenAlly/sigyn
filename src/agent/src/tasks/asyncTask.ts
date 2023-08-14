@@ -18,8 +18,13 @@ export function asyncTask(ruleConfig: SigynRule, options: AsyncTaskOptions) {
   const { rule, logger, lokiApi } = options;
 
   const task = new AsyncTask(ruleConfig.name, async() => {
+    const start = rule.getQueryRangeStartUnixTimestamp();
+    if (start === null) {
+      return;
+    }
+
     const logs = await lokiApi.queryRange(ruleConfig.logql, {
-      start: rule.getQueryRangeStartUnixTimestamp()
+      start
     });
 
     const polling = ruleConfig.polling ?? DEFAULT_POLLING;
