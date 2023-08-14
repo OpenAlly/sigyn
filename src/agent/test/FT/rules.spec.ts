@@ -9,7 +9,7 @@ import { after, before, describe, it } from "node:test";
 // Import Third-party Dependencies
 import dayjs from "dayjs";
 import MockDate from "mockdate";
-import { SigynConfig, SigynRule, getConfig, initConfig } from "@sigyn/config";
+import { SigynConfig, SigynRule, initConfig } from "@sigyn/config";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 
 // Import Internal Dependencies
