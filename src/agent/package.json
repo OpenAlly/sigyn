@@ -40,20 +40,20 @@
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@myunisoft/loki": "^1.2.0",
-    "better-sqlite3": "^8.4.0",
-    "cron-parser": "^4.8.1",
-    "croner": "^6.0.7",
+    "@myunisoft/loki": "^2.1.0",
+    "better-sqlite3": "^8.5.0",
+    "cron-parser": "^4.9.0",
+    "croner": "^7.0.0",
     "dayjs": "^1.11.9",
     "dotenv": "^16.3.1",
     "ms": "^2.1.3",
-    "pino": "^8.14.1",
+    "pino": "^8.15.0",
     "pupa": "^3.1.0",
     "toad-scheduler": "^3.0.0"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.4",
     "mockdate": "^3.0.5",
-    "pino-pretty": "^10.0.1"
+    "pino-pretty": "^10.2.0"
   }
 }

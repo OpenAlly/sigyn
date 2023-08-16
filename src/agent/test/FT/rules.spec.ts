@@ -31,7 +31,7 @@ function getRule(rule: SigynRule): DbRule {
 async function pollingIn100ms(rule: Rule, logs: string[]): Promise<boolean> {
   const t0 = performance.now();
 
-  const createAlert = await rule.walkOnLogs(logs);
+  const createAlert = await rule.walkOnLogs([{ values: logs, stream: {} }]);
 
   const timeToHandleLogsInMs = Math.floor(performance.now() - t0);
 
@@ -49,11 +49,17 @@ async function pollingIn100ms(rule: Rule, logs: string[]): Promise<boolean> {
 }
 
 function resetRuleCounter(rule: SigynRule): void {
-  getDB().prepare("UPDATE rules SET counter = 0 WHERE name = ?").run(rule.name);
+  const db = getDB();
+  db.transaction(() => {
+    db.prepare("UPDATE rules SET counter = 0 WHERE name = ?").run(rule.name);
+    db.prepare("DELETE FROM ruleLabels");
+    db.prepare("DELETE FROM ruleLogs");
+  })();
 }
 
 function createAlertInDB(rule: DbRule): void {
   getDB().prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)").run(rule.id, dayjs().valueOf());
+  getDB().prepare("UPDATE ruleLogs SET processed = 1 WHERE ruleId = ?").run(rule.id);
 }
 
 describe("Rule.walkOnLogs()", () => {
@@ -76,7 +82,6 @@ describe("Rule.walkOnLogs()", () => {
   after(() => {
     setGlobalDispatcher(kGlobalDispatcher);
   });
-
 
   describe("A rule with polling = '100ms', alert.on.count = 5 and alert.on.interval = '500ms'", () => {
     let config: SigynConfig;
@@ -117,7 +122,7 @@ describe("Rule.walkOnLogs()", () => {
 
         let pollingCount = 0;
         while (pollingCount++ < 4) {
-          const createAlert = await pollingIn100ms(rule, ["one new log"]);
+          const createAlert = await pollingIn100ms(rule, ["one new log outside interval limit"]);
 
           assert.equal(createAlert, false);
           assert.equal(getRule(ruleConfig).counter, pollingCount);
@@ -150,7 +155,7 @@ describe("Rule.walkOnLogs()", () => {
 
         assert.equal(getRule(ruleConfig).counter, 0);
 
-        const createAlert = await pollingIn100ms(rule, Array(5).map(() => "one new log"));
+        const createAlert = await pollingIn100ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
         assert.equal(createAlert, true);
         // once alert triggers, counter should be reset to 0
@@ -166,7 +171,7 @@ describe("Rule.walkOnLogs()", () => {
 
           assert.equal(getRule(ruleConfig).counter, 0);
 
-          const createAlert = await pollingIn100ms(rule, Array(5).map(() => "one new log"));
+          const createAlert = await pollingIn100ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
           assert.equal(createAlert, true);
           // once alert triggers, counter should be reset to 0
@@ -183,7 +188,7 @@ describe("Rule.walkOnLogs()", () => {
 
             assert.equal(getRule(ruleConfig).counter, 0);
 
-            const createAlert = await pollingIn100ms(rule, Array(5).map(() => "one new log"));
+            const createAlert = await pollingIn100ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
             assert.equal(createAlert, false);
             // once alert triggers, counter should be reset to 0
@@ -197,7 +202,7 @@ describe("Rule.walkOnLogs()", () => {
 
           assert.equal(getRule(ruleConfig).counter, 0);
 
-          const createAlert = await pollingIn100ms(rule, Array(5).map(() => "one new log"));
+          const createAlert = await pollingIn100ms(rule, Array.from(Array(15)).map(() => "one new log"));
 
           assert.equal(createAlert, true);
           // once alert triggers, counter should be reset to 0
@@ -214,7 +219,7 @@ describe("Rule.walkOnLogs()", () => {
 
         assert.equal(getRule(ruleConfig).counter, 0);
 
-        const createAlert = await pollingIn100ms(rule, Array(5).map(() => "one new log"));
+        const createAlert = await pollingIn100ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
         assert.equal(createAlert, true);
         // once alert triggers, counter should be reset to 0
@@ -231,7 +236,7 @@ describe("Rule.walkOnLogs()", () => {
 
           assert.equal(getRule(ruleConfig).counter, 0);
 
-          const createAlert = await pollingIn100ms(rule, Array(5).map(() => "one new log"));
+          const createAlert = await pollingIn100ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
           assert.equal(createAlert, true);
           // once alert triggers, counter should be reset to 0
@@ -269,7 +274,7 @@ describe("Rule.walkOnLogs()", () => {
 
         // 5th POLLING
         assert.equal(getRule(ruleConfig).counter, 4);
-        const createAlert = await pollingIn100ms(rule, ["one log"]);
+        const createAlert = await pollingIn100ms(rule, ["one log should trigger alert"]);
 
         assert.equal(createAlert, true);
         // once alert triggers, counter should be reset to 0
@@ -289,13 +294,13 @@ describe("Rule.walkOnLogs()", () => {
           }
         };
         const rule = new Rule(ruleConfig, { logger: kLogger });
-
+        resetRuleCounter(ruleConfig);
         assert.equal(getRule(ruleConfig).counter, 0);
 
         // since interval is 500ms and polling 100ms, need to do 5 polling to end the interval
         // 4 POLLINGS
         for (let i = 0; i < 4; i++) {
-          const createAlert = await pollingIn100ms(rule, Array(10).map(() => "one new log"));
+          const createAlert = await pollingIn100ms(rule, Array.from(Array(10)).map(() => "one new log"));
 
           assert.equal(createAlert, false);
           // once alert triggers, counter should be reset to 0
@@ -304,12 +309,47 @@ describe("Rule.walkOnLogs()", () => {
 
         // 5th POLLING
         assert.equal(getRule(ruleConfig).counter, 40);
-        const createAlert = await pollingIn100ms(rule, Array(10).map(() => "one new log"));
+        const createAlert = await pollingIn100ms(rule, Array.from(Array(10)).map(() => "one new log"));
 
         assert.equal(createAlert, false);
         // once alert triggers, counter should be reset to 0
         assert.equal(getRule(ruleConfig).counter, 50);
       });
+    });
+
+    it("should store labels", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      await rule.walkOnLogs([
+        { values: ["one"], stream: { foo: "bar" } },
+        { values: ["two"], stream: { foo: "baz", foz: "boz" } }
+      ]);
+
+      const labels = getDB().prepare("SELECT * FROM ruleLabels").all();
+
+      assert.equal(labels.length, 3);
+      assert.deepEqual(labels, [
+        { id: 1, ruleId: 1, key: "foo", value: "bar" },
+        { id: 2, ruleId: 1, key: "foo", value: "baz" },
+        { id: 3, ruleId: 1, key: "foz", value: "boz" }
+      ]);
+    });
+
+    it("should not store duplicate labels", async() => {
+      getDB().exec("DELETE from ruleLabels");
+
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+
+      await rule.walkOnLogs([
+        { values: ["one"], stream: { foo: "bar" } },
+        { values: ["two"], stream: { foo: "bar" } }
+      ]);
+
+      const labels = getDB().prepare("SELECT * FROM ruleLabels").all();
+
+      assert.equal(labels.length, 1);
+      assert.deepEqual(labels, [
+        { id: 1, ruleId: 1, key: "foo", value: "bar" }
+      ]);
     });
   });
 });
@@ -395,5 +435,38 @@ describe("Rule.getQueryRangeStartUnixTimestamp()", () => {
 
       assert.equal(start, dayjs("12-31-2022 20:59:00").unix());
     });
+  });
+});
+
+describe("Rule.getRuleFromDatabaseWithLabels()", () => {
+  let config: SigynConfig;
+
+  before(async() => {
+    config = await initConfig(kMultiPollingConfigLocation);
+  });
+
+  it("should return a rule with labels", async() => {
+    getDB().exec("DELETE from ruleLabels");
+
+    const rule = new Rule(config.rules[0], { logger: kLogger });
+    await rule.walkOnLogs([
+      { values: ["one"], stream: { foo: "bar" } },
+      { values: ["two"], stream: { foo: "baz", foz: "boz" } }
+    ]);
+
+    const ruleWithLabels = rule.getRuleFromDatabaseWithLabels();
+
+    assert.equal(Object.keys(ruleWithLabels.labels).length, 2);
+    assert.equal(ruleWithLabels.labels.foo, "bar, baz");
+    assert.equal(ruleWithLabels.labels.foz, "boz");
+  });
+
+  it("should return a rule without labels", async() => {
+    getDB().exec("DELETE from ruleLabels");
+
+    const rule = new Rule(config.rules[0], { logger: kLogger });
+    const ruleWithLabels = rule.getRuleFromDatabaseWithLabels();
+
+    assert.equal(Object.keys(ruleWithLabels.labels).length, 0);
   });
 });

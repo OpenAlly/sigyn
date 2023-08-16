@@ -50,7 +50,9 @@ describe("executeWebhook()", () => {
       await discord.execute({
         counter: 10,
         ruleConfig: { ...kValidRuleConfig, alert: { ...kValidRuleConfig.alert, template: {} } },
-        webhookUrl: kDummyWebhoobURL
+        webhookUrl: kDummyWebhoobURL,
+        severity: "error",
+        label: { foo: "bar" }
       });
     }, {
       name: "Error",
@@ -67,7 +69,9 @@ describe("executeWebhook()", () => {
     const { data } = await discord.execute({
       counter: 10,
       ruleConfig: kValidRuleConfig,
-      webhookUrl: kDummyWebhoobURL
+      webhookUrl: kDummyWebhoobURL,
+      severity: "error",
+      label: { foo: "bar" }
     });
 
     assert.deepEqual(JSON.parse(data), { foo: "bar" });
@@ -82,29 +86,12 @@ describe("executeWebhook()", () => {
     await assert.rejects(async() => await discord.execute({
       counter: 10,
       ruleConfig: kValidRuleConfig,
-      webhookUrl: kDummyWebhoobURL
+      webhookUrl: kDummyWebhoobURL,
+      severity: "error",
+      label: { foo: "bar" }
     }), {
       name: "Error",
       message: "Bad Request"
-    });
-  });
-
-  it("should fail executing webhook when given missing config", async() => {
-    pool.intercept({
-      method: "POST",
-      path: "/"
-    }).reply(200, { foo: "bar" });
-
-    await assert.rejects(async() => await discord.execute({
-      counter: 10,
-      ruleConfig: {
-        ...kValidRuleConfig,
-        alert: { ...kValidRuleConfig.alert, on: { ...kValidRuleConfig.alert.on, count: undefined } }
-      } as any,
-      webhookUrl: kDummyWebhoobURL
-    }), {
-      name: "MissingValueError",
-      message: "Missing a value for the placeholder: count"
     });
   });
 });

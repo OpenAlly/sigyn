@@ -18,13 +18,22 @@ const kExpectedTablesColumns = {
     { name: "name", dflt_value: null, type: "TEXT", pk: 0, notnull: 1 },
     { name: "counter", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 },
     { name: "lastRunAt", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
-    { name: "throttleCount", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 }
+    { name: "throttleCount", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "lastIntervalReset", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "firstReset", dflt_value: "1", type: "INTEGER", pk: 0, notnull: 0 }
   ],
-  counters: [
+  ruleLogs: [
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
     { name: "ruleId", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
-    { name: "counter", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
-    { name: "timestamp", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 }
+    { name: "log", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 },
+    { name: "timestamp", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "processed", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 }
+  ],
+  ruleLabels: [
+    { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
+    { name: "ruleId", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "key", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 },
+    { name: "value", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 }
   ],
   alerts: [
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
