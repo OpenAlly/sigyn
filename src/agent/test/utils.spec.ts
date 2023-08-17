@@ -232,6 +232,13 @@ describe("Utils", () => {
 
       assert.deepStrictEqual(labels, { app: "foo", env: "preprod" });
     });
+
+    it("should return an empty object when logql has no stream selector", () => {
+      const logql = "|= `my super logql`";
+      const labels = utils.parseLogQLLabels(logql);
+
+      assert.deepStrictEqual(labels, {});
+    });
   });
 
   describe("getSeverity()", () => {

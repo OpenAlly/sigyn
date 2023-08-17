@@ -1,5 +1,6 @@
 // Import Third-party Dependencies
 import { SigynRule, AlertSeverity, getConfig } from "@sigyn/config";
+import { StreamSelector } from "@sigyn/logql";
 import dayjs, { type Dayjs } from "dayjs";
 import ms from "ms";
 import cronParser from "cron-parser";
@@ -98,33 +99,12 @@ export function getRulePollings(polling: SigynRule["polling"] = DEFAULT_POLLING)
   return polling.map<RulePolling>((value) => [true, value]);
 }
 
-/**
- * Parse a LogQL string to extract labels.
- *
- * @example
- * ```ts
- * const logql = "{app=\"foo\", env=\"preprod\"} |= `my super logql`"
- * const labels = parseLogQLLabels(logql);
- * assert.deepStrictEqual(labels, { app: "foo", env: "preprod" });
- * ```
- */
 export function parseLogQLLabels(logql: string): Record<string, string> {
+  const streamSelector = new StreamSelector(logql);
   const labels: Record<string, string> = {};
 
-  const match = logql.match(/{(.*)}/);
-  if (!match || match.length !== 2) {
-    return labels;
-  }
-
-  const [, labelsStr] = match;
-  const labelsArr = labelsStr.split(",");
-
-  for (const label of labelsArr) {
-    const [key, value] = label.split("=").map((str) => str.trim().replaceAll(/"/g, ""));
-
-    if (key && value) {
-      labels[key] = value;
-    }
+  for (const [key, { value }] of streamSelector.entries()) {
+    labels[key] = value;
   }
 
   return labels;
