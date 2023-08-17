@@ -4,7 +4,7 @@ import { GrafanaLoki } from "@myunisoft/loki";
 import { AsyncTask } from "toad-scheduler";
 
 // Import Internal Dependencies
-import { DEFAULT_POLLING, Rule } from "../rules";
+import { Rule } from "../rules";
 import { Logger } from "..";
 import { createRuleAlert } from "../alert";
 
@@ -27,10 +27,8 @@ export function asyncTask(ruleConfig: SigynRule, options: AsyncTaskOptions) {
       start
     });
 
-    const polling = ruleConfig.polling ?? DEFAULT_POLLING;
-
     try {
-      logger.info(`[${ruleConfig.name}](state: polling start|polling: ${polling}|query: ${ruleConfig.logql})`);
+      logger.info(`[${ruleConfig.name}](state: polling|start: ${start}|query: ${ruleConfig.logql})`);
 
       const createAlert = await rule.walkOnLogs(logs);
       if (createAlert) {
