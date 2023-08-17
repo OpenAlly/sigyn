@@ -10,6 +10,10 @@ export interface StreamSelectorValue {
 
 export type LabelValue = Partial<StreamSelectorValue> & Pick<StreamSelectorValue, "value">;
 
+export interface StreamSelectorToJSONOptions {
+  skipOperator?: boolean;
+}
+
 export class StreamSelector extends Map<string, StreamSelectorValue> {
   constructor(init?: string | string[] | Iterable<[string, string]> | StreamSelector) {
     super();
@@ -87,5 +91,25 @@ export class StreamSelector extends Map<string, StreamSelectorValue> {
       .join(",");
 
     return `{${selectorStr}}`;
+  }
+
+  kv(): Record<string, string> {
+    const streamSelectors = {};
+
+    for (const [key, { value }] of this.entries()) {
+      streamSelectors[key] = value;
+    }
+
+    return streamSelectors;
+  }
+
+  toJSON(): Record<string, StreamSelectorValue> {
+    const streamSelectors = {};
+
+    for (const [key, { operator, value }] of this.entries()) {
+      streamSelectors[key] = { operator, value };
+    }
+
+    return streamSelectors;
   }
 }

@@ -557,5 +557,55 @@ describe("LabelFilters", () => {
         assert.equal(labels.toString(), "");
       });
     });
+
+    describe("toJSON()", () => {
+      it("should return an empty object", () => {
+        const labels = new LabelFilters();
+
+        assert.deepEqual(labels.toJSON(), {});
+      });
+
+      it("should return label filters with operators", () => {
+        const labels = new LabelFilters();
+        labels.set("app", "foo", "=");
+        labels.set("app", "foz", "=");
+        labels.set("env", "prod", "==");
+        labels.set("version", "1.0", "!=");
+        labels.set("foo", "bar", "=~");
+        labels.set("fox", "baz", "!~");
+        labels.set("size", "20kb", ">=");
+        labels.set("counter", 5, "<");
+
+        assert.deepEqual(labels.toJSON(), {
+          app: [{ value: "foo", operator: "=" }, { value: "foz", operator: "=" }],
+          env: [{ value: "prod", operator: "==" }],
+          version: [{ value: "1.0", operator: "!=" }],
+          foo: [{ value: "bar", operator: "=~" }],
+          fox: [{ value: "baz", operator: "!~" }],
+          size: [{ value: "20kb", operator: ">=" }],
+          counter: [{ value: 5, operator: "<" }]
+        });
+      });
+    });
+
+    describe("kv()", () => {
+      it("should return an empty object", () => {
+        const labels = new LabelFilters();
+
+        assert.deepEqual(labels.kv(), {});
+      });
+
+      it("should return label filters without operators", () => {
+        const labels = new LabelFilters();
+        labels.set("app", "foo", "=");
+        labels.set("env", "prod", "==");
+        labels.set("env", "dev", "==");
+
+        assert.deepEqual(labels.kv(), {
+          app: ["foo"],
+          env: ["prod", "dev"]
+        });
+      });
+    });
   });
 });

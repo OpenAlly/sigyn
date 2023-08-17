@@ -104,6 +104,26 @@ export class LabelFilters extends Map<string, LabelFilter[]> {
     })).join(" | ")}`;
   }
 
+  toJSON(): Record<string, LabelFilter[]> {
+    const labelFilters: Record<string, LabelFilter[]> = {};
+
+    for (const [key, values] of this.entries()) {
+      labelFilters[key] = values;
+    }
+
+    return labelFilters;
+  }
+
+  kv(): Record<string, string[]> {
+    const labelFilters: Record<string, string[]> = {};
+
+    for (const [key, values] of this.entries()) {
+      labelFilters[key] = values.map(({ value }) => String(value));
+    }
+
+    return labelFilters;
+  }
+
   #getDelimiter(value: string | number, operator: LabelFilterOperator) {
     if (typeof value === "number") {
       return "";
