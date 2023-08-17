@@ -112,7 +112,7 @@ export class Rule {
     db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(rule.counter, rule.id);
 
     const alertThreshold = this.#config.alert.on.count;
-    this.#logger.info(`[${rule.name}](state: handle|previous: ${lastCounter}|new: ${rule.counter - lastCounter}|next: ${rule.counter}|threshold: ${alertThreshold})`);
+    this.#logger.info(`[${rule.name}](state: handle|polling: ${this.#getCurrentPolling()[1]}|previous: ${lastCounter}|new: ${rule.counter - lastCounter}|next: ${rule.counter}|threshold: ${alertThreshold})`);
 
     const [operator, value] = utils.ruleCountThresholdOperator(alertThreshold);
 
