@@ -22,7 +22,7 @@ interface ExecuteWebhookOptions {
   webhookUrl: string;
   ruleConfig: NotifierFormattedSigynRule;
   counter: number;
-  label?: Record<string, string>;
+  label: Record<string, string>;
   severity: "critical" | "error" | "warning" | "info";
 }
 
@@ -56,7 +56,12 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
   const formattedLogQL = logql.includes("`") ? `\`\`${logql.endsWith("`") ? `${logql} ` : logql}\`\`` : `\`${logql}\``;
   const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label };
   const contentTemplateOptions = {
-    transform: ({ value }) => (value === undefined ? value : `**${value}**`)
+    transform: ({ value }) => (`**${value === undefined ? "unknown" : value}**`),
+    ignoreMissing: true
+  };
+  const titleTemplateOptions = {
+    transform: ({ value }) => (value === undefined ? "unknown" : value),
+    ignoreMissing: true
   };
 
   const content: string[] = templateContent.map((content) => pupa(
@@ -67,7 +72,7 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
 
   return {
     embeds: [{
-      title: pupa(`${kSeverityEmoji[severity]} ${templateTitle}`, templateData),
+      title: pupa(`${kSeverityEmoji[severity]} ${templateTitle}`, templateData, titleTemplateOptions),
       description: content.join("\n"),
       color: kEmbedColor[severity]
     }],

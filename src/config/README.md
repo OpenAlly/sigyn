@@ -243,6 +243,8 @@ You can also use a label variable from your LogQL using `{label.x}`:
 }
 ```
 
+You can also use any variable extracted from `stream` vector.
+
 > **Note** You **MUST NOT** use markdown in `title` or `content`, this is handled by notifiers.
 
 ## 🧠 Visual Studio Code JSON schema

@@ -45,7 +45,11 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
   const formattedLogQL = `\`${logql.replaceAll("`", "'")}\``;
   const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label };
   const textTemplateOptions = {
-    transform: ({ value, key }) => (value === undefined || key === "logql" ? value : `**${value}**`)
+    transform: ({ value, key }) => (key === "logql" ? value : `**${value ?? "unknown"}**`)
+  };
+  const titleTemplateOptions = {
+    transform: ({ value }) => value ?? "unknown",
+    ignoreMissing: true
   };
 
   const content: string[] = templateContent.map((content) => pupa(
@@ -55,7 +59,7 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
   ));
 
   return {
-    title: pupa(`${kSeverityEmoji[severity]} ${title}`, templateData),
+    title: pupa(`${kSeverityEmoji[severity]} ${title}`, templateData, titleTemplateOptions),
     text: content.join("\n")
   };
 }

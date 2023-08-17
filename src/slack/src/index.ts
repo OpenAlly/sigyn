@@ -14,7 +14,7 @@ interface ExecuteWebhookOptions {
   webhookUrl: string;
   ruleConfig: NotifierFormattedSigynRule;
   counter: number;
-  label?: Record<string, string>;
+  label: Record<string, string>;
   severity: "critical" | "error" | "warning" | "info";
 }
 
@@ -49,7 +49,11 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
 
   const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label };
   const templateOptions = {
-    transform: ({ value, key }) => (value === undefined || key === "logql" ? value : `*${value}*`)
+    transform: ({ value, key }) => (key === "logql" ? value : `*${value ?? "unknown"}*`)
+  };
+  const titleTemplateOptions = {
+    transform: ({ value }) => (value ?? "unknown"),
+    ignoreMissing: true
   };
 
   const formattedContent: string[] = content.map((text) => pupa(
@@ -58,7 +62,7 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
     templateOptions
   ));
   if (title) {
-    formattedContent.unshift(pupa(formattedTitle, templateData));
+    formattedContent.unshift(pupa(formattedTitle, templateData, titleTemplateOptions));
   }
 
   return {

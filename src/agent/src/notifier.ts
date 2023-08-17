@@ -11,7 +11,7 @@ import { Logger } from ".";
 const kPrivateInstancier = Symbol("instancier");
 
 export interface NotifierAlert {
-  rule: DbRule;
+  rule: DbRule & { labels: Record<string, string> };
   notifier: string;
   notif: Pick<DbAlertNotif, "alertId" | "notifierId">;
   error?: Error;
@@ -65,7 +65,7 @@ export class Notifier {
   }
 
   async #sendNotification(alert: NotifierAlert) {
-    const { notifier } = alert;
+    const { notifier, rule } = alert;
 
     const db = getDB();
     const config = getConfig();
@@ -81,7 +81,7 @@ export class Notifier {
       ...notifierConfig,
       ruleConfig,
       counter: alert.rule.counter,
-      label: utils.parseLogQLLabels(ruleConfig.logql),
+      label: { ...utils.parseLogQLLabels(ruleConfig.logql), ...rule.labels },
       severity: utils.getSeverity(ruleConfig.alert.severity)
     };
     const notifierPackage = utils.getNotifierPackage(notifier);

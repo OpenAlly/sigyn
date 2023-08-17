@@ -23,7 +23,7 @@ export function asyncTask(ruleConfig: SigynRule, options: AsyncTaskOptions) {
       return;
     }
 
-    const logs = await lokiApi.queryRange(ruleConfig.logql, {
+    const { logs } = await lokiApi.queryRangeStream<string>(ruleConfig.logql, {
       start
     });
 
@@ -34,7 +34,8 @@ export function asyncTask(ruleConfig: SigynRule, options: AsyncTaskOptions) {
 
       const createAlert = await rule.walkOnLogs(logs);
       if (createAlert) {
-        createRuleAlert(rule.getRuleFromDatabase(), ruleConfig, logger);
+        createRuleAlert(rule.getRuleFromDatabaseWithLabels(), ruleConfig, logger);
+        rule.clearLabels();
       }
     }
     catch (e) {

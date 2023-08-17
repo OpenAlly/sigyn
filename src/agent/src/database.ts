@@ -20,6 +20,23 @@ export interface DbRule {
   counter: number;
   lastRunAt?: number;
   throttleCount: number;
+  lastIntervalReset: null | number;
+  firstReset: 0 | 1;
+}
+
+export interface DbRuleLog {
+  id: number;
+  log: string;
+  ruleId: number;
+  timestamp: number;
+  processed: 0 | 1;
+}
+
+export interface DbRuleLabel {
+  id: number;
+  key: string;
+  value: string;
+  ruleId: number;
 }
 
 export interface DbCounter {
