@@ -24,10 +24,11 @@ interface ExecuteWebhookOptions {
   counter: number;
   label: Record<string, string>;
   severity: "critical" | "error" | "warning" | "info";
+  lokiUrl: string;
 }
 
 async function formatWebhook(options: ExecuteWebhookOptions) {
-  const { counter, ruleConfig, label, severity } = options;
+  const { counter, ruleConfig, label, severity, lokiUrl } = options;
 
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
@@ -54,9 +55,9 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
   // if the logql ends with a backtick, we need to add a space after it otherwise the string
   // ends with triple backtick and the code snippet is done.
   const formattedLogQL = logql.includes("`") ? `\`\`${logql.endsWith("`") ? `${logql} ` : logql}\`\`` : `\`${logql}\``;
-  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label };
+  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label, lokiUrl };
   const contentTemplateOptions = {
-    transform: ({ value }) => (`**${value === undefined ? "unknown" : value}**`),
+    transform: ({ key, value }) => (key === "lokiUrl" ? value : `**${value === undefined ? "unknown" : value}**`),
     ignoreMissing: true
   };
   const titleTemplateOptions = {

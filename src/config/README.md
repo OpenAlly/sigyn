@@ -228,6 +228,7 @@ You can use any of theses variables, surrounding with `{}` (see example below):
 - `counter`
 - `counter`
 - `interval`
+- `lokiUrl` **Note** you can use hyperlink with Markdown i.e. `[See logs]({lokiUrl})`
 
 You can also use a label variable from your LogQL using `{label.x}`:
 ```json
