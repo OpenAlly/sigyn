@@ -4,6 +4,8 @@ import { LineFilters } from "./lineFilters";
 import { LabelFilters } from "./labelFilters";
 import { ParserExpression } from "./parserExpression";
 
+export { StreamSelector, LineFilters, LabelFilters, ParserExpression };
+
 export class LogQL {
   streamSelector = new StreamSelector();
   lineFilters = new LineFilters();
