@@ -70,7 +70,7 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
 
     let formattedText = text;
     // Slack doesn't supports [label](url) format but <url|label> instead.
-    const mdUrlRegex = /\[(?<label>.+?)\]\((?<url>.+?)\)/g;
+    const mdUrlRegex = /\[([^[\]]+)\]\(([^()]+)\)/g;
     const [url, label, link] = mdUrlRegex.exec(text) ?? [];
     if (url !== undefined) {
       formattedText = formattedText.replace(url, `<${link}|${label}>`);
