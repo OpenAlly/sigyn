@@ -68,7 +68,8 @@ The **Sigyn** configuration object consists of theses properties: `loki`, `templ
           "content": [
             "- LogQL: {logql}",
             "- Threshold: {count}",
-            "- Interval: {interval}"
+            "- Interval: {interval}",
+            "- [See logs on Loki]({lokiUrl})"
           ]
         }
       }
