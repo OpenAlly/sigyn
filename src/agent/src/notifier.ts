@@ -82,7 +82,8 @@ export class Notifier {
       ruleConfig,
       counter: alert.rule.counter,
       label: { ...utils.parseLogQLLabels(ruleConfig.logql), ...rule.labels },
-      severity: utils.getSeverity(ruleConfig.alert.severity)
+      severity: utils.getSeverity(ruleConfig.alert.severity),
+      lokiUrl: await utils.getLokiUrl(ruleConfig)
     };
     const notifierPackage = utils.getNotifierPackage(notifier);
 

@@ -16,10 +16,11 @@ interface ExecuteWebhookOptions {
   counter: number;
   label: Record<string, string>;
   severity: "critical" | "error" | "warning" | "info";
+  lokiUrl: string;
 }
 
 async function formatWebhook(options: ExecuteWebhookOptions) {
-  const { counter, ruleConfig, label, severity } = options;
+  const { counter, ruleConfig, label, severity, lokiUrl } = options;
 
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
@@ -47,20 +48,40 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
   // Slack doesn't support header format
   const formattedTitle = `*${kSeverityEmoji[severity]} ${title}*\n\n`;
 
-  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label };
+  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label, lokiUrl };
   const templateOptions = {
-    transform: ({ value, key }) => (key === "logql" ? value : `*${value ?? "unknown"}*`)
+    transform: ({ value, key }) => {
+      if (key === "logql" || key === "lokiUrl") {
+        return value;
+      }
+
+      return `*${value ?? "unknown"}*`;
+    }
   };
   const titleTemplateOptions = {
     transform: ({ value }) => (value ?? "unknown"),
     ignoreMissing: true
   };
 
-  const formattedContent: string[] = content.map((text) => pupa(
-    text,
-    templateData,
-    templateOptions
-  ));
+  const formattedContent: string[] = content.map((text) => {
+    if (text === "") {
+      return "";
+    }
+
+    let formattedText = text;
+    // Slack doesn't supports [label](url) format but <url|label> instead.
+    const mdUrlRegex = /\[([^[\]]+)\]\(([^()]+)\)/g;
+    const [url, label, link] = mdUrlRegex.exec(text) ?? [];
+    if (url !== undefined) {
+      formattedText = formattedText.replace(url, `<${link}|${label}>`);
+    }
+
+    return pupa(
+      formattedText,
+      templateData,
+      templateOptions
+    );
+  });
   if (title) {
     formattedContent.unshift(pupa(formattedTitle, templateData, titleTemplateOptions));
   }

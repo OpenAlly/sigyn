@@ -7,6 +7,7 @@ import cronParser from "cron-parser";
 // Import Internal Dependencies
 import { DbRule, getDB } from "./database";
 import { DEFAULT_POLLING } from "./rules";
+import { Datasource } from "./datasource";
 
 // CONSTANTS
 const kOnlyDigitsRegExp = /^\d+$/;
@@ -148,4 +149,30 @@ export function getSeverity(sev: undefined | AlertSeverity): "critical" | "error
     default:
       return getSeverity(defaultSeverity);
   }
+}
+
+export async function getLokiUrl(config: SigynRule): Promise<string> {
+  const { loki: { apiUrl } } = getConfig();
+  const from = String(durationOrCronToDate(config.alert.on.interval, "subtract").valueOf());
+  const to = "now";
+  const { uid, orgId } = await Datasource.Loki(apiUrl);
+  const url = new URL("explore", apiUrl);
+  url.searchParams.append("orgId", String(orgId));
+  url.searchParams.append("left", JSON.stringify({
+    datasource: uid,
+    queries: [
+      {
+        datasource: {
+          type: "loki",
+          uid
+        },
+        editorMode: "builder",
+        expr: config.logql,
+        queryType: "range"
+      }
+    ],
+    range: { from, to }
+  }));
+
+  return url.href;
 }

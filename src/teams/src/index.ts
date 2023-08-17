@@ -16,10 +16,11 @@ interface ExecuteWebhookOptions {
   counter: number;
   label: Record<string, string>;
   severity: "critical" | "error" | "warning" | "info";
+  lokiUrl: string;
 }
 
 async function formatWebhook(options: ExecuteWebhookOptions) {
-  const { counter, ruleConfig, label, severity } = options;
+  const { counter, ruleConfig, label, severity, lokiUrl } = options;
 
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
@@ -43,9 +44,9 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
   }
 
   const formattedLogQL = `\`${logql.replaceAll("`", "'")}\``;
-  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label };
+  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label, lokiUrl };
   const textTemplateOptions = {
-    transform: ({ value, key }) => (key === "logql" ? value : `**${value ?? "unknown"}**`)
+    transform: ({ value, key }) => (key === "logql" || key === "lokiUrl" ? value : `**${value ?? "unknown"}**`)
   };
   const titleTemplateOptions = {
     transform: ({ value }) => value ?? "unknown",
