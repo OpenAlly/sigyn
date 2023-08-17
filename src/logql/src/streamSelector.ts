@@ -10,10 +10,6 @@ export interface StreamSelectorValue {
 
 export type LabelValue = Partial<StreamSelectorValue> & Pick<StreamSelectorValue, "value">;
 
-export interface StreamSelectorToJSONOptions {
-  skipOperator?: boolean;
-}
-
 export class StreamSelector extends Map<string, StreamSelectorValue> {
   constructor(init?: string | string[] | Iterable<[string, string]> | StreamSelector) {
     super();
