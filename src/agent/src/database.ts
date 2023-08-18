@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 // Import Third-party Dependencies
 import SQLite3 from "better-sqlite3";
+import { SigynRule } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { Logger } from ".";
@@ -77,7 +78,10 @@ export interface InitDbOptions {
   force?: boolean;
 }
 
-export function initDB(logger: Logger, options: InitDbOptions = {}): SQLite3.Database {
+export function initDB(
+  logger: Logger,
+  options: InitDbOptions = {}
+): SQLite3.Database {
   if (db && !options.force) {
     // This is workaround to use the initialized DB from functional tests
     // FIXME: inject DB in options ?
@@ -101,4 +105,20 @@ export function getDB(): SQLite3.Database {
   }
 
   return db;
+}
+
+export function cleanRulesInDb(
+  configRules: SigynRule[]
+) {
+  const db = getDB();
+
+  const dbRules = db.prepare("SELECT * FROM rules").all() as DbRule[];
+
+  for (const dbRule of dbRules) {
+    const dbRuleConfig = configRules.find((rule) => rule.name === dbRule.name);
+
+    if (dbRuleConfig === undefined) {
+      db.prepare("DELETE FROM rules WHERE name = ?").run(dbRule.name);
+    }
+  }
 }

@@ -9,7 +9,7 @@ import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/
 import dayjs from "dayjs";
 
 // Import Internal Dependencies
-import * as utils from "../src/utils";
+import * as utils from "../src/utils/index";
 import { DEFAULT_POLLING } from "../src/rules";
 
 // CONSTANTS
@@ -34,22 +34,22 @@ describe("Utils", () => {
     setGlobalDispatcher(kGlobalDispatcher);
   });
 
-  describe("durationToDate()", () => {
+  describe("durationOrCronToDate()", () => {
     it("should add one year", () => {
-      const date = utils.durationOrCronToDate("1y", "add");
+      const date = utils.cron.durationOrCronToDate("1y", "add");
 
       assert.equal(date.get("y"), dayjs().add(1, "y").get("y"));
     });
 
     it("should subtract one year", () => {
-      const date = utils.durationOrCronToDate("1y", "subtract");
+      const date = utils.cron.durationOrCronToDate("1y", "subtract");
 
       assert.equal(date.get("y"), dayjs().subtract(1, "y").get("y"));
     });
   });
 
-  describe("ruleCountThresholdOperator", () => {
-    const ruleCountThresholdOperatorTests: [number | string, utils.RuleCounterOperatorValue][] = [
+  describe("countThresholdOperator", () => {
+    const ruleCountThresholdOperatorTests: [number | string, utils.rules.RuleCounterOperatorValue][] = [
       ["10", [">=", 10]],
       [10, [">=", 10]],
       [">= 10", [">=", 10]],
@@ -69,7 +69,7 @@ describe("Utils", () => {
 
     for (const [input, expected] of ruleCountThresholdOperatorTests) {
       it(`should return ${JSON.stringify(expected)} given "${input}"`, () => {
-        const [operator, count] = utils.ruleCountThresholdOperator(input);
+        const [operator, count] = utils.rules.countThresholdOperator(input);
 
         assert.equal(operator, expected[0]);
         assert.equal(count, expected[1]);
@@ -78,7 +78,7 @@ describe("Utils", () => {
 
     it("should throw if the input is not a valid string", () => {
       assert.throws(() => {
-        utils.ruleCountThresholdOperator("foo");
+        utils.rules.countThresholdOperator("foo");
       }, {
         name: "Error",
         message: "Invalid count threshold format."
@@ -87,7 +87,7 @@ describe("Utils", () => {
 
     it("should throw if the value is not valid", () => {
       assert.throws(() => {
-        utils.ruleCountThresholdOperator(">= foo");
+        utils.rules.countThresholdOperator(">= foo");
       }, {
         name: "Error",
         message: "Invalid count threshold format."
@@ -96,7 +96,7 @@ describe("Utils", () => {
 
     it("should throw if the operator is not valid", () => {
       assert.throws(() => {
-        utils.ruleCountThresholdOperator("foo 10");
+        utils.rules.countThresholdOperator("foo 10");
       }, {
         name: "Error",
         message: "Invalid count threshold format."
@@ -104,44 +104,44 @@ describe("Utils", () => {
     });
   });
 
-  describe("ruleCountMatchOperator()", () => {
+  describe("countMatchOperator()", () => {
     it("should return true if the operator is '>' and the counter is greater than the count", () => {
-      assert.equal(utils.ruleCountMatchOperator(">", 10, 5), true);
+      assert.equal(utils.rules.countMatchOperator(">", 10, 5), true);
     });
 
     it("should return true if the operator is '>=' and the counter is greater than or equal to the count", () => {
-      assert.equal(utils.ruleCountMatchOperator(">=", 10, 10), true);
-      assert.equal(utils.ruleCountMatchOperator(">=", 10, 5), true);
+      assert.equal(utils.rules.countMatchOperator(">=", 10, 10), true);
+      assert.equal(utils.rules.countMatchOperator(">=", 10, 5), true);
     });
 
     it("should return true if the operator is '<' and the counter is less than the count", () => {
-      assert.equal(utils.ruleCountMatchOperator("<", 5, 10), true);
+      assert.equal(utils.rules.countMatchOperator("<", 5, 10), true);
     });
 
     it("should return true if the operator is '<=' and the counter is less than or equal to the count", () => {
-      assert.equal(utils.ruleCountMatchOperator("<=", 5, 10), true);
-      assert.equal(utils.ruleCountMatchOperator("<=", 10, 10), true);
+      assert.equal(utils.rules.countMatchOperator("<=", 5, 10), true);
+      assert.equal(utils.rules.countMatchOperator("<=", 10, 10), true);
     });
 
     it("should return false if the operator is '>' and the counter is less than the count", () => {
-      assert.equal(utils.ruleCountMatchOperator(">", 5, 10), false);
+      assert.equal(utils.rules.countMatchOperator(">", 5, 10), false);
     });
 
     it("should return false if the operator is '>=' and the counter is less than the count", () => {
-      assert.equal(utils.ruleCountMatchOperator(">=", 5, 10), false);
+      assert.equal(utils.rules.countMatchOperator(">=", 5, 10), false);
     });
 
     it("should return false if the operator is '<' and the counter is greater than the count", () => {
-      assert.equal(utils.ruleCountMatchOperator("<", 10, 5), false);
+      assert.equal(utils.rules.countMatchOperator("<", 10, 5), false);
     });
 
     it("should return false if the operator is '<=' and the counter is greater than the count", () => {
-      assert.equal(utils.ruleCountMatchOperator("<=", 10, 5), false);
+      assert.equal(utils.rules.countMatchOperator("<=", 10, 5), false);
     });
 
     it("should throw if the operator is not valid", () => {
       assert.throws(() => {
-        utils.ruleCountMatchOperator("foo" as utils.RuleCounterOperator, 10, 5);
+        utils.rules.countMatchOperator("foo" as utils.rules.RuleOperators, 10, 5);
       }, {
         name: "Error",
         message: "Invalid operator: foo"
@@ -149,37 +149,23 @@ describe("Utils", () => {
     });
   });
 
-  describe("getNotifierPackage()", () => {
-    it("should return '@sigyn/discord' when given 'discord'", () => {
-      assert.equal(utils.getNotifierPackage("discord"), "@sigyn/discord");
-    });
-
-    it("should return '@sigyn/slack' when given 'slack'", () => {
-      assert.equal(utils.getNotifierPackage("discord"), "@sigyn/discord");
-    });
-
-    it("should return the given notifier name when it is not a Sigyn notifier", () => {
-      assert.equal(utils.getNotifierPackage("foo"), "foo");
-    });
-  });
-
-  describe("getRulePollings()", () => {
+  describe("getPollings()", () => {
     it("should return a cron polling given a valid cron expression", () => {
-      const [[isCron, polling]] = utils.getRulePollings("*/5 * * * *");
+      const [[isCron, polling]] = utils.rules.getPollings("*/5 * * * *");
 
       assert.equal(isCron, true);
       assert.equal(polling, "*/5 * * * *");
     });
 
     it("should be a valid cron expression given a cron with seconds (non-standard)", () => {
-      const [[isCron, polling]] = utils.getRulePollings("* * * * * *");
+      const [[isCron, polling]] = utils.rules.getPollings("* * * * * *");
 
       assert.equal(isCron, true);
       assert.equal(polling, "* * * * * *");
     });
 
     it("should return a list of cron polling given a list of valid cron expression", () => {
-      const pollings = utils.getRulePollings([
+      const pollings = utils.rules.getPollings([
         "*/10 * 15-15,38 * * *",
         "*/30 * 0-14 * * *",
         "*/30 * 15,39-23 * * *"
@@ -193,14 +179,14 @@ describe("Utils", () => {
     });
 
     it("should not return a cron", () => {
-      const [[isCron, polling]] = utils.getRulePollings("5m");
+      const [[isCron, polling]] = utils.rules.getPollings("5m");
 
       assert.equal(isCron, false);
       assert.equal(polling, "5m");
     });
 
     it("should get default polling when no polling given", () => {
-      const [[isCron, polling]] = utils.getRulePollings();
+      const [[isCron, polling]] = utils.rules.getPollings();
 
       assert.equal(isCron, false);
       assert.equal(polling, DEFAULT_POLLING);
@@ -208,7 +194,7 @@ describe("Utils", () => {
 
     it("should throw when a polling in the list is not a valid cron expression", () => {
       assert.throws(() => {
-        utils.getRulePollings(["foo"]);
+        utils.rules.getPollings(["foo"]);
       }, {
         name: "Error",
         message: "All polling values must be cron expressions"
@@ -217,7 +203,7 @@ describe("Utils", () => {
 
     it("should throw when given a list with a single polling that is not a valid cron expression", () => {
       assert.throws(() => {
-        utils.getRulePollings(["1m"]);
+        utils.rules.getPollings(["1m"]);
       }, {
         name: "Error",
         message: "All polling values must be cron expressions"
