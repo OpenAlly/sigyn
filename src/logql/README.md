@@ -194,6 +194,14 @@ type LabelValue = Partial<StreamSelectorValue> & Pick<StreamSelectorValue, "valu
 Converts the `StreamSelector` instance into a partial LogQL query string.
 Returns a string representing the partial LogQL query.
 
+- `toJSON(): Record<string, StreamSelectorValue>`
+
+Return a key-value object representing stream selectors where each value is an object with `operator` and `value`.
+
+- `kv(): Record<string, string>`
+
+Return a key-value object reprensenting stream selectors where each value is a `string` (operator is skipped)
+
 ### LineFilters
 
 This class help to deal with **Line Filters**
@@ -320,6 +328,14 @@ If `labelValue` is a `string` or a `number`, the default operator will be an **e
 
 Converts the `LabelFilters` instance into a partial LogQL query string.
 Returns a string representing the partial LogQL query.
+
+- `toJSON(): Record<string, LabelFilter[]>`
+
+Return a key-value object representing label filters where each value is an array of object with `operator` and `value`.
+
+- `kv(): Record<string, string[]>`
+
+Return a key-value object reprensenting stream selectors where each value is an array of `string` (operator is skipped)
 
 ### ParserExpression
 

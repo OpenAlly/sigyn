@@ -237,6 +237,44 @@ describe("StreamSelector", () => {
     });
   });
 
+  describe("toJSON()", () => {
+    it("should return empty object", () => {
+      const streamSelector = new StreamSelector();
+
+      assert.deepEqual(streamSelector.toJSON(), {});
+    });
+
+    it("should return stream selectors with operator", () => {
+      const streamSelector = new StreamSelector("{foo=\"foo\",bar!=\"bar\",foz=~\"fo[oz]\",baz!~\"ba[rz]\"}");
+
+      assert.deepEqual(streamSelector.toJSON(), {
+        foo: { operator: "=", value: "foo" },
+        bar: { operator: "!=", value: "bar" },
+        foz: { operator: "=~", value: "fo[oz]" },
+        baz: { operator: "!~", value: "ba[rz]" }
+      });
+    });
+  });
+
+  describe("kv()", () => {
+    it("should return empty object", () => {
+      const streamSelector = new StreamSelector();
+
+      assert.deepEqual(streamSelector.kv(), {});
+    });
+
+    it("should return stream selectors without operator", () => {
+      const streamSelector = new StreamSelector("{foo=\"foo\",bar!=\"bar\",foz=~\"fo[oz]\",baz!~\"ba[rz]\"}");
+
+      assert.deepEqual(streamSelector.kv(), {
+        foo: "foo",
+        bar: "bar",
+        foz: "fo[oz]",
+        baz: "ba[rz]"
+      });
+    });
+  });
+
   describe("Building", () => {
     it("should add exactlyEqual label", () => {
       const streamSelector = new StreamSelector();

@@ -88,4 +88,24 @@ export class StreamSelector extends Map<string, StreamSelectorValue> {
 
     return `{${selectorStr}}`;
   }
+
+  kv(): Record<string, string> {
+    const streamSelectors = {};
+
+    for (const [key, { value }] of this.entries()) {
+      streamSelectors[key] = value;
+    }
+
+    return streamSelectors;
+  }
+
+  toJSON(): Record<string, StreamSelectorValue> {
+    const streamSelectors = {};
+
+    for (const [key, { operator, value }] of this.entries()) {
+      streamSelectors[key] = { operator, value };
+    }
+
+    return streamSelectors;
+  }
 }
