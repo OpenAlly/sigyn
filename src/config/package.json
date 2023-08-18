@@ -1,6 +1,6 @@
 {
   "name": "@sigyn/config",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Sigyn configuration manager",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
