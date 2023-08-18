@@ -194,6 +194,8 @@ export class Rule {
       }
 
       const interval = cronParser.parseExpression(polling);
+      // skip current date (first .prev() is equal to a .current())
+      interval.prev();
 
       return dayjs(interval.prev().toString()).unix();
     }
