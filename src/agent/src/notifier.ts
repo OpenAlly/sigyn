@@ -1,5 +1,6 @@
 // Import Third-party Dependencies
 import { getConfig } from "@sigyn/config";
+import { StreamSelector } from "@sigyn/logql";
 
 // Import Internal Dependencies
 import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "./database";
@@ -81,7 +82,7 @@ export class Notifier {
       ...notifierConfig,
       ruleConfig,
       counter: alert.rule.counter,
-      label: { ...utils.parseLogQLLabels(ruleConfig.logql), ...rule.labels },
+      label: { ...new StreamSelector(ruleConfig.logql).kv(), ...rule.labels },
       severity: utils.getSeverity(ruleConfig.alert.severity),
       lokiUrl: await utils.getLokiUrl(ruleConfig)
     };

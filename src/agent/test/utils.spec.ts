@@ -225,22 +225,6 @@ describe("Utils", () => {
     });
   });
 
-  describe("parseLogQLLabels()", () => {
-    it("should parse labels", () => {
-      const logql = "{app=\"foo\", env=\"preprod\"} |= `my super logql`";
-      const labels = utils.parseLogQLLabels(logql);
-
-      assert.deepStrictEqual(labels, { app: "foo", env: "preprod" });
-    });
-
-    it("should return an empty object when logql has no stream selector", () => {
-      const logql = "|= `my super logql`";
-      const labels = utils.parseLogQLLabels(logql);
-
-      assert.deepStrictEqual(labels, {});
-    });
-  });
-
   describe("getSeverity()", () => {
     const sev1: AlertSeverity[] = ["critical"];
     for (const sev of sev1) {
