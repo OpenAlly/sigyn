@@ -1,4 +1,5 @@
 // Import Third-party Dependencies
+import dayjs from "dayjs";
 import { SigynRule, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
@@ -12,7 +13,7 @@ export async function getLokiUrl(config: SigynRule): Promise<string> {
   const from = String(
     durationOrCronToDate(config.alert.on.interval, "subtract").valueOf()
   );
-  const to = "now";
+  const to = dayjs().valueOf();
 
   const url = new URL("explore", loki.apiUrl);
   url.searchParams.append("orgId", String(orgId));
