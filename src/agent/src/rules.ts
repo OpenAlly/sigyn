@@ -194,8 +194,13 @@ export class Rule {
       }
 
       const interval = cronParser.parseExpression(polling);
+      const prev = interval.prev().toString();
 
-      return dayjs(interval.prev().toString()).unix();
+      if (new Date().toString() === prev) {
+        return dayjs(interval.prev().toString()).unix();
+      }
+
+      return dayjs(prev).unix();
     }
 
     if (rule.lastRunAt) {
