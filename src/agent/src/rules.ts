@@ -9,7 +9,7 @@ import { Database } from "better-sqlite3";
 
 // Import Internal Dependencies
 import { DbRule, DbRuleLabel, getDB } from "./database";
-import * as utils from "./utils";
+import * as utils from "./utils/index";
 import { Logger } from ".";
 
 // CONSTANTS
@@ -76,7 +76,7 @@ export class Rule {
     const db = getDB();
 
     const now = dayjs().valueOf();
-    const timeThreshold = utils
+    const timeThreshold = utils.cron
       .durationOrCronToDate(this.#config.alert.on.interval, "subtract")
       .valueOf();
     const rule = this.getRuleFromDatabase();
@@ -114,7 +114,7 @@ export class Rule {
     const alertThreshold = this.#config.alert.on.count;
     this.#logger.info(`[${rule.name}](state: handle|polling: ${this.#getCurrentPolling()[1]}|previous: ${lastCounter}|new: ${rule.counter - lastCounter}|next: ${rule.counter}|threshold: ${alertThreshold})`);
 
-    const [operator, value] = utils.ruleCountThresholdOperator(alertThreshold);
+    const [operator, value] = utils.rules.countThresholdOperator(alertThreshold);
 
     if (operator.startsWith("<")) {
       // we checking for a max value, so we want to wait the whole interval before sending an alert
@@ -122,11 +122,11 @@ export class Rule {
         return false;
       }
 
-      if (!utils.ruleCountMatchOperator(operator, rule.counter, value)) {
+      if (!utils.rules.countMatchOperator(operator, rule.counter, value)) {
         return false;
       }
     }
-    else if (!utils.ruleCountMatchOperator(operator, rule.counter, value)) {
+    else if (!utils.rules.countMatchOperator(operator, rule.counter, value)) {
       return false;
     }
 
@@ -153,7 +153,7 @@ export class Rule {
     }
 
     const { interval, count = 0 } = throttle;
-    const intervalDate = utils.durationOrCronToDate(interval, "subtract").valueOf();
+    const intervalDate = utils.cron.durationOrCronToDate(interval, "subtract").valueOf();
     const ruleAlertsCount = db.prepare("SELECT * FROM alerts WHERE ruleId = ? AND createdAt >= ?").all(
       rule.id,
       intervalDate
@@ -212,7 +212,7 @@ export class Rule {
       }
     }
 
-    return utils.durationOrCronToDate(polling, "subtract").unix();
+    return utils.cron.durationOrCronToDate(polling, "subtract").unix();
   }
 
   /**
@@ -236,8 +236,8 @@ export class Rule {
     return nextDiff < previousDiff;
   }
 
-  #getCurrentPolling(): utils.RulePolling {
-    const rulePollings = utils.getRulePollings(this.#config.polling);
+  #getCurrentPolling(): utils.rules.RulePolling {
+    const rulePollings = utils.rules.getPollings(this.#config.polling);
 
     if (rulePollings.length === 1 && rulePollings[0][0] === false) {
       return rulePollings[0];

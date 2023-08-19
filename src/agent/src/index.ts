@@ -10,10 +10,10 @@ import { pino } from "pino";
 import ms from "ms";
 
 // Import Internal Dependencies
-import { initDB } from "./database";
+import { initDB, cleanRulesInDb } from "./database";
 import { asyncTask } from "./tasks/asyncTask";
 import { DEFAULT_POLLING, Rule } from "./rules";
-import * as utils from "./utils";
+import * as utils from "./utils/index";
 
 // CONSTANTS
 const kScheduler = new ToadScheduler();
@@ -53,7 +53,7 @@ export async function start(
     rule.init();
 
     const task = asyncTask(ruleConfig, { rule, logger, lokiApi });
-    const rulePollings = utils.getRulePollings(ruleConfig.polling);
+    const rulePollings = utils.rules.getPollings(ruleConfig.polling);
 
     for (const [isCron, polling] of rulePollings) {
       if (isCron) {
@@ -79,7 +79,7 @@ export async function start(
     await timers.setTimeout(200);
   }
 
-  utils.cleanRulesInDb(rules);
+  cleanRulesInDb(rules);
 
   return kScheduler;
 }

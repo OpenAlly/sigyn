@@ -5,7 +5,7 @@ import { StreamSelector } from "@sigyn/logql";
 // Import Internal Dependencies
 import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "./database";
 import { NotifierQueue } from "./notifierQueue";
-import * as utils from "./utils";
+import * as utils from "./utils/index";
 import { Logger } from ".";
 
 // CONSTANTS
@@ -19,6 +19,12 @@ export interface NotifierAlert {
 }
 
 export class Notifier {
+  static localPackages = new Set([
+    "discord",
+    "slack",
+    "teams"
+  ]);
+
   /**
    * This is the global notifier.
    * We don't want a notifier per rule but a global notifier shared with each rules.
@@ -86,7 +92,7 @@ export class Notifier {
       severity: utils.getSeverity(ruleConfig.alert.severity),
       lokiUrl: await utils.getLokiUrl(ruleConfig)
     };
-    const notifierPackage = utils.getNotifierPackage(notifier);
+    const notifierPackage = Notifier.localPackages.has(notifier) ? `@sigyn/${notifier}` : notifier;
 
     try {
       const notifier = await import(notifierPackage);
