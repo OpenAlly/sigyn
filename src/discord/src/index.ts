@@ -4,6 +4,7 @@ import { NotifierFormattedSigynRule } from "@sigyn/config";
 
 // CONSTANTS
 const kWebhookUsername = "Sigyn Agent";
+const kAvatarUrl = "https://user-images.githubusercontent.com/39910767/261796970-1c07ee01-30e4-464c-b9f9-903b93f84ff3.png";
 // https://gist.github.com/thomasbnt/b6f455e2c7d743b796917fa3c205f812
 const kEmbedColor = {
   critical: 15548997,
@@ -77,7 +78,8 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
       description: content.join("\n"),
       color: kEmbedColor[severity]
     }],
-    username: kWebhookUsername
+    username: kWebhookUsername,
+    avatar_url: kAvatarUrl
   };
 }
 
