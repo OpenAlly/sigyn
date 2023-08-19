@@ -19,17 +19,25 @@
       },
       "polling": {
         "title": "The polling interval defines how often Sigyn will fetch logs from Loki",
-        "description": "Can be a duration string (e.g. '1m', '1h', '1d') or a cron expression (e.g. '* * * * *', '*/2 * * * *').\nMultiple polling is supported with cron expression only.\nIf not specified, the default value is '1m' (1 minute).",
+        "description": "Can be a duration string (e.g. '1m', '1h', '1d') or a cron expression (e.g. '* * * * *', '*/2 * * * *').\nMultiple polling supports cron expressions only.\nIf not specified, the default value is '1m' (1 minute).",
         "anyOf": [
           {
             "type": "string",
-            "minLength": 1
+            "minLength": 1,
+            "oneOf": [
+              {
+                "pattern": "^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$"
+              },
+              {
+                "pattern": "(((\\d+,)+\\d+|(\\d+(\\/|-)\\d+)|\\d+|\\*) ?){5,6}"
+              }
+            ]
           },
           {
             "type": "array",
             "items": {
               "type": "string",
-              "minLength": 1
+              "pattern": "(((\\d+,)+\\d+|(\\d+(\\/|-)\\d+)|\\d+|\\*) ?){5,6}"
             },
             "minItems": 1
           }

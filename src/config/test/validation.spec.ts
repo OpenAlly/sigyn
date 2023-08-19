@@ -461,6 +461,69 @@ describe("Config validation", () => {
     });
   });
 
+  const durationPollings = [
+    "20milliseconds", "20 milliseconds",
+    "20msecs", "20 msecs",
+    "20ms", "20 ms",
+    "20seconds", "20 seconds",
+    "20secs", "20 secs",
+    "20s", "20 s",
+    "20minutes", "20 minutes",
+    "20mins", "20 mins",
+    "20m", "20 m",
+    "20hours", "20 hours",
+    "20hrs", "20 hrs",
+    "20h", "20 h"
+  ];
+  for (const polling of durationPollings) {
+    it(`rule polling can be a duration (${polling})`, () => {
+      assert.doesNotThrow(() => {
+        validateConfig({
+          ...kValidConfig,
+          rules: [
+            {
+              ...kValidConfig.rules[0],
+              polling
+            }
+          ]
+        });
+      });
+    });
+  }
+
+  const cronPollings = [
+    "*/5 * * * * *", "*/5 * * * *", "* 7-20 * * *", "* 7-20 * * 1-5"
+  ];
+  for (const polling of cronPollings) {
+    it(`rule polling can be a cron expression (${polling})`, () => {
+      assert.doesNotThrow(() => {
+        validateConfig({
+          ...kValidConfig,
+          rules: [
+            {
+              ...kValidConfig.rules[0],
+              polling
+            }
+          ]
+        });
+      });
+    });
+  }
+
+  it("rule polling can be an array of cron expressions", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            polling: cronPollings
+          }
+        ]
+      });
+    });
+  });
+
   it("rule polling should not be empty string", () => {
     assert.throws(() => {
       validateConfig({
@@ -474,7 +537,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/polling: must NOT have fewer than 1 characters, /rules/0/polling: must be array, /rules/0/polling: must match a schema in anyOf"
+      message: "Invalid config: /rules/0/polling: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\", /rules/0/polling: must match pattern \"(((\\d+,)+\\d+|(\\d+(\\/|-)\\d+)|\\d+|\\*) ?){5,6}\", /rules/0/polling: must match exactly one schema in oneOf, /rules/0/polling: must be array, /rules/0/polling: must match a schema in anyOf"
     });
   });
 
@@ -491,7 +554,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/polling: must be string, /rules/0/polling: must NOT have fewer than 1 items, /rules/0/polling: must match a schema in anyOf"
+      message: "Invalid config: /rules/0/polling: must match exactly one schema in oneOf, /rules/0/polling: must NOT have fewer than 1 items, /rules/0/polling: must match a schema in anyOf"
     });
   });
 
@@ -508,7 +571,24 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/polling: must be string, /rules/0/polling/1: must NOT have fewer than 1 characters, /rules/0/polling: must match a schema in anyOf"
+      message: "Invalid config: /rules/0/polling: must match exactly one schema in oneOf, /rules/0/polling/1: must match pattern \"(((\\d+,)+\\d+|(\\d+(\\/|-)\\d+)|\\d+|\\*) ?){5,6}\", /rules/0/polling: must match a schema in anyOf"
+    });
+  });
+
+  it("array of rule polling must be cron expression", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            polling: ["1m"]
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/polling: must match exactly one schema in oneOf, /rules/0/polling/0: must match pattern \"(((\\d+,)+\\d+|(\\d+(\\/|-)\\d+)|\\d+|\\*) ?){5,6}\", /rules/0/polling: must match a schema in anyOf"
     });
   });
 
