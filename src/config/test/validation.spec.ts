@@ -721,7 +721,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on: must have required property 'count'"
+      message: "Invalid config: /rules/0/alert/on: must have required property 'count', /rules/0/alert/on: must have required property 'label', /rules/0/alert/on: must have required property 'label', /rules/0/alert/on: must match a schema in anyOf"
     });
   });
 
@@ -748,7 +748,79 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule alert property 'on.interval' should be required", () => {
+  it("rule alert property 'on.value' should be required when rule is label based", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: undefined,
+                label: "foo",
+                thresholdPercent: 80
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/on: must have required property 'count', /rules/0/alert/on: must have required property 'value', /rules/0/alert/on: must have required property 'value', /rules/0/alert/on: must match a schema in anyOf"
+    });
+  });
+
+  it("rule alert property 'on.thresholdPercent' should be required when rule is label based", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: undefined,
+                label: "foo",
+                value: "bar"
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/on: must have required property 'count', /rules/0/alert/on: must have required property 'thresholdPercent', /rules/0/alert/on: must have required property 'thresholdPercent', /rules/0/alert/on: must match a schema in anyOf"
+    });
+  });
+
+  it("rule alert can be alert based", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                label: "foo",
+                value: "bar",
+                thresholdPercent: 80
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule alert property 'on.interval' should be required when rule is no label based", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -767,7 +839,33 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on: must have required property 'interval'"
+      message: "Invalid config: /rules/0/alert/on: must have required property 'interval', /rules/0/alert/on: must have required property 'label', /rules/0/alert/on: must have required property 'label', /rules/0/alert/on: must match a schema in anyOf"
+    });
+  });
+
+  it("rule alert property 'on.interval' should be required when rule is label based and no count", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                interval: undefined as any,
+                count: undefined as any,
+                label: "foo",
+                value: "bar"
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/on: must have required property 'count', /rules/0/alert/on: must have required property 'thresholdPercent', /rules/0/alert/on: must have required property 'thresholdPercent', /rules/0/alert/on: must match a schema in anyOf"
     });
   });
 

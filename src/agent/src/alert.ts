@@ -5,11 +5,15 @@ import dayjs from "dayjs";
 import { SigynRule, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { DbRule, getDB } from "./database";
-import { Notifier } from "./notifier";
+import { getDB } from "./database";
+import { Notifier, NotifierAlert } from "./notifier";
 import { Logger } from ".";
 
-export function createRuleAlert(rule: DbRule & { labels: Record<string, string> }, ruleConfig: SigynRule, logger: Logger) {
+export function createRuleAlert(
+  rule: NotifierAlert["rule"],
+  ruleConfig: SigynRule,
+  logger: Logger
+) {
   const notifier = Notifier.getSharedInstance(logger);
   const ruleNotifiers = ruleConfig.notifiers ?? [];
   const globalNotifiers = Object.keys(getConfig().notifiers);

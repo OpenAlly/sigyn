@@ -11,6 +11,8 @@ import { Database } from "better-sqlite3";
 import { DbRule, DbRuleLabel, getDB } from "./database";
 import * as utils from "./utils/index";
 import { Logger } from ".";
+import { getOldestLabelTimestamp } from "./utils/rules";
+import { NotifierAlert } from "./notifier";
 
 // CONSTANTS
 export const DEFAULT_POLLING = "1m";
@@ -34,11 +36,11 @@ export class Rule {
     return getDB().prepare("SELECT * FROM rules WHERE name = ?").get(this.#config.name) as DbRule;
   }
 
-  getRuleFromDatabaseWithLabels(): DbRule & { labels: Record<string, string> } {
+  getAlertFormattedRule(): NotifierAlert["rule"] {
     const rule = this.getRuleFromDatabase();
     const formattedLabels = {};
 
-    const labels = this.getRuleLabelsFromDatabase(rule.id);
+    const labels = this.getDistinctLabelsFromDatabase(rule.id);
     for (const { key, value } of labels) {
       if (formattedLabels[key] === undefined) {
         formattedLabels[key] = value;
@@ -50,12 +52,13 @@ export class Rule {
 
     return {
       ...rule,
-      labels: formattedLabels
+      labels: formattedLabels,
+      oldestLabelTimestamp: this.#config.alert.on.label ? getOldestLabelTimestamp(rule.id, this.#config.alert.on.label) : null
     };
   }
 
-  getRuleLabelsFromDatabase(ruleId: number): DbRuleLabel[] {
-    return getDB().prepare("SELECT * FROM ruleLabels WHERE ruleId = ?").all(ruleId) as DbRuleLabel[];
+  getDistinctLabelsFromDatabase(ruleId: number): DbRuleLabel[] {
+    return getDB().prepare("SELECT DISTINCT * FROM ruleLabels WHERE ruleId = ?").all(ruleId) as DbRuleLabel[];
   }
 
   clearLabels() {
@@ -76,32 +79,50 @@ export class Rule {
     const db = getDB();
 
     const now = dayjs().valueOf();
-    const timeThreshold = utils.cron
-      .durationOrCronToDate(this.#config.alert.on.interval, "subtract")
-      .valueOf();
     const rule = this.getRuleFromDatabase();
+    const ruleLabels = this.getDistinctLabelsFromDatabase(rule.id);
+    const lastCounter = rule.counter;
+
+    for (const { stream, values } of logs) {
+      for (const [key, value] of Object.entries(stream)) {
+        // If rule is based on label, insert as many label as there is values
+        // because we receive only one stream for N values (but the stream is the same for each value)
+        if (this.#config.alert.on.label === key) {
+          let insertedCount = 0;
+
+          while (insertedCount++ < values.length) {
+            db.prepare("INSERT INTO ruleLabels (ruleId, key, value, timestamp) VALUES (?, ?, ?, ?)").run(rule.id, key, value, now);
+          }
+        }
+        else {
+          // distinct label if rule is not based on, we don't need to count them
+          const label = ruleLabels.find((label) => label.key === key && label.value === value);
+          if (label === undefined) {
+            const { lastInsertRowid } = db.prepare("INSERT INTO ruleLabels (ruleId, key, value, timestamp) VALUES (?, ?, ?, ?)").run(rule.id, key, value, now);
+            ruleLabels.push({ id: Number(lastInsertRowid), ruleId: rule.id, key, value, timestamp: now });
+          }
+        }
+      }
+
+      db.transaction(() => {
+        for (const log of values) {
+          db.prepare("INSERT INTO ruleLogs (ruleId, log, timestamp) VALUES (?, ?, ?)").run(rule.id, log, now);
+        }
+      })();
+    }
+
+    if (this.#config.alert.on.label) {
+      return this.#checkLabelThreshold(rule);
+    }
+
+    const timeThreshold = utils.cron
+      .durationOrCronToDate(this.#config.alert.on.interval!, "subtract")
+      .valueOf();
 
     if (rule.lastIntervalReset === null || rule.lastIntervalReset - timeThreshold < 0) {
       db.prepare("UPDATE rules SET lastIntervalReset = ?, firstReset = ? WHERE id = ?").run(now, rule.lastIntervalReset === null ? 1 : 0, rule.id);
       rule.firstReset = rule.lastIntervalReset === null ? 1 : 0;
       rule.lastIntervalReset = now;
-    }
-
-    const lastCounter = rule.counter;
-    const ruleLogLabels = this.getRuleLabelsFromDatabase(rule.id);
-
-    for (const { stream, values } of logs) {
-      for (const [key, value] of Object.entries(stream)) {
-        const label = ruleLogLabels.find((label) => label.key === key && label.value === value);
-        if (label === undefined) {
-          const { lastInsertRowid } = db.prepare("INSERT INTO ruleLabels (ruleId, key, value) VALUES (?, ?, ?)").run(rule.id, key, value);
-          ruleLogLabels.push({ id: Number(lastInsertRowid), ruleId: rule.id, key, value });
-        }
-      }
-
-      for (const log of values) {
-        db.prepare("INSERT INTO ruleLogs (ruleId, log, timestamp) VALUES (?, ?, ?)").run(rule.id, log, now);
-      }
     }
 
     rule.counter = (
@@ -111,7 +132,7 @@ export class Rule {
 
     db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(rule.counter, rule.id);
 
-    const alertThreshold = this.#config.alert.on.count;
+    const alertThreshold = this.#config.alert.on.count!;
     this.#logger.info(`[${rule.name}](state: handle|polling: ${this.#getCurrentPolling()[1]}|previous: ${lastCounter}|new: ${rule.counter - lastCounter}|next: ${rule.counter}|threshold: ${alertThreshold})`);
 
     const [operator, value] = utils.rules.countThresholdOperator(alertThreshold);
@@ -138,11 +159,37 @@ export class Rule {
     this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
 
     db.transaction(() => {
-      db.prepare("UPDATE rules SET counter = 0, lastIntervalReset = ? WHERE id = ?").run(now, rule.id);
+      db.prepare("UPDATE rules SET counter = 0, threshold = ?, lastIntervalReset = ? WHERE id = ?").run(rule.counter, now, rule.id);
       db.prepare("UPDATE ruleLogs SET processed = 1 WHERE ruleId = ?").run(rule.id);
     })();
 
     return true;
+  }
+
+  #checkLabelThreshold(rule: DbRule): boolean {
+    const { label, value, thresholdPercent, count, interval } = this.#config.alert.on;
+
+    const labels = getDB().prepare("SELECT * FROM ruleLabels WHERE key = ? AND ruleId = ? ORDER BY timestamp ASC").all(label, rule.id) as DbRuleLabel[];
+    const olderLabel = labels[0];
+    if (olderLabel === undefined) {
+      this.#logger.info(`[${rule.name}](state: skip|label: ${label}`);
+
+      return false;
+    }
+    const intervalTimestamp = interval ? utils.cron.durationOrCronToDate(interval!, "subtract").valueOf() : null;
+    const intervalReached = interval ? intervalTimestamp! >= olderLabel.timestamp : true;
+    const countReached = count ? Number(count) <= labels.length : true;
+
+    if (!intervalReached || !countReached) {
+      this.#logger.info(`[${rule.name}](state: unreached|count: ${labels.length}|minimumCount: ${count ? count : "*"}|oldestTimestamp: ${olderLabel.timestamp}|minimumTimestamp: ${intervalTimestamp ?? "*"})`);
+
+      return false;
+    }
+
+    const thresholdLength = labels.filter((label) => label.value === value).length;
+    this.#logger.info(`[${rule.name}](state: reached|count: ${labels.length}|thresholdCount: ${thresholdLength}|thresholdPercent: ${thresholdPercent}|actual: ${thresholdLength / labels.length * 100})`);
+
+    return thresholdLength / labels.length * 100 >= thresholdPercent!;
   }
 
   #checkThrottle(rule: DbRule, db: Database): boolean {

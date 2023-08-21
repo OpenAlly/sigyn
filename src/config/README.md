@@ -88,6 +88,21 @@ The **Sigyn** configuration object consists of theses properties: `loki`, `templ
         },
         "template": "onlyTitle"
       }
+    },
+    {
+      "name": "A rule based on label matching",
+      "logql": "{app=\"foo\"} |~ `state: (ok|ko)` | regexp `state: (?P<state>ok|ko)`",
+      "alert": {
+        "on": {
+          "label": "state",
+          "value": "ko",
+          "thresholdPercent": 80,
+          "interval": "5d"
+        },
+        "template": {
+          "title": "Too much KO"
+        }
+      }
     }
   ]
 }
@@ -172,10 +187,17 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   - An object specifying when the alert should trigger.
   - It must have the following properties:
 
-  | Property   | Type                 | Required | Description |
-  |------------|----------------------|----------|-------------|
-  | `count`    | `number` or `string` | ✔️       | The count threshold of log that must triggers an alert. You can use a range string i.e. `<= 5`, `> 6`. |
-  | `interval` | `string`             | ✔️       | The time interval for the alerting condition. |
+  | Property           | Type                 | Required | Description |
+  |--------------------|----------------------|----------|-------------|
+  | `count`            | `number` or `string` | The count threshold of log that must triggers an alert **or** the minimum count of logs to triggers a **label based** alert. You can use a range string i.e. `<= 5`, `> 6`. For **label based** alert, this property **MUST** be a valid number i.e `900` or `"900"` |
+  | `interval`         | `string`             | The time interval for the alerting condition. |
+  | `label`            | `string`             | The label key to check. |
+  | `value`            | `string`             | The label value to check. |
+  | `thresholdPercent` | `number`             | The threshold percent of label value. |
+
+  > **Note** there are 2 sorts of alert: **basic** and **label based**
+  > For **basic** alert, both `count` and `interval` are **required**, other properties **must** be omitted.
+  > For **label based** alert, `label`, `value` and `thresholdPercent` are **required** plus at least one of `count` or `interval` which defines the minimum logs to be fetched to have a revelant alert.
 
 - `rules.alert.template` (Object or String, Required):
   - Can be an object representing the notification template or a string refering to a root template.

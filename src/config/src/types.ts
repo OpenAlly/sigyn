@@ -37,8 +37,11 @@ export type AlertSeverity =
 
 export interface SigynAlert {
   on: {
-    count: string | number;
-    interval: string;
+    count?: string | number;
+    interval?: string;
+    label?: string;
+    value?: string;
+    thresholdPercent?: number;
   },
   template: string | SigynAlertTemplate;
   severity?: AlertSeverity;

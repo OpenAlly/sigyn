@@ -19,6 +19,7 @@ export interface DbRule {
   id: number;
   name: string;
   counter: number;
+  threshold: number;
   lastRunAt?: number;
   throttleCount: number;
   lastIntervalReset: null | number;
@@ -38,6 +39,7 @@ export interface DbRuleLabel {
   key: string;
   value: string;
   ruleId: number;
+  timestamp: number;
 }
 
 export interface DbCounter {

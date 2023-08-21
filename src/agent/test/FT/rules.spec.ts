@@ -13,12 +13,13 @@ import { SigynConfig, SigynRule, initConfig } from "@sigyn/config";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 
 // Import Internal Dependencies
-import { DbRule, getDB, initDB } from "../../src/database";
+import { DbRule, DbRuleLabel, getDB, initDB } from "../../src/database";
 import { MockLogger } from "./helpers";
 import { Rule } from "../../src/rules";
 
 // CONSTANTS
 const kMultiPollingConfigLocation = path.join(__dirname, "/fixtures/multi-polling/sigyn.config.json");
+const kLabelConfigLocation = path.join(__dirname, "/fixtures/label/sigyn.config.json");
 const kLokiFixtureApiUrl = "http://localhost:3100";
 const kMockAgent = new MockAgent();
 const kGlobalDispatcher = getGlobalDispatcher();
@@ -28,22 +29,18 @@ function getRule(rule: SigynRule): DbRule {
   return getDB().prepare("SELECT * FROM rules WHERE name = ?").get(rule.name) as DbRule;
 }
 
-async function pollingIn100ms(rule: Rule, logs: string[]): Promise<boolean> {
+async function pollingIn200ms(rule: Rule, logs: string[], stream: Record<string, string> = {}): Promise<boolean> {
   const t0 = performance.now();
 
-  const createAlert = await rule.walkOnLogs([{ values: logs, stream: {} }]);
+  const createAlert = await rule.walkOnLogs([{ values: logs, stream }]);
 
   const timeToHandleLogsInMs = Math.floor(performance.now() - t0);
 
-  if (timeToHandleLogsInMs > 119) {
-    // 119ms is the max time to have tests to pass since we do series a 5 polls
-    // (120 * 5 would make 600 and would break the intended behavior), we must be bellow 600ms
-    throw new Error(`timeToHandleLogsInMs > 119 (${timeToHandleLogsInMs}`);
+  if (timeToHandleLogsInMs > 200) {
+    throw new Error(`timeToHandleLogsInMs > 200 (${timeToHandleLogsInMs})`);
   }
 
-  if (timeToHandleLogsInMs < 100) {
-    await timers.setTimeout(100 - timeToHandleLogsInMs);
-  }
+  await timers.setTimeout(200 - timeToHandleLogsInMs);
 
   return createAlert;
 }
@@ -83,7 +80,7 @@ describe("Rule.walkOnLogs()", () => {
     setGlobalDispatcher(kGlobalDispatcher);
   });
 
-  describe("A rule with polling = '100ms', alert.on.count = 5 and alert.on.interval = '500ms'", () => {
+  describe("A rule with polling = '200ms', alert.on.count = 5 and alert.on.interval = '1s'", () => {
     let config: SigynConfig;
 
     before(async() => {
@@ -99,13 +96,13 @@ describe("Rule.walkOnLogs()", () => {
 
         let pollingCount = 0;
         while (pollingCount++ < 4) {
-          const createAlert = await pollingIn100ms(rule, ["one new log"]);
+          const createAlert = await pollingIn200ms(rule, ["one new log"]);
 
           assert.equal(createAlert, false);
           assert.equal(getRule(ruleConfig).counter, pollingCount);
         }
 
-        const createAlert = await pollingIn100ms(rule, ["one new log"]);
+        const createAlert = await pollingIn200ms(rule, ["one new log"]);
 
         assert.equal(createAlert, true);
         // once alert triggers, counter should be reset to 0
@@ -122,26 +119,26 @@ describe("Rule.walkOnLogs()", () => {
 
         let pollingCount = 0;
         while (pollingCount++ < 4) {
-          const createAlert = await pollingIn100ms(rule, ["one new log outside interval limit"]);
+          const createAlert = await pollingIn200ms(rule, ["one new log outside interval limit"]);
 
           assert.equal(createAlert, false);
           assert.equal(getRule(ruleConfig).counter, pollingCount);
         }
 
-        // counter is 4 in 400ms, we wait 100ms more to be outside the interval (it does 200ms because polling takes 100ms)
+        // counter is 4 in 800ms, we wait 200ms more to be outside the interval (it does 400ms because polling takes 200ms)
         assert.equal(getRule(ruleConfig).counter, 4);
-        await timers.setTimeout(100);
+        await timers.setTimeout(200);
 
-        const createAlertAfter600Ms = await pollingIn100ms(rule, ["one new log"]);
+        const createAlertAfter1200Ms = await pollingIn200ms(rule, ["one new log"]);
 
-        // counter is still 4 because it has removed one counter added 600s later while interval is 500ms
-        assert.equal(createAlertAfter600Ms, false);
+        // counter is still 4 because it has removed one counter added 1.200s later while interval is 1s
+        assert.equal(createAlertAfter1200Ms, false);
         assert.equal(getRule(ruleConfig).counter, 4);
 
-        const createAlertAfter700Ms = await pollingIn100ms(rule, ["one new log"]);
+        const createAlertAfter1400Ms = await pollingIn200ms(rule, ["one new log"]);
 
-        // counter is still 4 because it has removed one counter added 600ms later while interval is 500ms
-        assert.equal(createAlertAfter700Ms, false);
+        // counter is still 4 because it has removed one counter added 1.200s later while interval is 1s
+        assert.equal(createAlertAfter1400Ms, false);
         assert.equal(getRule(ruleConfig).counter, 4);
       });
     });
@@ -155,7 +152,7 @@ describe("Rule.walkOnLogs()", () => {
 
         assert.equal(getRule(ruleConfig).counter, 0);
 
-        const createAlert = await pollingIn100ms(rule, Array.from(Array(5)).map(() => "one new log"));
+        const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
         assert.equal(createAlert, true);
         // once alert triggers, counter should be reset to 0
@@ -171,7 +168,7 @@ describe("Rule.walkOnLogs()", () => {
 
           assert.equal(getRule(ruleConfig).counter, 0);
 
-          const createAlert = await pollingIn100ms(rule, Array.from(Array(5)).map(() => "one new log"));
+          const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
           assert.equal(createAlert, true);
           // once alert triggers, counter should be reset to 0
@@ -188,7 +185,7 @@ describe("Rule.walkOnLogs()", () => {
 
             assert.equal(getRule(ruleConfig).counter, 0);
 
-            const createAlert = await pollingIn100ms(rule, Array.from(Array(5)).map(() => "one new log"));
+            const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
             assert.equal(createAlert, false);
             // once alert triggers, counter should be reset to 0
@@ -202,7 +199,7 @@ describe("Rule.walkOnLogs()", () => {
 
           assert.equal(getRule(ruleConfig).counter, 0);
 
-          const createAlert = await pollingIn100ms(rule, Array.from(Array(15)).map(() => "one new log"));
+          const createAlert = await pollingIn200ms(rule, Array.from(Array(15)).map(() => "one new log"));
 
           assert.equal(createAlert, true);
           // once alert triggers, counter should be reset to 0
@@ -219,7 +216,7 @@ describe("Rule.walkOnLogs()", () => {
 
         assert.equal(getRule(ruleConfig).counter, 0);
 
-        const createAlert = await pollingIn100ms(rule, Array.from(Array(5)).map(() => "one new log"));
+        const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
         assert.equal(createAlert, true);
         // once alert triggers, counter should be reset to 0
@@ -236,7 +233,7 @@ describe("Rule.walkOnLogs()", () => {
 
           assert.equal(getRule(ruleConfig).counter, 0);
 
-          const createAlert = await pollingIn100ms(rule, Array.from(Array(5)).map(() => "one new log"));
+          const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
           assert.equal(createAlert, true);
           // once alert triggers, counter should be reset to 0
@@ -262,10 +259,10 @@ describe("Rule.walkOnLogs()", () => {
 
         assert.equal(getRule(ruleConfig).counter, 0);
 
-        // since interval is 500ms and polling 100ms, need to do 5 polling to end the interval
+        // since interval is 1s and polling is 200ms, need to do 5 polling to end the interval
         // 4 POLLINGS
         for (let i = 0; i < 4; i++) {
-          const createAlert = await pollingIn100ms(rule, ["one log"]);
+          const createAlert = await pollingIn200ms(rule, ["one log"]);
 
           assert.equal(createAlert, false);
           // once alert triggers, counter should be reset to 0
@@ -274,7 +271,7 @@ describe("Rule.walkOnLogs()", () => {
 
         // 5th POLLING
         assert.equal(getRule(ruleConfig).counter, 4);
-        const createAlert = await pollingIn100ms(rule, ["one log should trigger alert"]);
+        const createAlert = await pollingIn200ms(rule, ["one log should trigger alert"]);
 
         assert.equal(createAlert, true);
         // once alert triggers, counter should be reset to 0
@@ -297,10 +294,10 @@ describe("Rule.walkOnLogs()", () => {
         resetRuleCounter(ruleConfig);
         assert.equal(getRule(ruleConfig).counter, 0);
 
-        // since interval is 500ms and polling 100ms, need to do 5 polling to end the interval
+        // since interval is 1s and polling is 200ms, need to do 5 polling to end the interval
         // 4 POLLINGS
         for (let i = 0; i < 4; i++) {
-          const createAlert = await pollingIn100ms(rule, Array.from(Array(10)).map(() => "one new log"));
+          const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"));
 
           assert.equal(createAlert, false);
           // once alert triggers, counter should be reset to 0
@@ -309,10 +306,9 @@ describe("Rule.walkOnLogs()", () => {
 
         // 5th POLLING
         assert.equal(getRule(ruleConfig).counter, 40);
-        const createAlert = await pollingIn100ms(rule, Array.from(Array(10)).map(() => "one new log"));
+        const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"));
 
         assert.equal(createAlert, false);
-        // once alert triggers, counter should be reset to 0
         assert.equal(getRule(ruleConfig).counter, 50);
       });
     });
@@ -324,10 +320,15 @@ describe("Rule.walkOnLogs()", () => {
         { values: ["two"], stream: { foo: "baz", foz: "boz" } }
       ]);
 
-      const labels = getDB().prepare("SELECT * FROM ruleLabels").all();
+      const labels = getDB().prepare("SELECT * FROM ruleLabels").all() as DbRuleLabel[];
 
       assert.equal(labels.length, 3);
-      assert.deepEqual(labels, [
+      assert.deepEqual(labels.map((label) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { timestamp, ...labelWithouTimestamp } = label;
+
+        return labelWithouTimestamp;
+      }), [
         { id: 1, ruleId: 1, key: "foo", value: "bar" },
         { id: 2, ruleId: 1, key: "foo", value: "baz" },
         { id: 3, ruleId: 1, key: "foz", value: "boz" }
@@ -344,12 +345,72 @@ describe("Rule.walkOnLogs()", () => {
         { values: ["two"], stream: { foo: "bar" } }
       ]);
 
-      const labels = getDB().prepare("SELECT * FROM ruleLabels").all();
+      const labels = getDB().prepare("SELECT * FROM ruleLabels").all() as DbRuleLabel[];
 
       assert.equal(labels.length, 1);
-      assert.deepEqual(labels, [
-        { id: 1, ruleId: 1, key: "foo", value: "bar" }
-      ]);
+      assert.equal(labels[0].id, 1);
+      assert.equal(labels[0].ruleId, 1);
+      assert.equal(labels[0].key, "foo");
+      assert.equal(labels[0].value, "bar");
+    });
+  });
+
+  describe("A rule based on label matching", () => {
+    let config: SigynConfig;
+
+    before(async() => {
+      config = await initConfig(kLabelConfigLocation);
+    });
+
+    it("should send alert when count and threshold reached", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.init();
+
+      const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { state: "ko" });
+
+      assert.equal(createAlert, true);
+    });
+
+    it("should not send alert when count not reached", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.clearLabels();
+
+      const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"), { state: "ko" });
+
+      assert.equal(createAlert, false);
+
+      const createAlertWhenThrehsholdReached = await pollingIn200ms(
+        rule,
+        Array.from(Array(5)).map(() => "one new log"),
+        { state: "ko" }
+      );
+
+      assert.equal(createAlertWhenThrehsholdReached, true);
+    });
+
+    it("should send alert when interval and threshold reached", async() => {
+      const ruleConfig = {
+        ...config.rules[0],
+        alert: {
+          ...config.rules[0].alert,
+          on: {
+            ...config.rules[0].alert.on,
+            interval: "400ms"
+          }
+        }
+      };
+      const rule = new Rule(ruleConfig, { logger: kLogger });
+      rule.clearLabels();
+
+      const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { state: "ko" });
+
+      assert.equal(createAlert, false);
+
+      assert.equal(await pollingIn200ms(rule, []), false);
+
+      // We need 3 intervals because there is some MS difference between the first polling and the first label timestamp
+      const createAlertAfterIntervalReached = await pollingIn200ms(rule, []);
+      assert.equal(createAlertAfterIntervalReached, true);
     });
   });
 });
@@ -438,7 +499,7 @@ describe("Rule.getQueryRangeStartUnixTimestamp()", () => {
   });
 });
 
-describe("Rule.getRuleFromDatabaseWithLabels()", () => {
+describe("Rule.getAlertFormattedRule()", () => {
   let config: SigynConfig;
 
   before(async() => {
@@ -454,7 +515,7 @@ describe("Rule.getRuleFromDatabaseWithLabels()", () => {
       { values: ["two"], stream: { foo: "baz", foz: "boz" } }
     ]);
 
-    const ruleWithLabels = rule.getRuleFromDatabaseWithLabels();
+    const ruleWithLabels = rule.getAlertFormattedRule();
 
     assert.equal(Object.keys(ruleWithLabels.labels).length, 2);
     assert.equal(ruleWithLabels.labels.foo, "bar, baz");
@@ -465,7 +526,7 @@ describe("Rule.getRuleFromDatabaseWithLabels()", () => {
     getDB().exec("DELETE from ruleLabels");
 
     const rule = new Rule(config.rules[0], { logger: kLogger });
-    const ruleWithLabels = rule.getRuleFromDatabaseWithLabels();
+    const ruleWithLabels = rule.getAlertFormattedRule();
 
     assert.equal(Object.keys(ruleWithLabels.labels).length, 0);
   });

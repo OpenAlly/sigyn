@@ -17,6 +17,7 @@ const kExpectedTablesColumns = {
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
     { name: "name", dflt_value: null, type: "TEXT", pk: 0, notnull: 1 },
     { name: "counter", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "threshold", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 },
     { name: "lastRunAt", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
     { name: "throttleCount", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 },
     { name: "lastIntervalReset", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
@@ -33,7 +34,8 @@ const kExpectedTablesColumns = {
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
     { name: "ruleId", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
     { name: "key", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 },
-    { name: "value", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 }
+    { name: "value", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 },
+    { name: "timestamp", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 }
   ],
   alerts: [
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
@@ -108,7 +110,7 @@ describe("Database", () => {
           });
 
           it("should not have other column", () => {
-            assert.equal(actualColumn.length, currentTable.lengt);
+            assert.equal(actualColumns.length, currentTable.length);
           });
         }
       });
