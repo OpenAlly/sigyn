@@ -5,15 +5,19 @@ import { SigynRule, getConfig } from "@sigyn/config";
 // Import Internal Dependencies
 import { Datasource } from "../datasource";
 import { durationOrCronToDate } from "./cron";
+import { NotifierAlert } from "../notifier";
 
-export async function getLokiUrl(config: SigynRule): Promise<string> {
+export async function getLokiUrl(
+  rule: NotifierAlert["rule"],
+  config: SigynRule
+): Promise<string> {
   const { loki } = getConfig();
   const { uid, orgId } = await Datasource.Loki(loki.apiUrl);
 
-  const from = String(
-    durationOrCronToDate(config.alert.on.interval, "subtract").valueOf()
+  const from = config.alert.on.label ? String(rule.oldestLabelTimestamp) : String(
+    durationOrCronToDate(config.alert.on.interval!, "subtract").valueOf()
   );
-  const to = dayjs().valueOf();
+  const to = String(dayjs().valueOf());
 
   const url = new URL("explore", loki.apiUrl);
   url.searchParams.append("orgId", String(orgId));

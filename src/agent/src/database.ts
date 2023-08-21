@@ -19,6 +19,7 @@ export interface DbRule {
   id: number;
   name: string;
   counter: number;
+  threshold: number;
   lastRunAt?: number;
   throttleCount: number;
   lastIntervalReset: null | number;
@@ -38,6 +39,7 @@ export interface DbRuleLabel {
   key: string;
   value: string;
   ruleId: number;
+  timestamp: number;
 }
 
 export interface DbCounter {
@@ -121,4 +123,10 @@ export function cleanRulesInDb(
       db.prepare("DELETE FROM rules WHERE name = ?").run(dbRule.name);
     }
   }
+}
+
+export function getOldestLabelTimestamp(ruleId: number, label: string) {
+  return (getDB()
+    .prepare("SELECT timestamp FROM ruleLabels WHERE key = ? AND ruleId = ? ORDER BY timestamp ASC LIMIT 1")
+    .get(label, ruleId) as Pick<DbRuleLabel, "timestamp">).timestamp;
 }

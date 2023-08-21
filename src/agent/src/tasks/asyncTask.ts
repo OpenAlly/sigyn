@@ -32,7 +32,7 @@ export function asyncTask(ruleConfig: SigynRule, options: AsyncTaskOptions) {
 
       const createAlert = await rule.walkOnLogs(logs);
       if (createAlert) {
-        createRuleAlert(rule.getRuleFromDatabaseWithLabels(), ruleConfig, logger);
+        createRuleAlert(rule.getAlertFormattedRule(), ruleConfig, logger);
         rule.clearLabels();
       }
     }

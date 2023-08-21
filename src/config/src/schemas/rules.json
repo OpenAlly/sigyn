@@ -77,11 +77,43 @@
                 "title": "The interval of time in which the logs will be counted",
                 "description": "A duration string (e.g. '1m', '1h', '1d').",
                 "type": "string"
+              },
+              "label": {
+                "title": "The label to watch",
+                "type": "string"
+              },
+              "value": {
+                "title": "The label value to watch",
+                "type": "string"
+              },
+              "thresholdPercent": {
+                "title": "The maximum percent of the given label value to trigger an alert",
+                "type": "number"
               }
             },
-            "required": [
-              "count",
-              "interval"
+            "anyOf": [
+              {
+                "required": [
+                  "count",
+                  "interval"
+                ]
+              },
+              {
+                "required": [
+                  "label",
+                  "value",
+                  "thresholdPercent",
+                  "count"
+                ]
+              },
+              {
+                "required": [
+                  "label",
+                  "value",
+                  "thresholdPercent",
+                  "interval"
+                ]
+              }
             ],
             "additionalProperties": false
           },

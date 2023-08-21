@@ -14,14 +14,14 @@
     {
       "name": "test1",
       "logql": "{app=\"foo\", env=\"preprod\"} |= `my super logql`",
-      "polling": "100ms",
+      "polling": "200ms",
       "alert": {
         "on": {
           "count": "5",
-          "interval": "500ms"
+          "interval": "1s"
         },
         "template": {
-          "title": "🚨 {ruleName} - Triggered {counter} times!",
+          "title": "{ruleName} - Triggered {counter} times!",
           "content": [
             "- LogQL: {logql}",
             "- Threshold: {count}",

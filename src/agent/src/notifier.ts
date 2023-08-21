@@ -12,7 +12,7 @@ import { Logger } from ".";
 const kPrivateInstancier = Symbol("instancier");
 
 export interface NotifierAlert {
-  rule: DbRule & { labels: Record<string, string> };
+  rule: DbRule & { labels: Record<string, string>; oldestLabelTimestamp: number | null };
   notifier: string;
   notif: Pick<DbAlertNotif, "alertId" | "notifierId">;
   error?: Error;
@@ -87,10 +87,10 @@ export class Notifier {
     const notifierOptions = {
       ...notifierConfig,
       ruleConfig,
-      counter: alert.rule.counter,
+      counter: alert.rule.threshold,
       label: { ...new StreamSelector(ruleConfig.logql).kv(), ...rule.labels },
       severity: utils.getSeverity(ruleConfig.alert.severity),
-      lokiUrl: await utils.getLokiUrl(ruleConfig)
+      lokiUrl: await utils.getLokiUrl(rule, ruleConfig)
     };
     const notifierPackage = Notifier.localPackages.has(notifier) ? `@sigyn/${notifier}` : notifier;
 

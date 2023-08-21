@@ -70,4 +70,3 @@ export function getPollings(
 
   return polling.map<RulePolling>((value) => [true, value]);
 }
-
