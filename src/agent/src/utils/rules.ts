@@ -4,7 +4,6 @@ import { SigynRule } from "@sigyn/config";
 // Import Internal Dependencies
 import { DEFAULT_POLLING } from "../rules";
 import { isCron } from "./cron";
-import { DbRuleLabel, getDB } from "../database";
 
 // CONSTANTS
 const kOnlyDigitsRegExp = /^\d+$/;
@@ -70,10 +69,4 @@ export function getPollings(
   }
 
   return polling.map<RulePolling>((value) => [true, value]);
-}
-
-export function getOldestLabelTimestamp(ruleId: number, label: string) {
-  return (getDB()
-    .prepare("SELECT timestamp FROM ruleLabels WHERE key = ? AND ruleId = ? ORDER BY timestamp ASC LIMIT 1")
-    .get(label, ruleId) as Pick<DbRuleLabel, "timestamp">).timestamp;
 }

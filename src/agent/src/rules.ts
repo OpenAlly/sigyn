@@ -8,10 +8,9 @@ import cronParser from "cron-parser";
 import { Database } from "better-sqlite3";
 
 // Import Internal Dependencies
-import { DbRule, DbRuleLabel, getDB } from "./database";
+import { DbRule, DbRuleLabel, getDB, getOldestLabelTimestamp } from "./database";
 import * as utils from "./utils/index";
 import { Logger } from ".";
-import { getOldestLabelTimestamp } from "./utils/rules";
 import { NotifierAlert } from "./notifier";
 
 // CONSTANTS
@@ -170,9 +169,9 @@ export class Rule {
     const { label, value, thresholdPercent, count, interval } = this.#config.alert.on;
 
     const labels = getDB().prepare("SELECT * FROM ruleLabels WHERE key = ? AND ruleId = ? ORDER BY timestamp ASC").all(label, rule.id) as DbRuleLabel[];
-    const olderLabel = labels[0];
+    const [olderLabel] = labels;
     if (olderLabel === undefined) {
-      this.#logger.info(`[${rule.name}](state: skip|label: ${label}`);
+      this.#logger.info(`[${rule.name}](state: skip|label: ${label})`);
 
       return false;
     }
@@ -181,7 +180,7 @@ export class Rule {
     const countReached = count ? Number(count) <= labels.length : true;
 
     if (!intervalReached || !countReached) {
-      this.#logger.info(`[${rule.name}](state: unreached|count: ${labels.length}|minimumCount: ${count ? count : "*"}|oldestTimestamp: ${olderLabel.timestamp}|minimumTimestamp: ${intervalTimestamp ?? "*"})`);
+      this.#logger.info(`[${rule.name}](state: unreached|count: ${labels.length}|minimumCount: ${count || "*"}|oldestTimestamp: ${olderLabel.timestamp}|minimumTimestamp: ${intervalTimestamp ?? "*"})`);
 
       return false;
     }
