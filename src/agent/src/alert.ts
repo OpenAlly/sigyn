@@ -24,7 +24,9 @@ export function createRuleAlert(
     dayjs().valueOf()
   );
 
-  for (const notifierName of notifierNames) {
-    notifier.sendAlert({ rule, notifier: notifierName });
-  }
+  notifier.sendAlerts(
+    notifierNames.map((notifierName) => {
+      return { rule, notifier: notifierName };
+    })
+  );
 }

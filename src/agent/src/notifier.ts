@@ -53,16 +53,27 @@ export class Notifier {
     return this.shared;
   }
 
-  sendAlert(alert: Omit<NotifierAlert, "notif">) {
+  sendAlerts(alerts: Omit<NotifierAlert, "notif">[]) {
     const db = getDB();
-    const { id: alertId } = db
-      .prepare("SELECT id from alerts WHERE ruleId = ?")
-      .get(alert.rule.id) as Pick<DbAlert, "id">;
-    const notifierId = this.#databaseNotifierId(alert.notifier);
+    const notificationAlerts: NotifierAlert[] = [];
 
-    db.prepare("INSERT INTO alertNotifs (alertId, notifierId) VALUES (?, ?)").run(alertId, notifierId);
+    for (const alert of alerts) {
+      const { id: alertId } = db
+        .prepare("SELECT id from alerts WHERE ruleId = ?")
+        .get(alert.rule.id) as Pick<DbAlert, "id">;
+      const notifierId = this.#databaseNotifierId(alert.notifier);
 
-    this.#queue.push({ ...alert, notif: { alertId, notifierId } });
+      notificationAlerts.push({ ...alert, notif: { alertId, notifierId } });
+    }
+
+    const insertAlertNotifs = db.prepare("INSERT INTO alertNotifs (alertId, notifierId) VALUES (?, ?)");
+    db.transaction(() => {
+      for (const { notif } of notificationAlerts) {
+        insertAlertNotifs.run(notif.alertId, notif?.notifierId);
+      }
+    })();
+
+    this.#queue.push(...notificationAlerts);
   }
 
   async #sendNotifications(notificationAlerts: NotifierAlert[]) {
