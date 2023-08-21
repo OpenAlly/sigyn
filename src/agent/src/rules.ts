@@ -81,34 +81,36 @@ export class Rule {
     const rule = this.getRuleFromDatabase();
     const ruleLabels = this.getDistinctLabelsFromDatabase(rule.id);
     const lastCounter = rule.counter;
+    const existingLabels = new Set();
+    for (const label of ruleLabels) {
+      existingLabels.add(`${label.key}:${label.value}`);
+    }
+    const ruleLabelsInsertStmt = db.prepare("INSERT INTO ruleLabels (ruleId, key, value, timestamp) VALUES (?, ?, ?, ?)");
+    const ruleLogInsertStmt = db.prepare("INSERT INTO ruleLogs (ruleId, log, timestamp) VALUES (?, ?, ?)");
 
-    for (const { stream, values } of logs) {
-      for (const [key, value] of Object.entries(stream)) {
+    db.transaction(() => {
+      for (const { stream, values } of logs) {
+        for (const [key, value] of Object.entries(stream)) {
         // If rule is based on label, insert as many label as there is values
         // because we receive only one stream for N values (but the stream is the same for each value)
-        if (this.#config.alert.on.label === key) {
-          let insertedCount = 0;
+          if (this.#config.alert.on.label === key) {
+            let insertedCount = 0;
 
-          while (insertedCount++ < values.length) {
-            db.prepare("INSERT INTO ruleLabels (ruleId, key, value, timestamp) VALUES (?, ?, ?, ?)").run(rule.id, key, value, now);
+            while (insertedCount++ < values.length) {
+              ruleLabelsInsertStmt.run(rule.id, key, value, now);
+            }
+          }
+          else if (!existingLabels.has(`${key}:${value}`)) {
+            ruleLabelsInsertStmt.run(rule.id, key, value, now);
+            existingLabels.add(`${key}:${value}`);
           }
         }
-        else {
-          // distinct label if rule is not based on, we don't need to count them
-          const label = ruleLabels.find((label) => label.key === key && label.value === value);
-          if (label === undefined) {
-            const { lastInsertRowid } = db.prepare("INSERT INTO ruleLabels (ruleId, key, value, timestamp) VALUES (?, ?, ?, ?)").run(rule.id, key, value, now);
-            ruleLabels.push({ id: Number(lastInsertRowid), ruleId: rule.id, key, value, timestamp: now });
-          }
+
+        for (const log of values) {
+          ruleLogInsertStmt.run(rule.id, log, now);
         }
       }
-
-      db.transaction(() => {
-        for (const log of values) {
-          db.prepare("INSERT INTO ruleLogs (ruleId, log, timestamp) VALUES (?, ?, ?)").run(rule.id, log, now);
-        }
-      })();
-    }
+    })();
 
     if (this.#config.alert.on.label) {
       return this.#checkLabelThreshold(rule);
