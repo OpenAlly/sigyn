@@ -4,6 +4,16 @@ export interface SigynConfig {
   rules: SigynRule[];
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
+  missingLabelStrategy: "ignore" | "error";
+  defaultSeverity: AlertSeverity
+}
+
+export interface PartialSigynConfig {
+  loki: LokiConfig;
+  notifiers: Record<string, unknown>;
+  rules: PartialSigynRule[];
+  templates?: Record<string, SigynAlertTemplate>;
+  extends?: string[];
   missingLabelStrategy?: "ignore" | "error";
   defaultSeverity?: AlertSeverity
 }
@@ -17,9 +27,20 @@ export interface LokiConfig {
 export interface SigynRule {
   name: string;
   logql: string;
+  polling: string | string[];
+  pollingStrategy: "bounded" | "unbounded";
+  alert: SigynAlert;
+  disabled: boolean;
+  notifiers: string[];
+  labelFilters?: Record<string, string[]>;
+}
+
+export interface PartialSigynRule {
+  name: string;
+  logql: string;
   polling?: string | string[];
   pollingStrategy?: "bounded" | "unbounded";
-  alert: SigynAlert;
+  alert: PartialSigynAlert;
   disabled?: boolean;
   notifiers?: string[];
   labelFilters?: Record<string, string[]>;
@@ -36,6 +57,22 @@ export type AlertSeverity =
   "information" | "info" | "low";
 
 export interface SigynAlert {
+  on: {
+    count?: string | number;
+    interval?: string;
+    label?: string;
+    value?: string;
+    thresholdPercent?: number;
+  },
+  template: string | SigynAlertTemplate;
+  severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
+  throttle?: {
+    count: number;
+    interval: string;
+  };
+}
+
+export interface PartialSigynAlert {
   on: {
     count?: string | number;
     interval?: string;

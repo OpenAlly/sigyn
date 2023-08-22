@@ -6,10 +6,10 @@ import { describe, it } from "node:test";
 
 // Import Internal Dependencies
 import { validateConfig } from "../src/validate";
-import { AlertSeverity, SigynConfig } from "../src/types";
+import { AlertSeverity, PartialSigynConfig } from "../src/types";
 
 // CONSTANTS
-const kValidConfig: SigynConfig = {
+const kValidConfig: PartialSigynConfig = {
   loki: {
     apiUrl: "http://localhost:3100"
   },
@@ -725,7 +725,7 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule alert property 'on.count' should be string or number", () => {
+  it("rule alert property 'on.count' should be string or integer", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -744,7 +744,30 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on/count: must be number, /rules/0/alert/on/count: must be string, /rules/0/alert/on/count: must match exactly one schema in oneOf"
+      message: "Invalid config: /rules/0/alert/on/count: must be integer, /rules/0/alert/on/count: must be string, /rules/0/alert/on/count: must match exactly one schema in oneOf"
+    });
+  });
+
+  it("rule alert property 'on.count' cannot be float", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: 50.5
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/on/count: must be integer, /rules/0/alert/on/count: must be string, /rules/0/alert/on/count: must match exactly one schema in oneOf"
     });
   });
 
@@ -795,6 +818,32 @@ describe("Config validation", () => {
     }, {
       name: "Error",
       message: "Invalid config: /rules/0/alert/on: must have required property 'count', /rules/0/alert/on: must have required property 'thresholdPercent', /rules/0/alert/on: must have required property 'thresholdPercent', /rules/0/alert/on: must match a schema in anyOf"
+    });
+  });
+
+  it("rule alert property 'on.thresholdPercent' cannot be float", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: undefined,
+                label: "foo",
+                value: "bar",
+                thresholdPercent: 80.5
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/on/thresholdPercent: must be integer"
     });
   });
 
@@ -990,6 +1039,29 @@ describe("Config validation", () => {
     });
   });
 
+  it("rule alert property 'throttle.count' cannot be float", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              throttle: {
+                interval: "1m",
+                count: 5.5
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/throttle/count: must be integer"
+    });
+  });
+
   it("rule alert property 'throttle.interval' should be required", () => {
     assert.throws(() => {
       validateConfig({
@@ -1034,7 +1106,7 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule alert property 'throttle.count' must be a number", () => {
+  it("rule alert property 'throttle.count' must be an integer", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -1053,7 +1125,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/throttle/count: must be number"
+      message: "Invalid config: /rules/0/alert/throttle/count: must be integer"
     });
   });
 

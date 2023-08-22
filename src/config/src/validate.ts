@@ -3,7 +3,7 @@ import Ajv, { ErrorObject } from "ajv";
 import ajvKeywords from "ajv-keywords";
 
 // Import Internal Dependencies
-import { ExtendedSigynConfig, SigynConfig } from "./types";
+import { ExtendedSigynConfig, PartialSigynConfig } from "./types";
 import rulesSchema from "./schemas/rules.json";
 import templateSchema from "./schemas/templates.json";
 import configSchema from "./schemas/configSchema.json";
@@ -15,7 +15,7 @@ kAjv.addSchema(rulesSchema);
 kAjv.addSchema(templateSchema);
 ajvKeywords(kAjv);
 
-export function validateConfig(config: SigynConfig) {
+export function validateConfig(config: PartialSigynConfig) {
   const validate = kAjv.compile(configSchema);
 
   if (!validate(config)) {
@@ -37,7 +37,7 @@ function buildValidationErrorMessage(errors: ErrorObject[]) {
   return errors.map((err) => `${err.instancePath}: ${err.message}`).join(", ");
 }
 
-function validateTemplate(config: SigynConfig) {
+function validateTemplate(config: PartialSigynConfig) {
   for (const rule of config.rules) {
     if (typeof rule.alert.template === "string") {
       const template = config.templates?.[rule.alert.template];

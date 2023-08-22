@@ -2,7 +2,7 @@
 import dayjs from "dayjs";
 
 // Import Third-party Dependencies
-import { SigynRule, getConfig } from "@sigyn/config";
+import { SigynRule } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { getDB } from "./database";
@@ -15,9 +15,6 @@ export function createRuleAlert(
   logger: Logger
 ) {
   const notifier = Notifier.getSharedInstance(logger);
-  const ruleNotifiers = ruleConfig.notifiers ?? [];
-  const globalNotifiers = Object.keys(getConfig().notifiers);
-  const notifierNames = ruleNotifiers.length > 0 ? ruleNotifiers : globalNotifiers;
 
   getDB().prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)").run(
     rule.id,
@@ -25,7 +22,7 @@ export function createRuleAlert(
   );
 
   notifier.sendAlerts(
-    notifierNames.map((notifierName) => {
+    ruleConfig.notifiers.map((notifierName) => {
       return { rule, notifier: notifierName };
     })
   );

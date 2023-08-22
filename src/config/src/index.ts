@@ -39,7 +39,7 @@ export async function initConfig(configPath: string | URL): Promise<SigynConfig>
   config.rules = await utils.mergeRulesLabelFilters(config);
   validateConfig(config);
 
-  return config;
+  return utils.applyDefaultValues(config);
 }
 
 export function getConfig(): SigynConfig {

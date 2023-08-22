@@ -1,8 +1,15 @@
 // Import Internal Dependencies
-import { SigynConfig, SigynRule } from "./types";
+import { AlertSeverity, PartialSigynConfig, SigynConfig, SigynRule } from "./types";
 
 // Import Third-party Dependencies
 import { GrafanaLoki } from "@myunisoft/loki";
+
+// CONSTANTS
+const kDefaultMissingLabelStrategy = "ignore";
+const kDefaultRulePolling = "1m";
+const kDefaultAlertSeverity = "error";
+const kDefaultAlertThrottleCount = 0;
+const kDefaultRulePollingStrategy = "unbounded";
 
 export async function mergeRulesLabelFilters(config: SigynConfig): Promise<SigynRule[]> {
   const labels = await fetchRulesLabels(config);
@@ -85,4 +92,60 @@ export async function fetchRulesLabels(config: Pick<SigynConfig, "loki" | "rules
   }
 
   return labels;
+}
+
+export function applyDefaultValues(
+  config: PartialSigynConfig | SigynConfig
+): SigynConfig {
+  return {
+    ...config,
+    missingLabelStrategy: config.missingLabelStrategy ?? kDefaultMissingLabelStrategy,
+    defaultSeverity: config.defaultSeverity ?? kDefaultAlertSeverity,
+    rules: config.rules.map((rule) => {
+      if (rule.polling === undefined) {
+        rule.polling = kDefaultRulePolling;
+      }
+
+      if (rule.alert.severity === undefined) {
+        rule.alert.severity = getSeverity(config.defaultSeverity ?? kDefaultAlertSeverity);
+      }
+
+      if (rule.alert.throttle && rule.alert.throttle.count === undefined) {
+        rule.alert.throttle.count = kDefaultAlertThrottleCount;
+      }
+
+      if (rule.disabled === undefined) {
+        rule.disabled = false;
+      }
+
+      if (rule.notifiers === undefined) {
+        rule.notifiers = Object.keys(config.notifiers!);
+      }
+
+      if (rule.pollingStrategy === undefined) {
+        rule.pollingStrategy = kDefaultRulePollingStrategy;
+      }
+
+      return rule as SigynRule;
+    })
+  };
+}
+
+export function getSeverity(sev: AlertSeverity): "critical" | "error" | "warning" | "info" {
+  switch (sev) {
+    case "critical":
+      return sev;
+    case "error":
+    case "major":
+      return "error";
+    case "warning":
+    case "minor":
+      return "warning";
+    case "information":
+    case "info":
+    case "low":
+      return "info";
+    default:
+      throw new Error(`Invalid severity: ${sev}`);
+  }
 }

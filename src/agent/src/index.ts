@@ -12,7 +12,7 @@ import ms from "ms";
 // Import Internal Dependencies
 import { initDB, cleanRulesInDb } from "./database";
 import { asyncTask } from "./tasks/asyncTask";
-import { DEFAULT_POLLING, Rule } from "./rules";
+import { Rule } from "./rules";
 import * as utils from "./utils/index";
 
 // CONSTANTS
@@ -63,7 +63,7 @@ export async function start(
       }
       else {
         const job = new SimpleIntervalJob({
-          milliseconds: ms(ruleConfig.polling ?? DEFAULT_POLLING),
+          milliseconds: ms(ruleConfig.polling),
           runImmediately: true
         }, task);
 
