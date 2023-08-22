@@ -14,8 +14,8 @@ export class NotifierQueue extends EventEmitter {
   #notificationAlerts: NotifierAlert[] = [];
   #inProgress = 0;
 
-  push(notification: NotifierAlert) {
-    this.#notificationAlerts.push(notification);
+  push(...notifications: NotifierAlert[]) {
+    this.#notificationAlerts.push(...notifications);
 
     if (this.#inProgress === 0) {
       this.emit(NotifierQueue.DEQUEUE, [...this.#dequeue()]);
