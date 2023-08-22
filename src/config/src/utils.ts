@@ -102,29 +102,14 @@ export function applyDefaultValues(
     missingLabelStrategy: config.missingLabelStrategy ?? kDefaultMissingLabelStrategy,
     defaultSeverity: config.defaultSeverity ?? kDefaultAlertSeverity,
     rules: config.rules.map((rule) => {
-      if (rule.polling === undefined) {
-        rule.polling = kDefaultRulePolling;
+      rule.polling ??= kDefaultRulePolling;
+      rule.alert.severity ??= getSeverity(config.defaultSeverity ?? kDefaultAlertSeverity);
+      if (rule.alert.throttle) {
+        rule.alert.throttle.count ??= kDefaultAlertThrottleCount;
       }
-
-      if (rule.alert.severity === undefined) {
-        rule.alert.severity = getSeverity(config.defaultSeverity ?? kDefaultAlertSeverity);
-      }
-
-      if (rule.alert.throttle && rule.alert.throttle.count === undefined) {
-        rule.alert.throttle.count = kDefaultAlertThrottleCount;
-      }
-
-      if (rule.disabled === undefined) {
-        rule.disabled = false;
-      }
-
-      if (rule.notifiers === undefined) {
-        rule.notifiers = Object.keys(config.notifiers!);
-      }
-
-      if (rule.pollingStrategy === undefined) {
-        rule.pollingStrategy = kDefaultRulePollingStrategy;
-      }
+      rule.disabled ??= false;
+      rule.notifiers ??= Object.keys(config.notifiers!);
+      rule.pollingStrategy ??= kDefaultRulePollingStrategy;
 
       return rule as SigynRule;
     })
