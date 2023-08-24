@@ -100,7 +100,7 @@ export class Notifier {
       ruleConfig,
       counter: alert.rule.threshold,
       label: { ...new StreamSelector(ruleConfig.logql).kv(), ...rule.labels },
-      severity: utils.getSeverity(ruleConfig.alert.severity),
+      severity: ruleConfig.alert.severity,
       lokiUrl: await utils.getLokiUrl(rule, ruleConfig)
     };
     const notifierPackage = Notifier.localPackages.has(notifier) ? `@sigyn/${notifier}` : notifier;

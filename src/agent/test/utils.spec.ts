@@ -4,13 +4,12 @@ import { after, before, describe, it } from "node:test";
 import path from "node:path";
 
 // Import Third-party Dependencies
-import { initConfig, AlertSeverity } from "@sigyn/config";
+import { initConfig } from "@sigyn/config";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 import dayjs from "dayjs";
 
 // Import Internal Dependencies
 import * as utils from "../src/utils/index";
-import { DEFAULT_POLLING } from "../src/rules";
 
 // CONSTANTS
 const kDummyUrl = "http://localhost:3000";
@@ -185,13 +184,6 @@ describe("Utils", () => {
       assert.equal(polling, "5m");
     });
 
-    it("should get default polling when no polling given", () => {
-      const [[isCron, polling]] = utils.rules.getPollings();
-
-      assert.equal(isCron, false);
-      assert.equal(polling, DEFAULT_POLLING);
-    });
-
     it("should throw when a polling in the list is not a valid cron expression", () => {
       assert.throws(() => {
         utils.rules.getPollings(["foo"]);
@@ -208,40 +200,6 @@ describe("Utils", () => {
         name: "Error",
         message: "All polling values must be cron expressions"
       });
-    });
-  });
-
-  describe("getSeverity()", () => {
-    const sev1: AlertSeverity[] = ["critical"];
-    for (const sev of sev1) {
-      it(`should return 'critical' when given ${sev}`, () => {
-        assert.equal(utils.getSeverity(sev), "critical");
-      });
-    }
-
-    const sev2: AlertSeverity[] = ["error", "major"];
-    for (const sev of sev2) {
-      it(`should return 'error' when given ${sev}`, () => {
-        assert.equal(utils.getSeverity(sev), "error");
-      });
-    }
-
-    const sev3: AlertSeverity[] = ["warning", "minor"];
-    for (const sev of sev3) {
-      it(`should return 'warning' when given ${sev}`, () => {
-        assert.equal(utils.getSeverity(sev), "warning");
-      });
-    }
-
-    const sev4: AlertSeverity[] = ["information", "info", "low"];
-    for (const sev of sev4) {
-      it(`should return 'info' when given ${sev}`, () => {
-        assert.equal(utils.getSeverity(sev), "info");
-      });
-    }
-
-    it("Default sevirity should be 'error'", () => {
-      assert.equal(utils.getSeverity(undefined), "error");
     });
   });
 });

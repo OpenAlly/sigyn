@@ -4,7 +4,7 @@ import { after, before, describe, it } from "node:test";
 
 // Import Internal Dependencies
 import * as utils from "../src/utils";
-import { SigynConfig, SigynRule } from "../src/types";
+import { AlertSeverity, SigynConfig, SigynRule } from "../src/types";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 
 // CONSTANTS
@@ -115,5 +115,110 @@ describe("Utils", () => {
       assert.deepEqual(labels.get("env"), ["prod", "dev"]);
       assert.equal(labels.get("foo"), undefined);
     });
+  });
+
+  describe("applyDefaultValues", () => {
+    const config = {
+      loki: {
+        apiUrl: kDummyUrl
+      },
+      notifiers: {
+        discord: {
+          webhookUrl: "https://discord.com/api/webhooks/1234567890/abcdefg"
+        },
+        slack: {
+          webhookUrl: "https://hooks.slack.com/services/1234567890/abcdefg"
+        }
+      },
+      rules: [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "10h"
+            },
+            throttle: {
+              interval: "1h"
+            },
+            template: {
+              title: "Alert for foo"
+            }
+          }
+
+        }
+      ]
+    };
+
+    assert.deepEqual(utils.applyDefaultValues(config), {
+      loki: {
+        apiUrl: kDummyUrl
+      },
+      notifiers: {
+        discord: {
+          webhookUrl: "https://discord.com/api/webhooks/1234567890/abcdefg"
+        },
+        slack: {
+          webhookUrl: "https://hooks.slack.com/services/1234567890/abcdefg"
+        }
+      },
+      missingLabelStrategy: "ignore",
+      defaultSeverity: "error",
+      rules: [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          polling: "1m",
+          disabled: false,
+          notifiers: ["discord", "slack"],
+          pollingStrategy: "unbounded",
+          alert: {
+            on: {
+              count: 5,
+              interval: "10h"
+            },
+            throttle: {
+              interval: "1h",
+              count: 0
+            },
+            severity: "error",
+            template: {
+              title: "Alert for foo"
+            }
+          }
+        }
+      ]
+    });
+  });
+
+  describe("getSeverity()", () => {
+    const sev1: AlertSeverity[] = ["critical"];
+    for (const sev of sev1) {
+      it(`should return 'critical' when given '${sev}'`, () => {
+        assert.equal(utils.getSeverity(sev), "critical");
+      });
+    }
+
+    const sev2: AlertSeverity[] = ["error", "major"];
+    for (const sev of sev2) {
+      it(`should return 'error' when given '${sev}'`, () => {
+        assert.equal(utils.getSeverity(sev), "error");
+      });
+    }
+
+    const sev3: AlertSeverity[] = ["warning", "minor"];
+    for (const sev of sev3) {
+      it(`should return 'warning' when given '${sev}'`, () => {
+        assert.equal(utils.getSeverity(sev), "warning");
+      });
+    }
+
+    const sev4: AlertSeverity[] = ["information", "info", "low"];
+    for (const sev of sev4) {
+      it(`should return 'info' when given '${sev}'`, () => {
+        assert.equal(utils.getSeverity(sev), "info");
+      });
+    }
   });
 });

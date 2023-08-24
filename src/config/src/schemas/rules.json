@@ -66,7 +66,7 @@
                 "description": "Can be a number or a range string (e.g. '< 4', '>= 5'). By default, the operator is '>=', it means that if no operator specified, the alert will be triggered when the number of logs is greater or equal to the count value.",
                 "oneOf": [
                   {
-                    "type": "number"
+                    "type": "integer"
                   },
                   {
                     "type": "string"
@@ -88,7 +88,7 @@
               },
               "thresholdPercent": {
                 "title": "The maximum percent of the given label value to trigger an alert",
-                "type": "number"
+                "type": "integer"
               }
             },
             "anyOf": [
@@ -152,7 +152,7 @@
             "properties": {
               "count": {
                 "title": "The number of alert to unlock the interval, default to 0",
-                "type": "number",
+                "type": "integer",
                 "nullable": true
               },
               "interval": {

@@ -51,24 +51,32 @@ describe("Extended configs", () => {
         name: "test1",
         logql: "{app=\"foo\", env=\"preprod\"} |= `my super logql`",
         polling: "1s",
+        pollingStrategy: "unbounded",
+        disabled: false,
+        notifiers: ["discord"],
         alert: {
           on: {
             count: "1",
             interval: "1m"
           },
-          template: "main"
+          template: "main",
+          severity: "error"
         }
       },
       {
         name: "fooRule",
         logql: "{app=\"foo\", env=\"preprod\"} |= `my super logql`",
         polling: "1s",
+        pollingStrategy: "unbounded",
+        disabled: false,
+        notifiers: ["discord"],
         alert: {
           on: {
             count: "1",
             interval: "1m"
           },
-          template: "foo"
+          template: "foo",
+          severity: "error"
         }
       }
     ]);

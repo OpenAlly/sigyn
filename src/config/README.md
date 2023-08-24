@@ -169,7 +169,7 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   | `name`      | `string`               | ✔️       | The name of the rule. Must be unique between each rule. |
   | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. You can use `{label.x}` where `x` is provided in `labelFilters` (see example below) |
   | `polling`   | `string` or `string[]` | ❌       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is useful if you want a different polling the day and the night. Default to  `1m`. |
-  | `pollingStrategy` | `bounded` or `unbounded` | ❌ | **For CRON polling only**. Defines how Sigyn should fetch logs given a range. For instance, given `* 7-20 * * *` at `7:00` it will fetch logs since `20:59` last day with `unbounded` strategy. It will skip and wait the next poll given a `bounded` strategy.
+  | `pollingStrategy` | `bounded` or `unbounded` | ❌ | **For CRON polling only**. Defines how Sigyn should fetch logs given a range. For instance, given `* 7-20 * * *` at `7:00` it will fetch logs since `20:59` last day with `unbounded` strategy. It will skip and wait the next poll given a `bounded` strategy. Default to `unbounded`
   | `alert`     | `object`               | ✔️       | An object defining the alerting configuration for the rule. |
   | `disabled`  | `boolean`              | ❌       | Weither the rule is enabled, default to `false`. |
   | `notifiers` | `string[]`             | ❌       | An array of strings representing the notifiers for the rule. It will enables all configured `notifiers` by default. |
@@ -302,7 +302,7 @@ Returns the previously initialized **Sigyn** config.
 
 > **Note** If you try to get config while the config has not been initialied, it will throws.
 
-### `validateConfig(config: SigynConfig): void`
+### `validateConfig(config: PartialSigynConfig): void`
 
 Validate Sigyn configuration against an internal AJV Schema.
 
@@ -319,7 +319,18 @@ interface SigynConfig {
   rules: SigynRule[];
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
+  missingLabelStrategy: "ignore" | "error";
+  defaultSeverity: AlertSeverity
+}
+
+interface PartialSigynConfig {
+  loki: LokiConfig;
+  notifiers: Record<string, unknown>;
+  rules: PartialSigynRule[];
+  templates?: Record<string, SigynAlertTemplate>;
+  extends?: string[];
   missingLabelStrategy?: "ignore" | "error";
+  defaultSeverity?: AlertSeverity
 }
 
 type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
@@ -331,8 +342,20 @@ interface LokiConfig {
 interface SigynRule {
   name: string;
   logql: string;
-  polling?: string | string[];
+  polling: string | string[];
+  pollingStrategy: "bounded" | "unbounded";
   alert: SigynAlert;
+  disabled: boolean;
+  notifiers: string[];
+  labelFilters?: Record<string, string[]>;
+}
+
+interface PartialSigynRule {
+  name: string;
+  logql: string;
+  polling?: string | string[];
+  pollingStrategy?: "bounded" | "unbounded";
+  alert: PartialSigynAlert;
   disabled?: boolean;
   notifiers?: string[];
   labelFilters?: Record<string, string[]>;
@@ -342,12 +365,36 @@ type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {
   alert: Omit<SigynAlert, "template"> & { template: SigynAlertTemplate };
 }
 
+type AlertSeverity =
+  "critical" |
+  "error" | "major" |
+  "warning" | "minor" |
+  "information" | "info" | "low";
+
 interface SigynAlert {
   on: {
     count: string | number;
     interval: string;
   },
   template: string | SigynAlertTemplate;
+  severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
+  throttle?: {
+    count: number;
+    interval: string;
+  };
+}
+
+interface PartialSigynAlert {
+  on: {
+    count: string | number;
+    interval: string;
+  },
+  template: string | SigynAlertTemplate;
+  severity?: AlertSeverity;
+  throttle?: {
+    count?: number;
+    interval: string;
+  };
 }
 
 interface SigynAlertTemplate {
@@ -355,6 +402,10 @@ interface SigynAlertTemplate {
   content?: string[];
 }
 ```
+
+> [!NOTE]
+> `PartialSigynConfig`, `PartialSigynRule` and `PartialSigynAlert` are the allowed types to **validate** config.
+> These types have extra optional fields that are set by their default values upon initialization (`initConfig()`).
 
 ## License
 MIT

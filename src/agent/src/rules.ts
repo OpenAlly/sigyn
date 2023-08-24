@@ -13,9 +13,6 @@ import * as utils from "./utils/index";
 import { Logger } from ".";
 import { NotifierAlert } from "./notifier";
 
-// CONSTANTS
-export const DEFAULT_POLLING = "1m";
-
 export interface RuleOptions {
   logger: Logger;
 }
@@ -200,7 +197,7 @@ export class Rule {
       return false;
     }
 
-    const { interval, count = 0 } = throttle;
+    const { interval, count } = throttle;
     const intervalDate = utils.cron.durationOrCronToDate(interval, "subtract").valueOf();
     const ruleAlertsCount = db.prepare("SELECT * FROM alerts WHERE ruleId = ? AND createdAt >= ?").all(
       rule.id,

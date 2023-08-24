@@ -2,7 +2,6 @@
 import { SigynRule } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { DEFAULT_POLLING } from "../rules";
 import { isCron } from "./cron";
 
 // CONSTANTS
@@ -55,7 +54,7 @@ export function countMatchOperator(
 }
 
 export function getPollings(
-  polling: SigynRule["polling"] = DEFAULT_POLLING
+  polling: SigynRule["polling"]
 ): RulePolling[] {
   if (typeof polling === "string") {
     return [[isCron(polling), polling]];
