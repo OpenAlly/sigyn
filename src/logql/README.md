@@ -176,7 +176,8 @@ If `labelValue` is a `LabelValue`, the default operator will be an **exactlyEqua
 
 If `labelValue` is a `string`, the default operator will be an **exactlyEqual** and must be passed as a third argument to be modified.
 
-> **Note** This method override the `Map` default `set` method.
+> [!NOTE]
+> This method override the `Map` default `set` method.
 
 ```ts
 type LabelMatchingOperator = "=" | "!=" | "=~" | "!~";
@@ -322,7 +323,8 @@ If `labelValue` is a `LabelValue` (or an array of `LabelValue`), the default ope
 
 If `labelValue` is a `string` or a `number`, the default operator will be an **exactlyEqual** and must be passed as a third argument to be modified.
 
-> **Note** This method override the `Map` default `set` method.
+> [!NOTE]
+> This method override the `Map` default `set` method.
 
 - `toString(): string`
 

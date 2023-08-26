@@ -195,7 +195,8 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   | `value`            | `string`             | The label value to check. |
   | `thresholdPercent` | `number`             | The threshold percent of label value. |
 
-  > **Note** there are 2 sorts of alert: **basic** and **label based**
+  > [!NOTE]
+  > There are 2 sorts of alert: **basic** and **label based**
   > For **basic** alert, both `count` and `interval` are **required**, other properties **must** be omitted.
   > For **label based** alert, `label`, `value` and `thresholdPercent` are **required** plus at least one of `count` or `interval` which defines the minimum logs to be fetched to have a revelant alert.
 
@@ -225,7 +226,8 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   | `interval` | `string`   | ✔️       | The throttle duration (e.g. `1m`, `1h`) after sending an alert. |
   | `count`    | `number`   | ❌       | The count threshold to bypass throttle, default to `0` (never send alert before the end of interval). |
 
-> **Note** At least one of `title` or `content` must be provided.
+> [!NOTE]
+> At least one of `title` or `content` must be provided.
 
 - `rule.labelFilters` (Object, Optional):
   - This object specifies label filters to add for a given rule.
@@ -243,7 +245,8 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
 - `@sigyn/slack` [See docs](../slack/README.md)
 - `@sigyn/teams` [See docs](../teams/README.md)
 
-> **Note** You can also use your own notifier and use any third-party notifier [more info](./TODO/)
+> [!NOTE]
+> You can also use your own notifier and use any third-party notifier [more info](./TODO/)
 
 You can use any of theses variables, surrounding with `{}` (see example below):
 - `ruleName`
@@ -269,7 +272,8 @@ You can also use a label variable from your LogQL using `{label.x}`:
 
 You can also use any variable extracted from `stream` vector.
 
-> **Note** You **MUST NOT** use markdown in `title` or `content`, this is handled by notifiers.
+> [!NOTE]
+> You **MUST NOT** use markdown in `title` or `content`, this is handled by notifiers.
 
 ## 🧠 Visual Studio Code JSON schema
 
@@ -300,7 +304,8 @@ Initialize **Sigyn** config given the path to the JSON config file.
 
 Returns the previously initialized **Sigyn** config.
 
-> **Note** If you try to get config while the config has not been initialied, it will throws.
+> [!NOTE]
+> If you try to get config while the config has not been initialied, it will throws.
 
 ### `validateConfig(config: PartialSigynConfig): void`
 
