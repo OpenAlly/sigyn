@@ -2,10 +2,12 @@
 import assert from "node:assert";
 import { after, before, describe, it } from "node:test";
 
+// Import Third-party Dependencies
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
+
 // Import Internal Dependencies
 import * as utils from "../src/utils";
-import { AlertSeverity, SigynConfig, SigynRule } from "../src/types";
-import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
+import { AlertSeverity, PartialSigynConfig, SigynConfig, SigynRule } from "../src/types";
 
 // CONSTANTS
 const kDummyUrl = "http://localhost:3000";
@@ -118,7 +120,7 @@ describe("Utils", () => {
   });
 
   describe("applyDefaultValues", () => {
-    const config = {
+    const config: PartialSigynConfig = {
       loki: {
         apiUrl: kDummyUrl
       },
@@ -151,44 +153,61 @@ describe("Utils", () => {
       ]
     };
 
-    assert.deepEqual(utils.applyDefaultValues(config), {
-      loki: {
-        apiUrl: kDummyUrl
-      },
-      notifiers: {
-        discord: {
-          webhookUrl: "https://discord.com/api/webhooks/1234567890/abcdefg"
+    it("should apply default values", () => {
+      assert.deepEqual(utils.applyDefaultValues(config), {
+        loki: {
+          apiUrl: kDummyUrl
         },
-        slack: {
-          webhookUrl: "https://hooks.slack.com/services/1234567890/abcdefg"
-        }
-      },
-      missingLabelStrategy: "ignore",
-      defaultSeverity: "error",
-      rules: [
-        {
-          name: "foo",
-          logql: "{app=\"foo\"} |= `my super logql`",
-          polling: "1m",
-          disabled: false,
-          notifiers: ["discord", "slack"],
-          pollingStrategy: "unbounded",
-          alert: {
-            on: {
-              count: 5,
-              interval: "10h"
-            },
-            throttle: {
-              interval: "1h",
-              count: 0
-            },
-            severity: "error",
-            template: {
-              title: "Alert for foo"
+        notifiers: {
+          discord: {
+            webhookUrl: "https://discord.com/api/webhooks/1234567890/abcdefg"
+          },
+          slack: {
+            webhookUrl: "https://hooks.slack.com/services/1234567890/abcdefg"
+          }
+        },
+        missingLabelStrategy: "ignore",
+        defaultSeverity: "error",
+        rules: [
+          {
+            name: "foo",
+            logql: "{app=\"foo\"} |= `my super logql`",
+            polling: "1m",
+            disabled: false,
+            notifiers: ["discord", "slack"],
+            pollingStrategy: "unbounded",
+            alert: {
+              on: {
+                count: 5,
+                interval: "10h"
+              },
+              throttle: {
+                interval: "1h",
+                count: 0
+              },
+              severity: "error",
+              template: {
+                title: "Alert for foo"
+              }
             }
           }
-        }
-      ]
+        ]
+      });
+    });
+
+    it("given severity 'information', severity should be 'info'", () => {
+      config.rules[0].alert.severity = "information";
+      assert.equal(utils.applyDefaultValues(config).rules[0].alert.severity, "info");
+    });
+
+    it("given severity 'major', severity should be 'error'", () => {
+      config.rules[0].alert.severity = "major";
+      assert.equal(utils.applyDefaultValues(config).rules[0].alert.severity, "error");
+    });
+
+    it("given severity 'minor', severity should be 'warning'", () => {
+      config.rules[0].alert.severity = "minor";
+      assert.equal(utils.applyDefaultValues(config).rules[0].alert.severity, "warning");
     });
   });
 

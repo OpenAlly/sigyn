@@ -103,7 +103,7 @@ export function applyDefaultValues(
     defaultSeverity: config.defaultSeverity ?? kDefaultAlertSeverity,
     rules: config.rules.map((rule) => {
       rule.polling ??= kDefaultRulePolling;
-      rule.alert.severity ??= getSeverity(config.defaultSeverity ?? kDefaultAlertSeverity);
+      rule.alert.severity = getSeverity(rule.alert.severity ?? config.defaultSeverity ?? kDefaultAlertSeverity);
       if (rule.alert.throttle) {
         rule.alert.throttle.count ??= kDefaultAlertThrottleCount;
       }
