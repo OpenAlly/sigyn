@@ -20,6 +20,8 @@ import { Rule } from "../../src/rules";
 // CONSTANTS
 const kMultiPollingConfigLocation = path.join(__dirname, "/fixtures/multi-polling/sigyn.config.json");
 const kLabelConfigLocation = path.join(__dirname, "/fixtures/label/sigyn.config.json");
+const kLabelRangeValueConfigLocation = path.join(__dirname, "/fixtures/label-range-value/sigyn.config.json");
+const kLabelCountConfigLocation = path.join(__dirname, "/fixtures/label-count/sigyn.config.json");
 const kLokiFixtureApiUrl = "http://localhost:3100";
 const kMockAgent = new MockAgent();
 const kGlobalDispatcher = getGlobalDispatcher();
@@ -355,7 +357,7 @@ describe("Rule.walkOnLogs()", () => {
     });
   });
 
-  describe("A rule based on label matching", () => {
+  describe("A rule based on percent threshold label matching", () => {
     let config: SigynConfig;
 
     before(async() => {
@@ -411,6 +413,91 @@ describe("Rule.walkOnLogs()", () => {
       // We need 3 intervals because there is some MS difference between the first polling and the first label timestamp
       const createAlertAfterIntervalReached = await pollingIn200ms(rule, []);
       assert.equal(createAlertAfterIntervalReached, true);
+    });
+  });
+
+  describe("A rule based on percent threshold label matching a range value", () => {
+    let config: SigynConfig;
+
+    before(async() => {
+      config = await initConfig(kLabelRangeValueConfigLocation);
+    });
+
+    it("should send alert when count and threshold reached", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.init();
+
+      const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { responseTime: "1500" });
+
+      assert.equal(createAlert, true);
+    });
+
+    it("should not send alert when count not reached", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.clearLabels();
+
+      const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"), { responseTime: "1500" });
+
+      assert.equal(createAlert, false);
+
+      const createAlertWhenThrehsholdReached = await pollingIn200ms(
+        rule,
+        Array.from(Array(5)).map(() => "one new log"),
+        { responseTime: "1500" }
+      );
+
+      assert.equal(createAlertWhenThrehsholdReached, true);
+    });
+
+    it("should send alert when interval and threshold reached", async() => {
+      const ruleConfig = {
+        ...config.rules[0],
+        alert: {
+          ...config.rules[0].alert,
+          on: {
+            ...config.rules[0].alert.on,
+            interval: "400ms"
+          }
+        }
+      };
+      const rule = new Rule(ruleConfig, { logger: kLogger });
+      rule.clearLabels();
+
+      const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { responseTime: "1500" });
+
+      assert.equal(createAlert, false);
+
+      assert.equal(await pollingIn200ms(rule, []), false);
+
+      // We need 3 intervals because there is some MS difference between the first polling and the first label timestamp
+      const createAlertAfterIntervalReached = await pollingIn200ms(rule, []);
+      assert.equal(createAlertAfterIntervalReached, true);
+    });
+  });
+
+  describe("A rule based on count label", () => {
+    let config: SigynConfig;
+
+    before(async() => {
+      config = await initConfig(kLabelCountConfigLocation);
+    });
+
+    it("should not send alert when count is not reached", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.init();
+
+      const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { responseTime: "50" });
+
+      assert.equal(createAlert, false);
+    });
+
+    it("should send alert when count is reached", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.init();
+
+      const createAlert = await pollingIn200ms(rule, ["one new log"], { responseTime: "550" });
+
+      assert.equal(createAlert, true);
     });
   });
 });
