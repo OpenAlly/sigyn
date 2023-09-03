@@ -46,7 +46,7 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
   // Slack doesn't support backtick escape in inline code
   const formattedLogQL = `\`${logql.replaceAll("`", "'")}\``;
   // Slack doesn't support header format
-  const formattedTitle = `*${kSeverityEmoji[severity]} ${title}*\n\n`;
+  const formattedTitle = `${kSeverityEmoji[severity]} ${title}`;
 
   const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label, lokiUrl };
   const templateOptions = {
@@ -63,32 +63,52 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
     ignoreMissing: true
   };
 
-  const formattedContent: string[] = content.map((text) => {
-    if (text === "") {
-      return "";
-    }
+  const blocks: Record<string, any>[] = [];
 
-    let formattedText = text;
-    // Slack doesn't supports [label](url) format but <url|label> instead.
-    const mdUrlRegex = /\[([^[\]]+)\]\(([^()]+)\)/g;
-    const [url, label, link] = mdUrlRegex.exec(text) ?? [];
-    if (url !== undefined) {
-      formattedText = formattedText.replace(url, `<${link}|${label}>`);
-    }
-
-    return pupa(
-      formattedText,
-      templateData,
-      templateOptions
-    );
-  });
   if (title) {
-    formattedContent.unshift(pupa(formattedTitle, templateData, titleTemplateOptions));
+    blocks.push({
+      type: "header",
+      text: {
+        type: "plain_text",
+        text: pupa(formattedTitle, templateData, titleTemplateOptions)
+      }
+    });
   }
 
-  return {
-    text: formattedContent.join("\n")
-  };
+  if (content) {
+    blocks.push(
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: content.map((text) => {
+            if (text === "") {
+              return "";
+            }
+
+            let formattedText = text;
+            // Slack doesn't supports [label](url) format but <url|label> instead.
+            const mdUrlRegex = /\[([^[\]]+)\]\(([^()]+)\)/g;
+            const [url, label, link] = mdUrlRegex.exec(text) ?? [];
+            if (url !== undefined) {
+              formattedText = formattedText.replace(url, `<${link}|${label}>`);
+            }
+
+            return pupa(
+              formattedText,
+              templateData,
+              templateOptions
+            );
+          }).join("\n")
+        }
+      },
+      {
+        type: "divider"
+      }
+    );
+  }
+
+  return { blocks };
 }
 
 export async function execute(options: ExecuteWebhookOptions) {
