@@ -28,7 +28,7 @@ export function asyncTask(ruleConfig: SigynRule, options: AsyncTaskOptions) {
     });
 
     try {
-      logger.info(`[${ruleConfig.name}](state: polling|start: ${start}|query: ${ruleConfig.logql})`);
+      logger.info(`[${ruleConfig.name}](state: polling|start: ${start}|end: ${Date.now()}|query: ${ruleConfig.logql})`);
 
       const createAlert = await rule.walkOnLogs(logs);
       if (createAlert) {
