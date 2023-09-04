@@ -6,7 +6,7 @@ import { isCron } from "./cron";
 
 // CONSTANTS
 const kOnlyDigitsRegExp = /^\d+$/;
-const kOperatorValueRegExp = /^\s*([<>]=?)\s*(\d+)\s*$/;
+export const OPERATOR_VALUE_REGEXP = /^\s*([<>]=?)\s*(\d+)\s*$/;
 
 export type RuleOperators = ">" | ">=" | "<" | "<=";
 export type RuleCounterOperatorValue = [RuleOperators, number];
@@ -24,7 +24,7 @@ export function countThresholdOperator(
 
   const match = counter
     .replace(/\s/g, "")
-    .match(kOperatorValueRegExp);
+    .match(OPERATOR_VALUE_REGEXP);
   if (!match || match.length !== 3) {
     throw new Error("Invalid count threshold format.");
   }

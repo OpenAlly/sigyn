@@ -86,33 +86,104 @@
                 "title": "The label value to watch",
                 "type": "string"
               },
-              "thresholdPercent": {
+              "percentThreshold": {
                 "title": "The maximum percent of the given label value to trigger an alert",
+                "type": "integer"
+              },
+              "minimumLabelCount": {
+                "title": "The minimum number of labels to compare with the percentThreshold",
                 "type": "integer"
               }
             },
-            "anyOf": [
+            "allOf": [
               {
-                "required": [
-                  "count",
-                  "interval"
-                ]
+                "if": {
+                  "required": [
+                    "label",
+                    "percentThreshold"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "value"
+                  ],
+                  "anyOf": [
+                    {
+                      "required": [
+                          "minimumLabelCount"
+                        ]
+                    },
+                    {
+                      "required": [
+                          "interval"
+                        ]
+                    }
+                  ],
+                  "not": {
+                    "required": [
+                      "count"
+                    ]
+                  }
+                },
+                "else": {
+                  "dependentRequired": {
+                    "label": [
+                      "count"
+                    ]
+                  }
+                }
               },
               {
-                "required": [
-                  "label",
-                  "value",
-                  "thresholdPercent",
-                  "count"
-                ]
+                "if": {
+                  "required": [
+                    "label",
+                    "count"
+                  ]
+                },
+                "then": {
+                  "required": [
+                    "value"
+                  ],
+                  "not": {
+                    "required": [
+                      "percentThreshold"
+                    ]
+                  }
+                },
+                "else": {
+                  "dependentRequired": {
+                    "label": [
+                      "percentThreshold"
+                    ]
+                  }
+                }
               },
               {
-                "required": [
-                  "label",
-                  "value",
-                  "thresholdPercent",
-                  "interval"
-                ]
+                "if": {
+                  "not": {
+                    "required": [
+                      "label"
+                    ]
+                  }
+                },
+                "then": {
+                  "required": [
+                    "count",
+                    "interval"
+                  ],
+                  "not": {
+                    "required": [
+                      "percentThreshold",
+                      "value",
+                      "minimumLabelCount"
+                    ]
+                  }
+                },
+                "else": {
+                  "required": [
+                    "value"
+                  ]
+                }
               }
             ],
             "additionalProperties": false

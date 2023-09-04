@@ -165,7 +165,7 @@ export class Rule {
   }
 
   #checkLabelThreshold(rule: DbRule): boolean {
-    const { label, value, thresholdPercent, count, interval } = this.#config.alert.on;
+    const { label, value, percentThreshold, count, minimumLabelCount, interval } = this.#config.alert.on;
 
     const labels = getDB().prepare("SELECT * FROM ruleLabels WHERE key = ? AND ruleId = ? ORDER BY timestamp ASC").all(label, rule.id) as DbRuleLabel[];
     const [olderLabel] = labels;
@@ -176,18 +176,32 @@ export class Rule {
     }
     const intervalTimestamp = interval ? utils.cron.durationOrCronToDate(interval!, "subtract").valueOf() : null;
     const intervalReached = interval ? intervalTimestamp! >= olderLabel.timestamp : true;
-    const countReached = count ? Number(count) <= labels.length : true;
+    const countReached = minimumLabelCount ? minimumLabelCount <= labels.length : true;
 
     if (!intervalReached || !countReached) {
-      this.#logger.info(`[${rule.name}](state: unreached|count: ${labels.length}|minimumCount: ${count || "*"}|oldestTimestamp: ${olderLabel.timestamp}|minimumTimestamp: ${intervalTimestamp ?? "*"})`);
+      this.#logger.info(`[${rule.name}](state: unreached|labelCount: ${labels.length}|minimumLabelCount: ${minimumLabelCount || "*"}|oldestTimestamp: ${olderLabel.timestamp}|minimumTimestamp: ${intervalTimestamp ?? "*"})`);
 
       return false;
     }
 
-    const thresholdLength = labels.filter((label) => label.value === value).length;
-    this.#logger.info(`[${rule.name}](state: reached|count: ${labels.length}|thresholdCount: ${thresholdLength}|thresholdPercent: ${thresholdPercent}|actual: ${thresholdLength / labels.length * 100})`);
+    const rangeValueMatch = utils.rules.OPERATOR_VALUE_REGEXP.exec(value!);
+    const labelMatchCount = labels.filter((label) => {
+      if (rangeValueMatch) {
+        return utils.rules.countMatchOperator(rangeValueMatch[1] as utils.rules.RuleOperators, Number(label.value), Number(rangeValueMatch[2]));
+      }
 
-    return thresholdLength / labels.length * 100 >= thresholdPercent!;
+      return label.value === value;
+    }).length;
+
+    this.#logger.info(`[${rule.name}](state: reached|actual: ${labels.length}|count: ${count ?? "x"}|thresholdCount: ${labelMatchCount}|percentThreshold: ${percentThreshold}|actualPercent: ${labelMatchCount / labels.length * 100})`);
+
+    if (percentThreshold) {
+      return labelMatchCount / labels.length * 100 >= percentThreshold!;
+    }
+
+    const [operator, countValue] = utils.rules.countThresholdOperator(count!);
+
+    return utils.rules.countMatchOperator(operator, labelMatchCount, countValue);
   }
 
   #checkThrottle(rule: DbRule, db: Database): boolean {

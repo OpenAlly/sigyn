@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import Ajv, { ErrorObject } from "ajv";
+import Ajv, { ErrorObject } from "ajv/dist/2020";
 import ajvKeywords from "ajv-keywords";
 
 // Import Internal Dependencies

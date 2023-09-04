@@ -721,7 +721,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on: must have required property 'count', /rules/0/alert/on: must have required property 'label', /rules/0/alert/on: must have required property 'label', /rules/0/alert/on: must match a schema in anyOf"
+      message: "Invalid config: /rules/0/alert/on: must have required property 'count'"
     });
   });
 
@@ -784,7 +784,7 @@ describe("Config validation", () => {
                 ...kValidConfig.rules[0].alert.on,
                 count: undefined,
                 label: "foo",
-                thresholdPercent: 80
+                percentThreshold: 80
               }
             }
           }
@@ -792,11 +792,11 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on: must have required property 'count', /rules/0/alert/on: must have required property 'value', /rules/0/alert/on: must have required property 'value', /rules/0/alert/on: must match a schema in anyOf"
+      message: "Invalid config: /rules/0/alert/on: must have required property 'value'"
     });
   });
 
-  it("rule alert property 'on.thresholdPercent' should be required when rule is label based", () => {
+  it("rule alert property 'on.count' should be required when rule is label count based", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -817,11 +817,11 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on: must have required property 'count', /rules/0/alert/on: must have required property 'thresholdPercent', /rules/0/alert/on: must have required property 'thresholdPercent', /rules/0/alert/on: must match a schema in anyOf"
+      message: "Invalid config: /rules/0/alert/on: must have property count when property label is present"
     });
   });
 
-  it("rule alert property 'on.thresholdPercent' cannot be float", () => {
+  it("rule alert property 'on.percentThreshold' cannot be float", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -835,7 +835,7 @@ describe("Config validation", () => {
                 count: undefined,
                 label: "foo",
                 value: "bar",
-                thresholdPercent: 80.5
+                percentThreshold: 80.5
               }
             }
           }
@@ -843,11 +843,11 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on/thresholdPercent: must be integer"
+      message: "Invalid config: /rules/0/alert/on/percentThreshold: must be integer"
     });
   });
 
-  it("rule alert can be alert based", () => {
+  it("rule alert can be label based", () => {
     assert.doesNotThrow(() => {
       validateConfig({
         ...kValidConfig,
@@ -858,14 +858,42 @@ describe("Config validation", () => {
               ...kValidConfig.rules[0].alert,
               on: {
                 ...kValidConfig.rules[0].alert.on,
+                count: undefined,
                 label: "foo",
                 value: "bar",
-                thresholdPercent: 80
+                percentThreshold: 80
               }
             }
           }
         ]
       });
+    });
+  });
+
+  it("rule label alert cannot be based on both percentThreshold and count", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: 10,
+                label: "foo",
+                value: "bar",
+                percentThreshold: 80
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      // TODO: the message should be more explicit
+      message: "Invalid config: /rules/0/alert/on: must NOT be valid"
     });
   });
 
@@ -888,11 +916,11 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on: must have required property 'interval', /rules/0/alert/on: must have required property 'label', /rules/0/alert/on: must have required property 'label', /rules/0/alert/on: must match a schema in anyOf"
+      message: "Invalid config: /rules/0/alert/on: must have required property 'interval'"
     });
   });
 
-  it("rule alert property 'on.interval' should be required when rule is label based and no count", () => {
+  it("rule alert property 'on.interval' or 'on.minimumLabelCount' should be required when rule is label percent threhsold based", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -903,10 +931,12 @@ describe("Config validation", () => {
               ...kValidConfig.rules[0].alert,
               on: {
                 ...kValidConfig.rules[0].alert.on,
-                interval: undefined as any,
-                count: undefined as any,
+                count: undefined,
+                interval: undefined,
+                minimumLabelCount: undefined,
                 label: "foo",
-                value: "bar"
+                value: "bar",
+                percentThreshold: 80
               }
             }
           }
@@ -914,7 +944,81 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on: must have required property 'count', /rules/0/alert/on: must have required property 'thresholdPercent', /rules/0/alert/on: must have required property 'thresholdPercent', /rules/0/alert/on: must match a schema in anyOf"
+      message: "Invalid config: /rules/0/alert/on: must have required property 'minimumLabelCount', /rules/0/alert/on: must have required property 'interval', /rules/0/alert/on: must match a schema in anyOf"
+    });
+  });
+
+  it("rule label percent threshold based can have minimumLabelCount skiped when interval is set", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: undefined,
+                interval: "5m",
+                minimumLabelCount: undefined,
+                label: "foo",
+                value: "bar",
+                percentThreshold: 80
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule label percent threshold based can have interval skiped when minimumLabelCount is set", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: undefined,
+                interval: undefined,
+                minimumLabelCount: 50,
+                label: "foo",
+                value: "bar",
+                percentThreshold: 80
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule count label does not need an interval or a minimumLabelCount", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: 50,
+                interval: undefined,
+                minimumLabelCount: undefined,
+                label: "foo",
+                value: "bar"
+              }
+            }
+          }
+        ]
+      });
     });
   });
 

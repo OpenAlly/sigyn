@@ -62,7 +62,8 @@ export interface SigynAlert {
     interval?: string;
     label?: string;
     value?: string;
-    thresholdPercent?: number;
+    percentThreshold?: number;
+    minimumLabelCount?: number;
   },
   template: string | SigynAlertTemplate;
   severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
@@ -78,7 +79,8 @@ export interface PartialSigynAlert {
     interval?: string;
     label?: string;
     value?: string;
-    thresholdPercent?: number;
+    percentThreshold?: number;
+    minimumLabelCount?: number;
   },
   template: string | SigynAlertTemplate;
   severity?: AlertSeverity;

@@ -12,13 +12,13 @@
   },
   "rules": [
     {
-      "name": "State KO >= 80%",
-      "logql": "{app=\"sigyn\"} |~ `state: (ok|ko)` | regexp `state: (?P<state>ok|ko)`",
+      "name": "Response time >= 1000ms",
+      "logql": "{app=\"sigyn\"} |~ `statusCode: [0-9]+` | regexp `((?P<responseTime>\\d+\\.\\d+)ms)`",
       "polling": "200ms",
       "alert": {
         "on": {
-          "label": "state",
-          "value": "ko",
+          "label": "responseTime",
+          "value": "> 1000",
           "percentThreshold": 80,
           "minimumLabelCount": 10
         },
