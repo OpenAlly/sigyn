@@ -18,13 +18,13 @@
     "src/teams"
   ],
   "devDependencies": {
-    "@nodesecure/eslint-config": "^1.7.1",
-    "@types/node": "^20.5.0",
+    "@nodesecure/eslint-config": "^1.8.0",
+    "@types/node": "^20.5.9",
     "c8": "^8.0.1",
     "cross-env": "^7.0.3",
-    "glob": "^10.3.3",
+    "glob": "^10.3.4",
     "tsup": "^7.2.0",
-    "tsx": "^3.12.7",
-    "typescript": "^5.1.6"
+    "tsx": "^3.12.8",
+    "typescript": "^5.2.2"
   }
 }

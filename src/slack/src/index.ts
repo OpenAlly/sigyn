@@ -3,6 +3,12 @@ import * as httpie from "@myunisoft/httpie";
 import { NotifierFormattedSigynRule } from "@sigyn/config";
 
 // CONSTANTS
+const kAttachmentColor = {
+  critical: "#FF3333",
+  error: "#F3840F",
+  warning: "#FFE333",
+  info: "#E7E7E7"
+};
 const kSeverityEmoji = {
   critical: "💥",
   error: "❗️",
@@ -63,52 +69,41 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
     ignoreMissing: true
   };
 
-  const blocks: Record<string, any>[] = [];
-
-  if (title) {
-    blocks.push({
-      type: "header",
-      text: {
-        type: "plain_text",
-        text: pupa(formattedTitle, templateData, titleTemplateOptions)
-      }
-    });
-  }
-
-  if (content) {
-    blocks.push(
+  const body = {
+    attachments: [
       {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: content.map((text) => {
-            if (text === "") {
-              return "";
-            }
+        mrkdwn_in: ["text"],
+        color: kAttachmentColor[severity],
+        title: pupa(formattedTitle, templateData, titleTemplateOptions),
+        fields: [
+          {
+            value: content.map((text) => {
+              if (text === "") {
+                return "";
+              }
 
-            let formattedText = text;
-            // Slack doesn't supports [label](url) format but <url|label> instead.
-            const mdUrlRegex = /\[([^[\]]+)\]\(([^()]+)\)/g;
-            const [url, label, link] = mdUrlRegex.exec(text) ?? [];
-            if (url !== undefined) {
-              formattedText = formattedText.replace(url, `<${link}|${label}>`);
-            }
+              let formattedText = text;
+              // Slack doesn't supports [label](url) format but <url|label> instead.
+              const mdUrlRegex = /\[([^[\]]+)\]\(([^()]+)\)/g;
+              const [url, label, link] = mdUrlRegex.exec(text) ?? [];
+              if (url !== undefined) {
+                formattedText = formattedText.replace(url, `<${link}|${label}>`);
+              }
 
-            return pupa(
-              formattedText,
-              templateData,
-              templateOptions
-            );
-          }).join("\n")
-        }
-      },
-      {
-        type: "divider"
+              return pupa(
+                formattedText,
+                templateData,
+                templateOptions
+              );
+            }).join("\n"),
+            short: false
+          }
+        ]
       }
-    );
-  }
+    ]
+  };
 
-  return { blocks };
+  return body;
 }
 
 export async function execute(options: ExecuteWebhookOptions) {
