@@ -193,14 +193,16 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   | `interval`          | `string`             | The time interval for the alerting condition. |
   | `label`             | `string`             | The label key to check. |
   | `value`             | `string`             | The label value to check. |
+  | `valueMatch`        | `string`             | The label regexp to check. |
   | `percentThreshold`  | `number`             | The percent threshold of label value. |
   | `minimumLabelCount` | `number`             | The minimum count of label to compare percent threshold. |
 
   > [!NOTE]
   > There are 2 sorts of alert: **basic** and **label based**
   > For **basic** alert, both `count` and `interval` are **required**, other properties **must** be omitted.
-  > For **label based** alert, `label`, `value` are **required** plus at least one of `minimumLabelCount` or `interval` which defines the minimum logs to be fetched to have a revelant alert when `percentThreshold` is set, or `count` which works the same as basic alerting.
+  > For **label based** alert, `label`, `value` **or** `valueMatch` are **required** plus at least one of `minimumLabelCount` or `interval` which defines the minimum logs to be fetched to have a revelant alert when `percentThreshold` is set, or `count` which works the same as basic alerting.
   > `minimumLabelCount` and/or `interval` are optional when rule is based on `count` label.
+  > You cannot use both `value` and `valueMatch`
 
 - `rules.alert.template` (Object or String, Required):
   - Can be an object representing the notification template or a string refering to a root template.
@@ -380,8 +382,13 @@ type AlertSeverity =
 
 interface SigynAlert {
   on: {
-    count: string | number;
-    interval: string;
+    count?: string | number;
+    interval?: string;
+    label?: string;
+    value?: string;
+    valueMatch?: string;
+    percentThreshold?: number;
+    minimumLabelCount?: number;
   },
   template: string | SigynAlertTemplate;
   severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
@@ -393,13 +400,18 @@ interface SigynAlert {
 
 interface PartialSigynAlert {
   on: {
-    count: string | number;
-    interval: string;
+    count?: string | number;
+    interval?: string;
+    label?: string;
+    value?: string;
+    valueMatch?: string;
+    percentThreshold?: number;
+    minimumLabelCount?: number;
   },
   template: string | SigynAlertTemplate;
-  severity?: AlertSeverity;
+  severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
   throttle?: {
-    count?: number;
+    count: number;
     interval: string;
   };
 }

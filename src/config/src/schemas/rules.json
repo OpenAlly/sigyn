@@ -86,6 +86,10 @@
                 "title": "The label value to watch",
                 "type": "string"
               },
+              "valueMatch": {
+                "title": "The label value regexp to watch",
+                "type": "string"
+              },
               "percentThreshold": {
                 "title": "The maximum percent of the given label value to trigger an alert",
                 "type": "integer"
@@ -104,26 +108,54 @@
                   ]
                 },
                 "then": {
-                  "required": [
-                    "value"
-                  ],
-                  "anyOf": [
+                  "oneOf": [
                     {
                       "required": [
-                          "minimumLabelCount"
+                        "value"
+                      ],
+                      "anyOf": [
+                        {
+                          "required": [
+                            "minimumLabelCount"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "interval"
+                          ]
+                        }
+                      ],
+                      "not": {
+                        "required": [
+                          "count",
+                          "valueMatch"
                         ]
+                      }
                     },
                     {
                       "required": [
-                          "interval"
+                        "valueMatch"
+                      ],
+                      "anyOf": [
+                        {
+                          "required": [
+                            "minimumLabelCount"
+                          ]
+                        },
+                        {
+                          "required": [
+                            "interval"
+                          ]
+                        }
+                      ],
+                      "not": {
+                        "required": [
+                          "count",
+                          "value"
                         ]
+                      }
                     }
-                  ],
-                  "not": {
-                    "required": [
-                      "count"
-                    ]
-                  }
+                  ]
                 },
                 "else": {
                   "dependentRequired": {
@@ -141,8 +173,17 @@
                   ]
                 },
                 "then": {
-                  "required": [
-                    "value"
+                  "oneOf": [
+                    {
+                      "required": [
+                        "value"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "valueMatch"
+                      ]
+                    }
                   ],
                   "not": {
                     "required": [
@@ -175,13 +216,23 @@
                     "required": [
                       "percentThreshold",
                       "value",
+                      "valueMatch",
                       "minimumLabelCount"
                     ]
                   }
                 },
                 "else": {
-                  "required": [
-                    "value"
+                  "oneOf": [
+                    {
+                      "required": [
+                        "value"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "valueMatch"
+                      ]
+                    }
                   ]
                 }
               }

@@ -62,6 +62,7 @@ export interface SigynAlert {
     interval?: string;
     label?: string;
     value?: string;
+    valueMatch?: string;
     percentThreshold?: number;
     minimumLabelCount?: number;
   },
@@ -79,6 +80,7 @@ export interface PartialSigynAlert {
     interval?: string;
     label?: string;
     value?: string;
+    valueMatch?: string;
     percentThreshold?: number;
     minimumLabelCount?: number;
   },

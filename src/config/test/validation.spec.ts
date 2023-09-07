@@ -771,7 +771,7 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule alert property 'on.value' should be required when rule is label based", () => {
+  it("rule alert property 'on.value' OR `on.valueMatch` should be required when rule is label based", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -792,7 +792,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on: must have required property 'value'"
+      message: "Invalid config: /rules/0/alert/on: must have required property 'value', /rules/0/alert/on: must have required property 'valueMatch', /rules/0/alert/on: must match exactly one schema in oneOf"
     });
   });
 
@@ -847,7 +847,7 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule alert can be label based", () => {
+  it("rule alert can be label based (value)", () => {
     assert.doesNotThrow(() => {
       validateConfig({
         ...kValidConfig,
@@ -861,6 +861,29 @@ describe("Config validation", () => {
                 count: undefined,
                 label: "foo",
                 value: "bar",
+                percentThreshold: 80
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule alert can be label based (valueMatch)", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: undefined,
+                label: "foo",
+                valueMatch: "bar",
                 percentThreshold: 80
               }
             }
@@ -920,7 +943,7 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule alert property 'on.interval' or 'on.minimumLabelCount' should be required when rule is label percent threhsold based", () => {
+  it("rule alert property 'on.interval' or 'on.minimumLabelCount' should be required when rule is label percent threhsold based (value)", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -944,11 +967,39 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/on: must have required property 'minimumLabelCount', /rules/0/alert/on: must have required property 'interval', /rules/0/alert/on: must match a schema in anyOf"
+      message: "Invalid config: /rules/0/alert/on: must have required property 'minimumLabelCount', /rules/0/alert/on: must have required property 'interval', /rules/0/alert/on: must match a schema in anyOf, /rules/0/alert/on: must have required property 'minimumLabelCount', /rules/0/alert/on: must have required property 'interval', /rules/0/alert/on: must match a schema in anyOf, /rules/0/alert/on: must match exactly one schema in oneOf"
     });
   });
 
-  it("rule label percent threshold based can have minimumLabelCount skiped when interval is set", () => {
+  it("rule alert property 'on.interval' or 'on.minimumLabelCount' should be required when rule is label percent threhsold based (valueMatch)", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: undefined,
+                interval: undefined,
+                minimumLabelCount: undefined,
+                label: "foo",
+                valueMatch: "bar",
+                percentThreshold: 80
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/on: must have required property 'minimumLabelCount', /rules/0/alert/on: must have required property 'interval', /rules/0/alert/on: must match a schema in anyOf, /rules/0/alert/on: must have required property 'minimumLabelCount', /rules/0/alert/on: must have required property 'interval', /rules/0/alert/on: must match a schema in anyOf, /rules/0/alert/on: must match exactly one schema in oneOf"
+    });
+  });
+
+  it("rule label percent threshold based can have minimumLabelCount skiped when interval is set (value)", () => {
     assert.doesNotThrow(() => {
       validateConfig({
         ...kValidConfig,
@@ -973,7 +1024,32 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule label percent threshold based can have interval skiped when minimumLabelCount is set", () => {
+  it("rule label percent threshold based can have minimumLabelCount skiped when interval is set (valueMatch)", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: undefined,
+                interval: "5m",
+                minimumLabelCount: undefined,
+                label: "foo",
+                valueMatch: "bar",
+                percentThreshold: 80
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule label percent threshold based can have interval skiped when minimumLabelCount is set (value)", () => {
     assert.doesNotThrow(() => {
       validateConfig({
         ...kValidConfig,
@@ -998,7 +1074,32 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule count label does not need an interval or a minimumLabelCount", () => {
+  it("rule label percent threshold based can have interval skiped when minimumLabelCount is set (valueMatch)", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: undefined,
+                interval: undefined,
+                minimumLabelCount: 50,
+                label: "foo",
+                value: "bar",
+                percentThreshold: 80
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule count label does not need an interval or a minimumLabelCount (value)", () => {
     assert.doesNotThrow(() => {
       validateConfig({
         ...kValidConfig,
@@ -1019,6 +1120,57 @@ describe("Config validation", () => {
           }
         ]
       });
+    });
+  });
+
+  it("rule count label does not need an interval or a minimumLabelCount (valueMatch)", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: 50,
+                interval: undefined,
+                minimumLabelCount: undefined,
+                label: "foo",
+                value: "bar"
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule label based cannot have both value and valueMatch", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              on: {
+                ...kValidConfig.rules[0].alert.on,
+                count: 50,
+                label: "foo",
+                value: "bar",
+                valueMatch: "baz"
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      // TODO: should we have a better error message?
+      message: "Invalid config: /rules/0/alert/on: must match exactly one schema in oneOf"
     });
   });
 
