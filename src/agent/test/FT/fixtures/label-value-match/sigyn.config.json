@@ -1,0 +1,31 @@
+{
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
+  "notifiers": {
+    "slack": {
+      "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"
+    },
+    "discord": {
+      "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
+    }
+  },
+  "rules": [
+    {
+      "name": "Status code >= 400",
+      "logql": "{app=\"sigyn\"} |~ `statusCode: [0-9]+` | regexp `(statusCode: (?P<statusCode>[0-9]+))`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "label": "statusCode",
+          "valueMatch": "[45][0-9]{2}",
+          "percentThreshold": 80,
+          "minimumLabelCount": 10
+        },
+        "template": {
+          "title": "Alert"
+        }
+      }
+    }
+  ]
+}
