@@ -167,12 +167,21 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   | Property    | Type                   | Required | Description |
   |-------------|------------------------|----------|-------------|
   | `name`      | `string`               | ✔️       | The name of the rule. Must be unique between each rule. |
-  | `logql`     | `string`               | ✔️       | The LogQL query associated with the rule. You can use `{label.x}` where `x` is provided in `labelFilters` (see example below) |
+  | `logql`     | `string` **or**  `object` | ✔️    | The LogQL query associated with the rule. You can use `{label.x}` where `x` is provided in `labelFilters` (see example below) |
   | `polling`   | `string` or `string[]` | ❌       | The polling interval for the rule. You can use a `duration` i.e. `2m` or a **Cron expression**. If given an array of polling, it should only be **Cron expressions**, this is useful if you want a different polling the day and the night. Default to  `1m`. |
   | `pollingStrategy` | `bounded` or `unbounded` | ❌ | **For CRON polling only**. Defines how Sigyn should fetch logs given a range. For instance, given `* 7-20 * * *` at `7:00` it will fetch logs since `20:59` last day with `unbounded` strategy. It will skip and wait the next poll given a `bounded` strategy. Default to `unbounded`
   | `alert`     | `object`               | ✔️       | An object defining the alerting configuration for the rule. |
   | `disabled`  | `boolean`              | ❌       | Weither the rule is enabled, default to `false`. |
   | `notifiers` | `string[]`             | ❌       | An array of strings representing the notifiers for the rule. It will enables all configured `notifiers` by default. |
+
+- `rules.logql` (Object, Required):
+ - This object specifies rule LogQL options
+ - You can either use this object pattern **or** a simple string.
+
+ | Property    | Type                                   | Required | Description |
+ |-------------|----------------------------------------|----------|-------------|
+ | `query`     | `string`                               | ✔️       | The LogQL query e.g. `{app="foo"} |= "error"` |
+ | `vars`      | `Record<string, string | string[]>`    | ✔️       | A record of vars that you can use in the `query` with `{vars.yourVar}` syntax |
 
 - `rules.alert` (Object, Required):
   - This object specifies the alerting configuration for the rule.
@@ -332,6 +341,16 @@ interface SigynConfig {
   defaultSeverity: AlertSeverity
 }
 
+interface SigynInitializedConfig {
+  loki: LokiConfig;
+  notifiers: Record<string, unknown>;
+  rules: SigynInitializedRule[];
+  templates?: Record<string, SigynAlertTemplate>;
+  extends?: string[];
+  missingLabelStrategy: "ignore" | "error";
+  defaultSeverity: AlertSeverity
+}
+
 interface PartialSigynConfig {
   loki: LokiConfig;
   notifiers: Record<string, unknown>;
@@ -350,6 +369,17 @@ interface LokiConfig {
 
 interface SigynRule {
   name: string;
+  logql: string | { query: string; vars?: Record<string, string | string[]> };
+  polling: string | string[];
+  pollingStrategy: "bounded" | "unbounded";
+  alert: SigynAlert;
+  disabled: boolean;
+  notifiers: string[];
+  labelFilters?: Record<string, string[]>;
+}
+
+interface SigynInitializedRule {
+  name: string;
   logql: string;
   polling: string | string[];
   pollingStrategy: "bounded" | "unbounded";
@@ -361,7 +391,7 @@ interface SigynRule {
 
 interface PartialSigynRule {
   name: string;
-  logql: string;
+  logql: string | { query: string; vars?: Record<string, string | string[]> };
   polling?: string | string[];
   pollingStrategy?: "bounded" | "unbounded";
   alert: PartialSigynAlert;
@@ -370,7 +400,7 @@ interface PartialSigynRule {
   labelFilters?: Record<string, string[]>;
 }
 
-type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {
+type NotifierFormattedSigynRule = Omit<SigynInitializedRule, "alert"> & {
   alert: Omit<SigynAlert, "template"> & { template: SigynAlertTemplate };
 }
 
@@ -421,6 +451,9 @@ interface SigynAlertTemplate {
   content?: string[];
 }
 ```
+> [!NOTE]
+> `SigynInitializedConfig` represents the config after initialization.
+> For instance, given a rule with a `logql` object with `query` & `vars`, the rule is updated upon initialization then `logql` is always as **string**.
 
 > [!NOTE]
 > `PartialSigynConfig`, `PartialSigynRule` and `PartialSigynAlert` are the allowed types to **validate** config.

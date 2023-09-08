@@ -1,5 +1,5 @@
 // Import Internal Dependencies
-import { AlertSeverity, PartialSigynConfig, SigynConfig, SigynRule } from "./types";
+import { AlertSeverity, PartialSigynConfig, SigynConfig, SigynInitializedConfig, SigynInitializedRule, SigynRule } from "./types";
 
 // Import Third-party Dependencies
 import { GrafanaLoki } from "@myunisoft/loki";
@@ -37,7 +37,12 @@ export async function mergeRulesLabelFilters(config: SigynConfig): Promise<Sigyn
         rule.name.replace(`{label.${label}}`, `${value}`) :
         `${rule.name} (${label} = ${value})`;
 
-      const logql = rule.logql.replace(`{label.${label}}`, `"${value}"`);
+      const logql = typeof rule.logql === "string" ?
+        rule.logql.replace(`{label.${label}}`, `"${value}"`) :
+        {
+          ...rule.logql,
+          query: rule.logql.query.replace(`{label.${label}}`, `"${value}"`)
+        };
 
       mergedRules.push({
         ...rule,
@@ -96,7 +101,7 @@ export async function fetchRulesLabels(config: Pick<SigynConfig, "loki" | "rules
 
 export function applyDefaultValues(
   config: PartialSigynConfig | SigynConfig
-): SigynConfig {
+): SigynInitializedConfig {
   return {
     ...config,
     missingLabelStrategy: config.missingLabelStrategy ?? kDefaultMissingLabelStrategy,
@@ -111,7 +116,7 @@ export function applyDefaultValues(
       rule.notifiers ??= Object.keys(config.notifiers!);
       rule.pollingStrategy ??= kDefaultRulePollingStrategy;
 
-      return rule as SigynRule;
+      return rule as SigynInitializedRule;
     })
   };
 }
@@ -133,4 +138,29 @@ export function getSeverity(sev: AlertSeverity): "critical" | "error" | "warning
     default:
       throw new Error(`Invalid severity: ${sev}`);
   }
+}
+
+export function applyRulesLogQLVariables(config: SigynConfig) {
+  const rules: SigynInitializedRule[] = [];
+
+  for (const rule of config.rules) {
+    if (typeof rule.logql === "string" || Object.keys(rule.logql.vars ?? {}).length === 0) {
+      rules.push({
+        ...rule,
+        logql: typeof rule.logql === "string" ? rule.logql : rule.logql.query
+      });
+      continue;
+    }
+
+    const formattedRule = { ...rule, logql: rule.logql.query };
+
+    for (const [key, value] of Object.entries(rule.logql.vars!)) {
+      const replaceWith = typeof value === "string" ? value : value.join("|");
+      formattedRule.logql = formattedRule.logql.replace(`{vars.${key}}`, replaceWith);
+    }
+
+    rules.push(formattedRule);
+  }
+
+  return rules;
 }

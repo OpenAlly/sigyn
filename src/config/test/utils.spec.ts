@@ -240,4 +240,60 @@ describe("Utils", () => {
       });
     }
   });
+
+  describe("applyRulesLogQLVariables()", () => {
+    const config: PartialSigynConfig = {
+      loki: {
+        apiUrl: kDummyUrl
+      },
+      notifiers: {
+        discord: {
+          webhookUrl: "https://discord.com/api/webhooks/1234567890/abcdefg"
+        },
+        slack: {
+          webhookUrl: "https://hooks.slack.com/services/1234567890/abcdefg"
+        }
+      },
+      rules: [
+        {
+          name: "foo ({vars.foo})",
+          logql: {
+            query: "{app=\"foo\"} |= `{vars.foo} {vars.baz}`",
+            vars: {
+              foo: "bar",
+              baz: ["foo", "bar"]
+            }
+          },
+          alert: {
+            on: {
+              count: 5,
+              interval: "10h"
+            },
+            throttle: {
+              interval: "1h"
+            },
+            template: {
+              title: "Alert for foo"
+            }
+          }
+
+        }
+      ]
+    };
+
+    it("should apply variables", async() => {
+      const rules = utils.applyRulesLogQLVariables(config as SigynConfig);
+
+      assert.equal(rules[0].logql, "{app=\"foo\"} |= `bar foo|bar`");
+    });
+
+    it("should not modify logql if there is no variable", async() => {
+      const conf = { ...config } as any;
+      conf.rules[0].logql.vars = undefined;
+
+      const rules = utils.applyRulesLogQLVariables(conf as SigynConfig);
+
+      assert.equal(rules[0].logql, "{app=\"foo\"} |= `{vars.foo} {vars.baz}`");
+    });
+  });
 });
