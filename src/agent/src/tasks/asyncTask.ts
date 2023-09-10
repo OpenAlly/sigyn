@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import { SigynRule } from "@sigyn/config";
+import { SigynInitializedRule } from "@sigyn/config";
 import { GrafanaLoki } from "@myunisoft/loki";
 import { AsyncTask } from "toad-scheduler";
 
@@ -14,7 +14,7 @@ export interface AsyncTaskOptions {
   lokiApi: GrafanaLoki;
 }
 
-export function asyncTask(ruleConfig: SigynRule, options: AsyncTaskOptions) {
+export function asyncTask(ruleConfig: SigynInitializedRule, options: AsyncTaskOptions) {
   const { rule, logger, lokiApi } = options;
 
   const task = new AsyncTask(ruleConfig.name, async() => {

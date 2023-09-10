@@ -430,7 +430,7 @@ describe("Config validation", () => {
     });
   });
 
-  it("rule logql should not be empty", () => {
+  it("rule logql must be defined", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -443,7 +443,124 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/logql: must NOT have fewer than 1 characters"
+      message: "Invalid config: /rules/0/logql: must NOT have fewer than 1 characters, /rules/0/logql: must be object, /rules/0/logql: must match exactly one schema in oneOf"
+    });
+  });
+
+  it("rule logql can be string", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            logql: "{ app=\"foo\" } |= \"bar\""
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule logql can be an object", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            logql: {
+              query: "{ app=\"foo\" } |= \"bar\""
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule logql can have variables", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            logql: {
+              query: "{ app=\"foo\" } |= \"bar\"",
+              vars: {
+                foo: ["bar"],
+                baz: ["foo", "bar"]
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule logql variables cannot be empty object", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            logql: {
+              query: "{ app=\"foo\" } |= \"bar\"",
+              vars: {}
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/logql: must be string, /rules/0/logql/vars: must NOT have fewer than 1 properties, /rules/0/logql: must match exactly one schema in oneOf"
+    });
+  });
+
+  it("rule logql variables must be string or string[]", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            logql: {
+              query: "{ app=\"foo\" } |= \"bar\"",
+              vars: {
+                foo: "bar",
+                baz: 55
+              },
+              foo: "bar"
+            } as any
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/logql: must be string, /rules/0/logql: must NOT have additional properties, /rules/0/logql: must match exactly one schema in oneOf"
+    });
+  });
+  it("rule logql cannot have additional properties", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            logql: {
+              query: "{ app=\"foo\" } |= \"bar\"",
+              vars: {
+                foo: "bar",
+                baz: ["foo", "bar"]
+              },
+              foo: "bar"
+            } as any
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/logql: must be string, /rules/0/logql: must NOT have additional properties, /rules/0/logql: must match exactly one schema in oneOf"
     });
   });
 

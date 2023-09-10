@@ -8,6 +8,16 @@ export interface SigynConfig {
   defaultSeverity: AlertSeverity
 }
 
+export interface SigynInitializedConfig {
+  loki: LokiConfig;
+  notifiers: Record<string, unknown>;
+  rules: SigynInitializedRule[];
+  templates?: Record<string, SigynAlertTemplate>;
+  extends?: string[];
+  missingLabelStrategy: "ignore" | "error";
+  defaultSeverity: AlertSeverity
+}
+
 export interface PartialSigynConfig {
   loki: LokiConfig;
   notifiers: Record<string, unknown>;
@@ -26,6 +36,17 @@ export interface LokiConfig {
 
 export interface SigynRule {
   name: string;
+  logql: string | { query: string; vars?: Record<string, string | string[]> };
+  polling: string | string[];
+  pollingStrategy: "bounded" | "unbounded";
+  alert: SigynAlert;
+  disabled: boolean;
+  notifiers: string[];
+  labelFilters?: Record<string, string[]>;
+}
+
+export interface SigynInitializedRule {
+  name: string;
   logql: string;
   polling: string | string[];
   pollingStrategy: "bounded" | "unbounded";
@@ -37,7 +58,7 @@ export interface SigynRule {
 
 export interface PartialSigynRule {
   name: string;
-  logql: string;
+  logql: string | { query: string; vars?: Record<string, string | string[]> };
   polling?: string | string[];
   pollingStrategy?: "bounded" | "unbounded";
   alert: PartialSigynAlert;
@@ -46,7 +67,7 @@ export interface PartialSigynRule {
   labelFilters?: Record<string, string[]>;
 }
 
-export type NotifierFormattedSigynRule = Omit<SigynRule, "alert"> & {
+export type NotifierFormattedSigynRule = Omit<SigynInitializedRule, "alert"> & {
   alert: Omit<SigynAlert, "template"> & { template: SigynAlertTemplate };
 }
 

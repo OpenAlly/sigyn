@@ -14,8 +14,49 @@
       },
       "logql": {
         "title": "The logql used to fetch logs from Loki",
-        "type": "string",
-        "minLength": 1
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "object",
+            "properties": {
+              "query": {
+                "title": "The logql query",
+                "type": "string",
+                "minLength": 1
+              },
+              "vars": {
+                "title": "The logql variables",
+                "type": "object",
+                "patternProperties": {
+                  "^.*$": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "minItems": 1
+                      }
+                    ]
+                  }
+                },
+                "minProperties": 1
+              }
+            },
+            "required": [
+              "query"
+            ],
+            "additionalProperties": false
+          }
+        ]
       },
       "polling": {
         "title": "The polling interval defines how often Sigyn will fetch logs from Loki",
