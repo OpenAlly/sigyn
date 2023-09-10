@@ -1,5 +1,14 @@
 // Import Internal Dependencies
-import { AlertSeverity, PartialSigynConfig, SigynConfig, SigynInitializedConfig, SigynInitializedRule, SigynRule } from "./types";
+import {
+  AlertSeverity,
+  PartialSigynConfig,
+  SigynAlertTemplate,
+  SigynConfig,
+  SigynInitializedTemplate,
+  SigynInitializedConfig,
+  SigynInitializedRule,
+  SigynRule
+} from "./types";
 
 // Import Third-party Dependencies
 import { GrafanaLoki } from "@myunisoft/loki";
@@ -11,12 +20,16 @@ const kDefaultAlertSeverity = "error";
 const kDefaultAlertThrottleCount = 0;
 const kDefaultRulePollingStrategy = "unbounded";
 
-export async function mergeRulesLabelFilters(config: SigynConfig): Promise<SigynRule[]> {
+export async function initializeRules(config: SigynConfig): Promise<SigynRule[]> {
   const labels = await fetchRulesLabels(config);
 
   const mergedRules: SigynRule[] = [];
 
   for (const rule of config.rules) {
+    if (typeof rule.alert.template === "object" && rule.alert.template.extends) {
+      rule.alert.template = extendsTemplates(rule.alert.template, config);
+    }
+
     if (!rule.labelFilters) {
       mergedRules.push(rule);
 
@@ -104,6 +117,7 @@ export function applyDefaultValues(
 ): SigynInitializedConfig {
   return {
     ...config,
+    templates: config.templates as Record<string, SigynInitializedTemplate>,
     missingLabelStrategy: config.missingLabelStrategy ?? kDefaultMissingLabelStrategy,
     defaultSeverity: config.defaultSeverity ?? kDefaultAlertSeverity,
     rules: config.rules.map((rule) => {
@@ -148,7 +162,7 @@ export function applyRulesLogQLVariables(config: SigynConfig) {
       rules.push({
         ...rule,
         logql: typeof rule.logql === "string" ? rule.logql : rule.logql.query
-      });
+      } as SigynInitializedRule);
       continue;
     }
 
@@ -159,8 +173,46 @@ export function applyRulesLogQLVariables(config: SigynConfig) {
       formattedRule.logql = formattedRule.logql.replace(`{vars.${key}}`, replaceWith);
     }
 
-    rules.push(formattedRule);
+    rules.push(formattedRule as SigynInitializedRule);
   }
 
   return rules;
+}
+
+export function extendsTemplates(template: SigynAlertTemplate, config: SigynConfig): SigynInitializedTemplate {
+  const configTemplates = config.templates!;
+
+  function getBaseTemplate(key: string): SigynInitializedTemplate {
+    const baseTemplate = configTemplates[key];
+
+    if (baseTemplate.extends) {
+      return extendsTemplates(baseTemplate, config);
+    }
+
+    return baseTemplate as SigynInitializedTemplate;
+  }
+
+  if (template.extends === undefined) {
+    return template as SigynInitializedTemplate;
+  }
+
+  const baseTemplate = getBaseTemplate(template.extends);
+  const templateContent = baseTemplate.content ? [...baseTemplate.content] : [];
+
+  if (Array.isArray(template.content)) {
+    templateContent.push(...template.content);
+  }
+  else {
+    if (template.content?.after) {
+      templateContent.push(...template.content.after);
+    }
+    if (template.content?.before) {
+      templateContent.unshift(...template.content.before);
+    }
+  }
+
+  return {
+    title: template.title ?? baseTemplate?.title,
+    content: templateContent
+  };
 }

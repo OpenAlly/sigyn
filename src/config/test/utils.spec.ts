@@ -29,18 +29,38 @@ describe("Utils", () => {
     setGlobalDispatcher(kGlobalDispatcher);
   });
 
-  describe("mergeRulesLabelFilters()", () => {
+  describe("initializeRules()", () => {
     it("should create rule for each label filter", async() => {
       const rules: Partial<SigynRule>[] = [
         {
           name: "foo",
-          logql: "{app=\"foo\"} |= `my super logql`"
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              title: "title"
+            }
+          }
         },
         {
           name: "bar",
           logql: "{env={label.env}} |= `my super logql`",
           labelFilters: {
             env: ["prod", "dev"]
+          },
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              title: "title"
+            }
           }
         },
         {
@@ -48,19 +68,49 @@ describe("Utils", () => {
           logql: "{app=\"foo\", env={label.env}} |= `my super logql`",
           labelFilters: {
             env: ["prod", "dev"]
+          },
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              title: "title"
+            }
           }
         }
       ];
       const expectedRules: Partial<SigynRule>[] = [
         {
           name: "foo",
-          logql: "{app=\"foo\"} |= `my super logql`"
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              title: "title"
+            }
+          }
         },
         {
           name: "bar (env = prod)",
           logql: "{env=\"prod\"} |= `my super logql`",
           labelFilters: {
             env: ["prod", "dev"]
+          },
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              title: "title"
+            }
           }
         },
         {
@@ -68,6 +118,16 @@ describe("Utils", () => {
           logql: "{env=\"dev\"} |= `my super logql`",
           labelFilters: {
             env: ["prod", "dev"]
+          },
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              title: "title"
+            }
           }
         },
         {
@@ -75,6 +135,16 @@ describe("Utils", () => {
           logql: "{app=\"foo\", env=\"prod\"} |= `my super logql`",
           labelFilters: {
             env: ["prod", "dev"]
+          },
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              title: "title"
+            }
           }
         },
         {
@@ -82,6 +152,16 @@ describe("Utils", () => {
           logql: "{app=\"foo\", env=\"dev\"} |= `my super logql`",
           labelFilters: {
             env: ["prod", "dev"]
+          },
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              title: "title"
+            }
           }
         }
       ];
@@ -91,7 +171,333 @@ describe("Utils", () => {
         },
         rules
       };
-      assert.deepEqual(await utils.mergeRulesLabelFilters(config as SigynConfig), expectedRules);
+      assert.deepEqual(await utils.initializeRules(config as SigynConfig), expectedRules);
+    });
+
+    it("should extends template content (array)", async() => {
+      const rules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              extends: "foo",
+              content: ["bar"]
+            }
+          }
+        }
+      ];
+      const expectedRules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              content: [
+                "foo",
+                "bar"
+              ],
+              title: undefined
+            }
+          }
+        }
+      ];
+      const config = {
+        templates: {
+          foo: {
+            content: [
+              "foo"
+            ]
+          }
+        },
+        loki: {
+          apiUrl: kDummyUrl
+        },
+        rules
+      };
+      assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    });
+    it("should extends template content (array)", async() => {
+      const rules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              extends: "foo",
+              content: ["bar"]
+            }
+          }
+        }
+      ];
+      const expectedRules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              content: [
+                "foo",
+                "bar"
+              ],
+              title: undefined
+            }
+          }
+        }
+      ];
+      const config = {
+        templates: {
+          foo: {
+            content: [
+              "foo"
+            ]
+          }
+        },
+        loki: {
+          apiUrl: kDummyUrl
+        },
+        rules
+      };
+      assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    });
+
+    it("should extends template content (after)", async() => {
+      const rules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              extends: "foo",
+              content: {
+                after: ["bar"]
+              }
+            }
+          }
+        }
+      ];
+      const expectedRules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              content: [
+                "foo",
+                "bar"
+              ],
+              title: undefined
+            }
+          }
+        }
+      ];
+      const config = {
+        templates: {
+          foo: {
+            content: [
+              "foo"
+            ]
+          }
+        },
+        loki: {
+          apiUrl: kDummyUrl
+        },
+        rules
+      };
+      assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    });
+
+    it("should extends template content (before)", async() => {
+      const rules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              extends: "foo",
+              content: {
+                before: ["bar"]
+              }
+            }
+          }
+        }
+      ];
+      const expectedRules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              content: [
+                "bar",
+                "foo"
+              ],
+              title: undefined
+            }
+          }
+        }
+      ];
+      const config = {
+        templates: {
+          foo: {
+            content: [
+              "foo"
+            ]
+          }
+        },
+        loki: {
+          apiUrl: kDummyUrl
+        },
+        rules
+      };
+      assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    });
+
+    it("should extends template content (before and after)", async() => {
+      const rules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              extends: "foo",
+              content: {
+                before: ["bar"],
+                after: ["baz"]
+              }
+            }
+          }
+        }
+      ];
+      const expectedRules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              content: [
+                "bar",
+                "foo",
+                "baz"
+              ],
+              title: undefined
+            }
+          }
+        }
+      ];
+      const config = {
+        templates: {
+          foo: {
+            content: [
+              "foo"
+            ]
+          }
+        },
+        loki: {
+          apiUrl: kDummyUrl
+        },
+        rules
+      };
+      assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    });
+
+    it("should replace extended template title", async() => {
+      const rules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              extends: "foo",
+              title: "bar"
+            }
+          }
+        }
+      ];
+      const expectedRules: Partial<SigynRule>[] = [
+        {
+          name: "foo",
+          logql: "{app=\"foo\"} |= `my super logql`",
+          alert: {
+            on: {
+              count: 5,
+              interval: "1h"
+            },
+            severity: "information",
+            template: {
+              content: [],
+              title: "bar"
+            }
+          }
+        }
+      ];
+      const config = {
+        templates: {
+          foo: {
+            title: "foo"
+          }
+        },
+        loki: {
+          apiUrl: kDummyUrl
+        },
+        rules
+      };
+      assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
     });
   });
 

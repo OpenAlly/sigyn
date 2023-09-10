@@ -146,7 +146,189 @@ describe("Config validation", () => {
     });
   });
 
-  it("given a root template with only cotnent, it should validate", () => {
+  it("given an extended template with title only, it should validate", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          },
+          bar: {
+            extends: "foo",
+            title: "bar"
+          }
+        }
+      });
+    });
+  });
+
+  it("given an extended template with content only, it should validate", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          },
+          bar: {
+            extends: "foo",
+            content: ["bar"]
+          }
+        }
+      });
+    });
+  });
+
+  it("given an extended template with title & content, it should validate", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          },
+          bar: {
+            extends: "foo",
+            content: ["bar"]
+          }
+        }
+      });
+    });
+  });
+
+  it("given an extended template with content 'before', it should validate", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          },
+          bar: {
+            extends: "foo",
+            content: {
+              before: ["bar"]
+            }
+          }
+        }
+      });
+    });
+  });
+
+  it("given an extended template with content 'after', it should validate", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          },
+          bar: {
+            extends: "foo",
+            content: {
+              after: ["bar"]
+            }
+          }
+        }
+      });
+    });
+  });
+
+  it("given an extended template with content 'before' and 'after', it should validate", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          },
+          bar: {
+            extends: "foo",
+            content: {
+              before: ["bar"],
+              after: ["baz"]
+            }
+          }
+        }
+      });
+    });
+  });
+
+  it("given a non-extended template with content 'before', it should throws", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          },
+          bar: {
+            content: {
+              before: ["bar"],
+              after: ["baz"]
+            }
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /templates/bar/content: must be array"
+    });
+  });
+
+  it("given an extended template (root) which does not exists, it should throws", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          },
+          bar: {
+            extends: "baz",
+            content: {
+              before: ["bar"],
+              after: ["baz"]
+            }
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Template 'baz' not found"
+    });
+  });
+
+  it("given an extended template (rule) which does not exists, it should throws", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        templates: {
+          foo: {
+            content: ["foo"]
+          }
+        },
+        rules: [
+          {
+            ...kValidConfig.rules[0],
+            alert: {
+              ...kValidConfig.rules[0].alert,
+              template: {
+                extends: "unknown",
+                content: ["foo"]
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Template 'unknown' not found"
+    });
+  });
+
+  it("given a root template with only content, it should validate", () => {
     assert.doesNotThrow(() => {
       validateConfig({
         ...kValidConfig,
@@ -181,7 +363,7 @@ describe("Config validation", () => {
     });
   });
 
-  it("given a rule template with empty content, it should throws", () => {
+  it("given a rule non-extended template with empty content, it should throws", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -199,7 +381,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/template/content: must NOT have fewer than 1 items, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
+      message: "Invalid config: /rules/0/alert/template/content: must NOT have fewer than 1 items, /rules/0/alert/template: must match \"else\" schema, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
     });
   });
 
@@ -243,7 +425,7 @@ describe("Config validation", () => {
     });
   });
 
-  it("given a rule template with empty content and valid title, it should throws", () => {
+  it("given a rule non-extended template with empty content and valid title, it should throws", () => {
     assert.throws(() => {
       validateConfig({
         ...kValidConfig,
@@ -262,7 +444,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/template/content: must NOT have fewer than 1 items, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
+      message: "Invalid config: /rules/0/alert/template/content: must NOT have fewer than 1 items, /rules/0/alert/template: must match \"else\" schema, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
     });
   });
 
@@ -299,7 +481,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /rules/0/alert/template: must have required property 'title', /rules/0/alert/template: must have required property 'content', /rules/0/alert/template: must match a schema in anyOf, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
+      message: "Invalid config: /rules/0/alert/template: must have required property 'title', /rules/0/alert/template: must have required property 'content', /rules/0/alert/template: must have required property 'extends', /rules/0/alert/template: must match a schema in anyOf, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
     });
   });
 
@@ -313,7 +495,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
-      message: "Invalid config: /templates/foo: must have required property 'title', /templates/foo: must have required property 'content', /templates/foo: must match a schema in anyOf"
+      message: "Invalid config: /templates/foo: must have required property 'title', /templates/foo: must have required property 'content', /templates/foo: must have required property 'extends', /templates/foo: must match a schema in anyOf"
     });
   });
 
