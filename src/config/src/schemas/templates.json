@@ -11,15 +11,77 @@
       "nullable": true,
       "minLength": 1
     },
-    "content": {
-      "title": "The content of the alert",
-      "description": "An array of string.\nYou can use any of theses variables, surrounding with '{}':\n- ruleName\n- logql\n- counter\n- count\n- interval\nYou can also use a label variable from your LogQL using {label.x}",
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "nullable": true,
-      "minItems": 1
+    "extends": {
+      "type": "string"
+    }
+  },
+  "if": {
+    "required": [
+      "extends"
+    ]
+  },
+  "then": {
+    "properties": {
+      "content": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true,
+            "minItems": 1
+          },
+          {
+            "type": "object",
+            "properties": {
+              "before": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "nullable": true,
+                "minItems": 1
+              },
+              "after": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "nullable": true,
+                "minItems": 1
+              }
+            },
+            "additionalProperties": false,
+            "anyOf": [
+              {
+                "required": [
+                  "before"
+                ]
+              },
+              {
+                "required": [
+                  "after"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "else": {
+    "properties": {
+      "content": {
+        "title": "The content of the alert",
+        "description": "An array of string.\nYou can use any of theses variables, surrounding with '{}':\n- ruleName\n- logql\n- counter\n- count\n- interval\nYou can also use a label variable from your LogQL using {label.x}",
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "nullable": true,
+        "minItems": 1
+      }
     }
   },
   "anyOf": [
@@ -32,7 +94,11 @@
       "required": [
         "content"
       ]
+    },
+    {
+      "required": [
+        "extends"
+      ]
     }
-  ],
-  "additionalProperties": false
+  ]
 }

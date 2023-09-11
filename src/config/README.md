@@ -69,7 +69,7 @@ The **Sigyn** configuration object consists of theses properties: `loki`, `templ
             "- LogQL: {logql}",
             "- Threshold: {count}",
             "- Interval: {interval}",
-            "- [See logs on Loki]({lokiUrl})"
+            "- [See logs on Grafana]({lokiUrl})"
           ]
         }
       }
@@ -146,7 +146,7 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
 
   | Property       | Type     | Required | Description |
   |----------------|----------|----------|-------------|
-  | `[key:string]` | `object` | ✔️       | A record of template object that can have either of `title` or `content` properties (**See below**) |
+  | `[key:string]` | `object` | ✔️       | A record of template object that can have either of `title`, `content` or `extends` properties (**See below**) |
 
 - `extends` (String[], Optional):
   - This array specifies the configuration paths to extends from.
@@ -220,7 +220,18 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   | Property   | Type       | Required | Description |
   |------------|------------|----------|-------------|
   | `title`    | `string`   | ❌       | The title of the notification template. |
-  | `content`  | `string[]` | ❌       | The content of the notification template. |
+  | `content`  | `string[]` or `object` | ❌       | The content of the notification template. It can be an object when extending another template |
+  | `content.before`  | `string[]` | ❌       | The content of the notification template to add **after** the extended template's content |
+  | `content.after`  | `string[]` | ❌       | The content of the notification template to add **before** the extended template's content |
+  | `extends`  | `string` | ❌       | The content of the notification template. |
+
+  > [!NOTE]
+  > When extending template with `extends`:
+  > - if `title` is specified then it replaces the extended template's title
+  > - if `content` is `string[]` then it has the same behavior as using `content.after` i.e. it adds the content **after** the extended template's content.
+
+  > [!NOTE]
+  > Extending templates can be nested
 
 - `rules.alert.severity` (String or Number, Optional):
   - If not specified, the default value is `config.defaultSeverity`, if not specified the default is Severity 3 (`error`). Theses severities change the alert UI sent by the notifiers.
@@ -345,7 +356,7 @@ interface SigynInitializedConfig {
   loki: LokiConfig;
   notifiers: Record<string, unknown>;
   rules: SigynInitializedRule[];
-  templates?: Record<string, SigynAlertTemplate>;
+  templates?: Record<string, SigynInitializedTemplate>;
   extends?: string[];
   missingLabelStrategy: "ignore" | "error";
   defaultSeverity: AlertSeverity
@@ -383,7 +394,7 @@ interface SigynInitializedRule {
   logql: string;
   polling: string | string[];
   pollingStrategy: "bounded" | "unbounded";
-  alert: SigynAlert;
+  alert: SigynInitializedAlert;
   disabled: boolean;
   notifiers: string[];
   labelFilters?: Record<string, string[]>;
@@ -401,8 +412,10 @@ interface PartialSigynRule {
 }
 
 type NotifierFormattedSigynRule = Omit<SigynInitializedRule, "alert"> & {
-  alert: Omit<SigynAlert, "template"> & { template: SigynAlertTemplate };
-}
+  alert: Omit<SigynInitializedAlert, "template"> & {
+    template: SigynInitializedTemplate;
+  };
+};
 
 type AlertSeverity =
   "critical" |
@@ -428,6 +441,24 @@ interface SigynAlert {
   };
 }
 
+interface SigynInitializedAlert {
+  on: {
+    count?: string | number;
+    interval?: string;
+    label?: string;
+    value?: string;
+    valueMatch?: string;
+    percentThreshold?: number;
+    minimumLabelCount?: number;
+  },
+  template: string | SigynInitializedTemplate;
+  severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
+  throttle?: {
+    count: number;
+    interval: string;
+  };
+}
+
 interface PartialSigynAlert {
   on: {
     count?: string | number;
@@ -439,14 +470,25 @@ interface PartialSigynAlert {
     minimumLabelCount?: number;
   },
   template: string | SigynAlertTemplate;
-  severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
+  severity?: AlertSeverity;
   throttle?: {
-    count: number;
+    count?: number;
     interval: string;
   };
 }
 
+interface SigynAlertTemplateExtendedContent {
+  before?: string[];
+  after?: string[];
+}
+
 interface SigynAlertTemplate {
+  title?: string;
+  content?: string[] | SigynAlertTemplateExtendedContent;
+  extends?: string;
+}
+
+interface SigynInitializedTemplate {
   title?: string;
   content?: string[];
 }

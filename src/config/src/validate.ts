@@ -39,12 +39,28 @@ function buildValidationErrorMessage(errors: ErrorObject[]) {
 
 function validateTemplate(config: PartialSigynConfig) {
   for (const rule of config.rules) {
-    if (typeof rule.alert.template === "string") {
-      const template = config.templates?.[rule.alert.template];
+    const templateMustExists = typeof rule.alert.template === "string" ? rule.alert.template : rule.alert.template.extends;
 
-      if (template === undefined) {
-        throw new Error(`Template '${rule.alert.template}' not found`);
-      }
+    if (templateMustExists === undefined) {
+      continue;
+    }
+
+    const template = config.templates?.[templateMustExists];
+
+    if (template === undefined) {
+      throw new Error(`Template '${templateMustExists}' not found`);
+    }
+  }
+
+  for (const template of Object.values(config.templates ?? {})) {
+    if (template.extends === undefined) {
+      continue;
+    }
+
+    const configTemplate = config.templates?.[template.extends];
+
+    if (configTemplate === undefined) {
+      throw new Error(`Template '${template.extends}' not found`);
     }
   }
 }

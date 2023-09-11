@@ -1,0 +1,63 @@
+{
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
+  "notifiers": {
+    "discord": {
+      "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
+    }
+  },
+  "templates": {
+    "main": {
+      "title": "🚨 {ruleName} - Triggered {counter} times!",
+      "content": [
+        "- LogQL: {logql}",
+        "- Threshold: {count}",
+        "- Interval: {interval}"
+      ]
+    },
+    "test": {
+      "extends": "main",
+      "content": [
+        "- One more line"
+      ]
+    },
+    "test2": {
+      "extends": "test",
+      "content": [
+        "- test2"
+      ]
+    },
+    "test3": {
+      "extends": "test2",
+      "content": {
+        "before": [
+          "- test3"
+        ]
+      }
+    },
+    "test4": {
+      "extends": "test3",
+      "content": {
+        "before": [
+          "- test4"
+        ]
+      },
+      "title": "TEST 4 TITLE"
+    }
+  },
+  "rules": [
+    {
+      "name": "test1",
+      "logql": "{app=\"foo\", env=\"preprod\"} |= `my super logql`",
+      "polling": "1s",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1m"
+        },
+        "template": "main"
+      }
+    }
+  ]
+}
