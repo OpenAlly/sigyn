@@ -564,6 +564,7 @@ describe("Utils", () => {
         loki: {
           apiUrl: kDummyUrl
         },
+        templates: undefined,
         notifiers: {
           discord: {
             webhookUrl: "https://discord.com/api/webhooks/1234567890/abcdefg"
