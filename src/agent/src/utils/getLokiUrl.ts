@@ -1,6 +1,6 @@
 // Import Third-party Dependencies
 import dayjs from "dayjs";
-import { SigynRule, getConfig } from "@sigyn/config";
+import { SigynInitializedRule, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { Datasource } from "../datasource";
@@ -9,7 +9,7 @@ import { NotifierAlert } from "../notifier";
 
 export async function getLokiUrl(
   rule: NotifierAlert["rule"],
-  config: SigynRule
+  config: SigynInitializedRule
 ): Promise<string> {
   const { loki } = getConfig();
   const { uid, orgId } = await Datasource.Loki(loki.apiUrl);
