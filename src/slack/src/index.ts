@@ -95,7 +95,7 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
                 templateData,
                 templateOptions
               );
-            }).join("\n"),
+            }).join("\n").replaceAll(/>(?!\s)/g, "›"),
             short: false
           }
         ]
