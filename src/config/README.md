@@ -196,8 +196,8 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   - An object specifying when the alert should trigger.
   - It must have the following properties:
 
-  | Property            | Type                 | Required | Description |
-  |---------------------|----------------------|----------|-------------|
+  | Property            | Type                 | Description |
+  |---------------------|----------------------|-------------|
   | `count`             | `number` or `string` | The count threshold of log or label that must triggers an alert. You can use a range string i.e. `<= 5`, `> 6`. For **label based** alert, this property **MUST** be a valid number i.e `900` or `"900"` |
   | `interval`          | `string`             | The time interval for the alerting condition. |
   | `label`             | `string`             | The label key to check. |
@@ -207,10 +207,10 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   | `minimumLabelCount` | `number`             | The minimum count of label to compare percent threshold. |
 
   > [!NOTE]
-  > There are 2 sorts of alert: **basic** and **label based**
-  > For **basic** alert, both `count` and `interval` are **required**, other properties **must** be omitted.
-  > For **label based** alert, `label`, `value` **or** `valueMatch` are **required** plus at least one of `minimumLabelCount` or `interval` which defines the minimum logs to be fetched to have a revelant alert when `percentThreshold` is set, or `count` which works the same as basic alerting.
-  > `minimumLabelCount` and/or `interval` are optional when rule is based on `count` label.
+  > There are 2 sorts of alert: **basic** and **label based**  
+  > For **basic** alert, both `count` and `interval` are **required**, other properties **must** be omitted.  
+  > For **label based** alert, `label`, `value` **or** `valueMatch` are **required** plus at least one of `minimumLabelCount` or `interval` which defines the minimum logs to be fetched to have a revelant alert when `percentThreshold` is set, or `count` which works the same as basic alerting.  
+  > `minimumLabelCount` and/or `interval` are optional when rule is based on `count` label.  
   > You cannot use both `value` and `valueMatch`
 
 - `rules.alert.template` (Object or String, Required):
