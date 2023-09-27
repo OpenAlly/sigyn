@@ -677,4 +677,39 @@ describe("Rule.getAlertFormattedRule()", () => {
 
     assert.equal(Object.keys(ruleWithLabels.labels).length, 0);
   });
+
+  it("labels should be distinct", async() => {
+    getDB().exec("DELETE from ruleLabels");
+
+    const rule = new Rule(config.rules[0], { logger: kLogger });
+    await rule.walkOnLogs([
+      { values: ["one"], stream: { foo: "bar" } },
+      { values: ["two"], stream: { foo: "baz", foz: "boz" } },
+      { values: ["three"], stream: { foo: "baz", foz: "boz" } }
+    ]);
+
+    const ruleWithLabels = rule.getAlertFormattedRule();
+
+    assert.equal(Object.keys(ruleWithLabels.labels).length, 2);
+    assert.equal(ruleWithLabels.labels.foo, "bar, baz");
+    assert.equal(ruleWithLabels.labels.foz, "boz");
+  });
+
+  it("when a rule is based on label, labels not matching rule should be skipped", async() => {
+    const ruleConfig = await initConfig(kLabelValueMatchConfigLocation);
+    getDB().exec("DELETE from ruleLabels");
+
+    const rule = new Rule(ruleConfig.rules[0], { logger: kLogger });
+    // rule match statusCode 4xx & 5xx so the 200 should be skipped
+    await rule.walkOnLogs([
+      { values: ["statusCode: 200"], stream: { statusCode: "200" } },
+      { values: ["statusCode: 400"], stream: { statusCode: "400" } },
+      { values: ["statusCode: 500"], stream: { statusCode: "500" } }
+    ]);
+
+    const ruleWithLabels = rule.getAlertFormattedRule();
+
+    assert.equal(Object.keys(ruleWithLabels.labels).length, 1);
+    assert.equal(ruleWithLabels.labels.statusCode, "400, 500");
+  });
 });
