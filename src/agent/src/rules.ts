@@ -38,6 +38,24 @@ export class Rule {
 
     const labels = this.getDistinctLabelsFromDatabase(rule.id);
     for (const { key, value } of labels) {
+      // if rule is based on current DB label, we take only if matching rule
+      if (key === this.#config.alert.on.label) {
+        const { value: wantedValue, valueMatch } = this.#config.alert.on;
+
+        if (wantedValue) {
+          const rangeValueMatch = utils.rules.OPERATOR_VALUE_REGEXP.exec(wantedValue);
+          if (rangeValueMatch && !utils.rules.countMatchOperator(rangeValueMatch[1] as utils.rules.RuleOperators, Number(value), Number(rangeValueMatch[2]))) {
+            continue;
+          }
+          else if (value !== wantedValue) {
+            continue;
+          }
+        }
+        else if (!value.match(valueMatch!)) {
+          continue;
+        }
+      }
+
       if (formattedLabels[key] === undefined) {
         formattedLabels[key] = value;
       }
@@ -54,7 +72,7 @@ export class Rule {
   }
 
   getDistinctLabelsFromDatabase(ruleId: number): DbRuleLabel[] {
-    return getDB().prepare("SELECT DISTINCT * FROM ruleLabels WHERE ruleId = ?").all(ruleId) as DbRuleLabel[];
+    return getDB().prepare("SELECT DISTINCT key, value FROM ruleLabels WHERE ruleId = ?").all(ruleId) as DbRuleLabel[];
   }
 
   clearLabels() {
