@@ -2,7 +2,7 @@
 import EventEmitter from "node:events";
 
 // Import Internal Dependencies
-import { NotifierAlert } from "./notifier";
+import { AgentFailureAlert, NotifierAlert } from "./notifier";
 
 // CONSTANTS
 const kNotifsConcurrency = 10;
@@ -11,10 +11,10 @@ const kNotifsConcurrency = 10;
 export class NotifierQueue extends EventEmitter {
   static DEQUEUE = Symbol("dequeue");
 
-  #notificationAlerts: NotifierAlert[] = [];
+  #notificationAlerts: (NotifierAlert | AgentFailureAlert)[] = [];
   #inProgress = 0;
 
-  push(...notifications: NotifierAlert[]) {
+  push(...notifications: NotifierAlert[] | AgentFailureAlert[]) {
     this.#notificationAlerts.push(...notifications);
 
     if (this.#inProgress === 0) {

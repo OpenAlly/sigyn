@@ -67,6 +67,18 @@ export interface DbAlertNotif {
   retries: number;
 }
 
+export interface DbAgentFailure {
+  id: number;
+  ruleId: number;
+  message: string;
+  timestamp: number;
+}
+
+export interface DbAgentFailureAlert {
+  id: number;
+  createdAt: number;
+}
+
 export interface InitDbOptions {
   /**
    * @default process.env.SIGYN_DB.

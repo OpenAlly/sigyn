@@ -1,0 +1,35 @@
+{
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
+  "notifiers": {
+    "discord": {
+      "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
+    }
+  },
+  "rules": [
+    {
+      "name": "State KO >= 80%",
+      "logql": "{app=\"sigyn\"} |~ `state: (ok|ko)` | regexp `state: (?P<state>ok|ko)`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "label": "state",
+          "value": "ko",
+          "percentThreshold": 80,
+          "minimumLabelCount": 10
+        },
+        "template": {
+          "title": "Alert"
+        }
+      }
+    }
+  ],
+  "selfMonitoring": {
+    "notifiers": ["discord"],
+    "template": {
+      "title": "foo"
+    },
+    "ruleFilters": ["This rule does not exists so it will never trigger"]
+  }
+}

@@ -1849,4 +1849,380 @@ describe("Config validation", () => {
       message: "Invalid config: /defaultSeverity: must be equal to one of the allowed values"
     });
   });
+
+  it("property 'selfMonitoring' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: undefined
+      });
+    });
+  });
+
+  it("property 'selfMonitoring' can be set", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: {
+            title: "foo"
+          },
+          notifiers: ["discord"]
+        }
+      });
+    });
+  });
+
+  it("property 'selfMonitoring.template' should be required", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: undefined as any,
+          notifiers: ["discord"]
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring: must have required property 'template'"
+    });
+  });
+
+  it("property 'selfMonitoring.template' can be a string", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["discord"]
+        }
+      });
+    });
+  });
+
+  it("property 'selfMonitoring.template' can be an object with title", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: {
+            title: "foo"
+          },
+          notifiers: ["discord"]
+        }
+      });
+    });
+  });
+
+  it("property 'selfMonitoring.template' can be an object with content", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: {
+            content: ["foo"]
+          },
+          notifiers: ["discord"]
+        }
+      });
+    });
+  });
+
+  it("property 'selfMonitoring.template' can be an object with both title & content", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: {
+            title: "foo",
+            content: ["foo"]
+          },
+          notifiers: ["discord"]
+        }
+      });
+    });
+  });
+
+  it("property 'selfMonitoring.notifiers' should be required", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: undefined as any
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring: must have required property 'notifiers'"
+    });
+  });
+
+  it("property 'selfMonitoring.notifiers' must be array", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: "foo" as any
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/notifiers: must be array"
+    });
+  });
+
+  it("property 'selfMonitoring.notifiers' must be string array", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: [true] as any
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/notifiers/0: must be string"
+    });
+  });
+
+  it("property 'selfMonitoring.errorFilters' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          errorFilters: undefined
+        }
+      });
+    });
+  });
+
+  it("property 'selfMonitoring.errorFilters' must be array", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          errorFilters: "foo" as any
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/errorFilters: must be array"
+    });
+  });
+
+  it("property 'selfMonitoring.errorFilters' must be string array", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          errorFilters: [true] as any
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/errorFilters/0: must be string"
+    });
+  });
+
+  it("property 'selfMonitoring.ruleFilters' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          ruleFilters: undefined
+        }
+      });
+    });
+  });
+
+  it("property 'selfMonitoring.ruleFilters' must be array", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          ruleFilters: "foo" as any
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/ruleFilters: must be array"
+    });
+  });
+
+  it("property 'selfMonitoring.ruleFilters' must be string array", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          ruleFilters: [true] as any
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/ruleFilters/0: must be string"
+    });
+  });
+
+  it("property 'selfMonitoring.minimumErrorCount' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          minimumErrorCount: undefined
+        }
+      });
+    });
+  });
+
+  it("property 'selfMonitoring.ruleFilters' must be integer", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          minimumErrorCount: 5.5
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/minimumErrorCount: must be integer"
+    });
+  });
+
+  it("property 'selfMonitoring.throttle' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          throttle: undefined
+        }
+      });
+    });
+  });
+
+  it("property 'selfMonitoring.throttle' must be an object", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          throttle: "hello" as any
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/throttle: must be object"
+    });
+  });
+
+  it("property 'selfMonitoring.throttle.count' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          throttle: {
+            interval: "1m",
+            count: undefined
+          }
+        }
+      });
+    });
+  });
+
+  it("property 'selfMonitoring.throttle.count' cannot be float", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          throttle: {
+            interval: "1m",
+            count: 5.5
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/throttle/count: must be integer"
+    });
+  });
+
+  it("property 'selfMonitoring.throttle.interval' should be required", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          throttle: {
+            interval: undefined as any
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/throttle: must have required property 'interval'"
+    });
+  });
+
+  it("property 'selfMonitoring.throttle.interval' must be a string", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          throttle: {
+            interval: 55 as any
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/throttle/interval: must be string"
+    });
+  });
+
+  it("property 'selfMonitoring.throttle.count' must be an integer", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["foo"],
+          throttle: {
+            interval: "1m",
+            count: "5" as any
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/throttle/count: must be integer"
+    });
+  });
 });

@@ -598,7 +598,8 @@ describe("Utils", () => {
               }
             }
           }
-        ]
+        ],
+        selfMonitoring: undefined
       });
     });
 

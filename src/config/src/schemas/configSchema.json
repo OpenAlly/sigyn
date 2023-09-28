@@ -67,6 +67,80 @@
         "info",
         "low"
       ]
+    },
+    "selfMonitoring": {
+      "title": "Defines the behavior of the self monitoring",
+      "type": "object",
+      "properties": {
+        "template": {
+          "title": "The template used to send the alert",
+          "description": "Can be a string or an object.\nIf it's a string, it must be a reference to a root template key.\nIf it's an object, it will be used as the template itself.",
+          "oneOf": [
+            {
+              "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/templates.json"
+            },
+            {
+              "type": "string",
+              "minLength": 1
+            }
+          ]
+        },
+        "notifiers": {
+          "title": "The notifiers used to send the alert",
+          "description": "An array of notifier names. Theses notifiers must be installed.\nSigyn notifiers can be unscopped (e.g. 'discord') or scopped (e.g. '@sigyn/discord').\nIf not specified, default to each notifiers configured.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "nullable": true
+        },
+        "errorFilters": {
+          "title": "Defines filters to errors to handle",
+          "description": "Can be a list of string or RegExp",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "ruleFilters": {
+          "title": "Defines filters to rules to handle",
+          "description": "Can be a list of string or RegExp",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "minimumErrorCount": {
+          "title": "Defines the minimum number of errors to send an alert",
+          "type": "integer",
+          "minimum": 1
+        },
+        "throttle": {
+          "title": "Defines the self-monitoring alerts throttle",
+          "description": "Can be useful to avoid spam",
+          "type": "object",
+          "properties": {
+            "count": {
+              "title": "The number of error to unlock the interval, default to 0",
+              "type": "integer",
+              "nullable": true
+            },
+            "interval": {
+              "title": "The interval of time to pause alert",
+              "description": "A duration string (e.g. '1m', '1h', '1d').",
+              "type": "string"
+            }
+          },
+          "required": [
+            "interval"
+          ]
+        }
+      },
+      "required": [
+        "template",
+        "notifiers"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

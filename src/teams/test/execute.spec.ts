@@ -10,25 +10,6 @@ import * as teams from "../src/index";
 
 const kMockAgent = new MockAgent();
 const kDispatcher = getGlobalDispatcher();
-const kValidRuleConfig = {
-  name: "test1",
-  logql: "{app=\"foo\", env=\"prod\"} |= `One of the file names does not match what is expected`",
-  polling: "1m",
-  alert: {
-    on: {
-      count: 6,
-      interval: "5m"
-    },
-    template: {
-      title: "🚨 {ruleName} - Triggered {counter} times!",
-      content: [
-        "- LogQL: {logql}",
-        "- Threshold: {count}",
-        "- Interval: {interval}"
-      ]
-    }
-  }
-};
 const kDummyWebhoobURL = "https://foo.com";
 
 describe("execute()", () => {
@@ -48,11 +29,13 @@ describe("execute()", () => {
   it("should throws if there is no title AND no content", async() => {
     await assert.rejects(async() => {
       await teams.execute({
-        counter: 10,
-        ruleConfig: { ...kValidRuleConfig, alert: { ...kValidRuleConfig.alert, template: {} } },
         webhookUrl: kDummyWebhoobURL,
-        severity: "error",
-        label: { foo: "bar" }
+        data: {
+          counter: 10,
+          severity: "error",
+          label: { foo: "bar" }
+        },
+        template: {} as any
       });
     }, {
       name: "Error",
@@ -67,11 +50,13 @@ describe("execute()", () => {
     }).reply(200, { foo: "bar" });
 
     const { data } = await teams.execute({
-      counter: 10,
-      ruleConfig: kValidRuleConfig,
       webhookUrl: kDummyWebhoobURL,
-      severity: "error",
-      label: { foo: "bar" }
+      data: {
+        counter: 10,
+        severity: "error",
+        label: { foo: "bar" }
+      },
+      template: { title: "foo" }
     });
 
     assert.deepEqual(JSON.parse(data), { foo: "bar" });
@@ -84,11 +69,13 @@ describe("execute()", () => {
     }).reply(400, { message: "Unable to send webhook" });
 
     await assert.rejects(async() => await teams.execute({
-      counter: 10,
-      ruleConfig: kValidRuleConfig,
       webhookUrl: kDummyWebhoobURL,
-      severity: "error",
-      label: { foo: "bar" }
+      data: {
+        counter: 10,
+        severity: "error",
+        label: { foo: "bar" }
+      },
+      template: { title: "foo" }
     }), {
       name: "Error",
       message: "Bad Request"
