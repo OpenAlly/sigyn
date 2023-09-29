@@ -10,15 +10,15 @@ import * as utils from "./utils";
 export * from "./types";
 export { validateConfig, validateExtendedConfig };
 
-let config: SigynInitializedConfig;
+let initializedConfig: SigynInitializedConfig;
 
 export async function initConfig(configPath: string | URL): Promise<SigynInitializedConfig> {
   const rawConfig = fs.readFileSync(configPath, "utf-8");
 
-  const conf: SigynInitializedConfig = JSON.parse(rawConfig);
+  const config: SigynInitializedConfig = JSON.parse(rawConfig);
 
-  if (conf.extends) {
-    for (const extendedConfigPath of conf.extends) {
+  if (config.extends) {
+    for (const extendedConfigPath of config.extends) {
       const formattedPath = extendedConfigPath.endsWith(".json") ? extendedConfigPath : `${extendedConfigPath}.sigyn.config.json`;
       const rawConfig = fs.readFileSync(path.join(configPath.toString(), "..", formattedPath), "utf-8");
       const extendConfig = JSON.parse(rawConfig);
@@ -26,35 +26,35 @@ export async function initConfig(configPath: string | URL): Promise<SigynInitial
       validateExtendedConfig(extendConfig);
 
       if (extendConfig.templates) {
-        conf.templates = {
-          ...conf.templates,
+        config.templates = {
+          ...config.templates,
           ...extendConfig.templates
         };
       }
 
-      conf.rules.push(...extendConfig.rules);
+      config.rules.push(...extendConfig.rules);
     }
   }
 
-  for (const [key, template] of Object.entries(conf.templates ?? {})) {
-    conf.templates![key] = utils.extendsTemplates(template, conf);
+  for (const [key, template] of Object.entries(config.templates ?? {})) {
+    config.templates![key] = utils.extendsTemplates(template, config);
   }
 
-  const rules = await utils.initializeRules(conf);
-  validateConfig(conf);
+  const rules = await utils.initializeRules(config);
+  validateConfig(config);
 
-  conf.rules = utils.applyRulesLogQLVariables({ ...conf, rules });
+  config.rules = utils.applyRulesLogQLVariables({ ...config, rules });
 
-  config = utils.applyDefaultValues(conf);
+  initializedConfig = utils.applyDefaultValues(config);
 
-  return config;
+  return initializedConfig;
 }
 
 export function getConfig(): SigynInitializedConfig {
-  if (config === undefined) {
+  if (initializedConfig === undefined) {
     throw new Error("You must init config first");
   }
 
-  return config;
+  return initializedConfig;
 }
 
