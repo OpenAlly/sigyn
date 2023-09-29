@@ -56,6 +56,7 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
 
   const templateData = {
     ...ruleConfig ?? {},
+    ruleName: ruleConfig?.name,
     agentFailure,
     counter,
     logql: ruleConfig?.logql ? formatLogQL(ruleConfig.logql) : null,

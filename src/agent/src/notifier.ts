@@ -93,6 +93,31 @@ export class Notifier {
     );
   }
 
+  async #notiferAlertData(alert: NotifierAlert) {
+    const { rule } = alert;
+    const ruleConfig = getConfig().rules.find((configRule) => configRule.name === rule.name)!;
+
+    return {
+      ruleConfig,
+      counter: rule.threshold,
+      label: { ...new StreamSelector(ruleConfig.logql).kv(), ...rule.labels },
+      severity: ruleConfig.alert.severity,
+      lokiUrl: await utils.getLokiUrl(rule, ruleConfig)
+    };
+  }
+
+  #agentFailureAlertData(alert: AgentFailureAlert) {
+    const { failures } = alert;
+
+    return {
+      agentFailure: {
+        errors: failures.reduce((pre, { message }) => (pre ? `${pre}, ${message}` : message), ""),
+        rules: getAgentFailureRules(alert)
+      },
+      severity: kAgentFailureSeverity
+    };
+  }
+
   async #sendNotification(alert: NotifierAlert | AgentFailureAlert) {
     const { notifier } = alert;
     const rule = "rule" in alert ? alert.rule : null;
@@ -101,36 +126,22 @@ export class Notifier {
     const notifierConfig = config.notifiers[notifier]!;
 
     const ruleConfig = rule ? config.rules.find((configRule) => configRule.name === rule.name)! : null;
-    const ruleTemplate = ruleConfig?.alert.template;
-    if (rule && typeof ruleTemplate === "string") {
-      ruleConfig!.alert.template = config.templates![ruleTemplate]!;
-    }
 
     const notifierOptions = {
       ...notifierConfig,
-      // eslint-disable-next-line max-len
-      template: rule ? ruleTemplate : config.selfMonitoring!.template,
-      data: {
-        ruleConfig,
-        counter: rule ? rule.threshold : null,
-        label: rule ? { ...new StreamSelector(ruleConfig!.logql).kv(), ...rule.labels } : null,
-        agentFailure: rule ? null : {
-          errors:
-            (alert as AgentFailureAlert).failures.reduce((pre, { message }) => (pre ? `${pre}, ${message}` : message), ""),
-          rules: getAgentFailureRules(alert as AgentFailureAlert)
-        },
-        severity: rule ? ruleConfig!.alert.severity : kAgentFailureSeverity,
-        lokiUrl: rule ? await utils.getLokiUrl(rule, ruleConfig!) : null
-      }
+      template: rule ? ruleConfig!.alert.template : config.selfMonitoring!.template,
+      data: rule ? await this.#notiferAlertData(alert as NotifierAlert) : this.#agentFailureAlertData(alert as AgentFailureAlert)
     };
     const notifierPackage = Notifier.localPackages.has(notifier) ? `@sigyn/${notifier}` : notifier;
 
     try {
       const notifier = await import(notifierPackage);
       await notifier.execute(notifierOptions);
+
+      this.#logger.info(`[SELF-MONITORING](notify: success|notifier: ${alert.notifier})`);
+
       if (!rule) {
         this.#queue.done();
-        this.#logger.info(`[SELF-MONITORING](notify: success|notifier: ${alert.notifier})`);
 
         return;
       }
@@ -138,8 +149,6 @@ export class Notifier {
       db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
         "success", (alert as NotifierAlert).notif.alertId
       );
-
-      this.#logger.info(`[${rule.name}](notify: success|notifier: ${alert.notifier})`);
     }
     catch (error) {
       db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
