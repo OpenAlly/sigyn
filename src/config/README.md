@@ -269,7 +269,7 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   | `throttle.count`    | `number` | ❌ | The count threshold to bypass throttle, default to `0` (never send alert before the end of interval). |
 
 > [!WARNING]
-> Self-monitoring templates can a root template reference, however the available variables are differents.
+> Self-monitoring templates can be a root template reference, however the available variables are differents.
 
 - `rule.labelFilters` (Object, Optional):
   - This object specifies label filters to add for a given rule.
