@@ -1988,6 +1988,21 @@ describe("Config validation", () => {
     });
   });
 
+  it("property 'selfMonitoring.notifiers' must have at least one item", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...kValidConfig,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: []
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/notifiers: must NOT have fewer than 1 items"
+    });
+  });
+
   it("property 'selfMonitoring.errorFilters' should be optional", () => {
     assert.doesNotThrow(() => {
       validateConfig({
