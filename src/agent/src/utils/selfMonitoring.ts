@@ -11,7 +11,9 @@ import { createAgentFailureAlert } from "../alert";
 
 export function getAgentFailureRules(alert: AgentFailureAlert): string {
   const ruleIds = new Set(alert.failures.map(({ ruleId }) => ruleId));
-  const failures = getDB().prepare("SELECT name FROM rules WHERE id IN (?)").all([...ruleIds]) as { name: string }[];
+  const failures = getDB()
+    .prepare("SELECT name FROM rules WHERE id IN (?)")
+    .all([...ruleIds]) as { name: string }[];
 
   return failures.map(({ name }) => name).join(", ");
 }
@@ -24,9 +26,10 @@ function hasAgentFailureThrottle(throttle: SigynSelfMonitoring["throttle"]) {
   const { interval, count = 0 } = throttle;
 
   const intervalDate = cronUtils.durationOrCronToDate(interval, "subtract").valueOf();
-  const agentFailuresCount = getDB().prepare("SELECT * FROM agentFailures WHERE timestamp <= ?").all(
-    intervalDate
-  ).length;
+  const agentFailuresCount = getDB()
+    .prepare("SELECT * FROM agentFailures WHERE timestamp <= ?")
+    .all(intervalDate)
+    .length;
 
   return agentFailuresCount <= count;
 }
@@ -48,11 +51,13 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
 
   try {
     const dbRule = rule.getRuleFromDatabase();
-    getDB().prepare("INSERT INTO agentFailures (ruleId, message, timestamp) VALUES (?, ?, ?)").run(
-      dbRule.id,
-      errorMessage,
-      Date.now()
-    );
+    getDB()
+      .prepare("INSERT INTO agentFailures (ruleId, message, timestamp) VALUES (?, ?, ?)")
+      .run(
+        dbRule.id,
+        errorMessage,
+        Date.now()
+      );
 
     const agentFailures = getDB().prepare("SELECT * FROM agentFailures").all() as DbAgentFailure[];
     if (agentFailures.length > minimumErrorCount) {
