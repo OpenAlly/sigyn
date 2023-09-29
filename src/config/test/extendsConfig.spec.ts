@@ -59,7 +59,14 @@ describe("Extended configs", () => {
             count: "1",
             interval: "1m"
           },
-          template: "main",
+          template: {
+            title: "🚨 {ruleName} - Triggered {counter} times!",
+            content: [
+              "- LogQL: {logql}",
+              "- Threshold: {count}",
+              "- Interval: {interval}"
+            ]
+          },
           severity: "error"
         }
       },
@@ -75,7 +82,9 @@ describe("Extended configs", () => {
             count: "1",
             interval: "1m"
           },
-          template: "foo",
+          template: {
+            title: "🚨 {ruleName} - Triggered {counter} times!"
+          },
           severity: "error"
         }
       }

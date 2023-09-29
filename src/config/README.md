@@ -25,7 +25,7 @@
 
 ## ⚙️ Configuration
 
-The **Sigyn** configuration object consists of theses properties: `loki`, `templates`, `rules` and `notifiers`.
+The **Sigyn** configuration object consists of theses properties: `loki`, `templates`, `rules`,  `notifiers` and `selfMonitoring`.
 
 ### Example configuration
 
@@ -132,6 +132,8 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
 - `warning` | `minor`
 - `information` | `info` | `low`
 
+The `selfMonitoring` property defines how/when Sigyn should emit alert for self problem (i.e when Loki API is down)
+
 ### Schema Properties
 
 - `loki` (Object, Required):
@@ -226,6 +228,9 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   | `extends`  | `string` | ❌       | The content of the notification template. |
 
   > [!NOTE]
+  > At least one of `title` or `content` must be provided.
+
+  > [!NOTE]
   > When extending template with `extends`:
   > - if `title` is specified then it replaces the extended template's title
   > - if `content` is `string[]` then it has the same behavior as using `content.after` i.e. it adds the content **after** the extended template's content.
@@ -250,8 +255,21 @@ The `defaultSeverity` defines the rule alert severities when not specified. Seve
   | `interval` | `string`   | ✔️       | The throttle duration (e.g. `1m`, `1h`) after sending an alert. |
   | `count`    | `number`   | ❌       | The count threshold to bypass throttle, default to `0` (never send alert before the end of interval). |
 
-> [!NOTE]
-> At least one of `title` or `content` must be provided.
+- `selfMonitoring` (Object, Optional):
+  - Represents the configuration to enable self-monitoring.
+
+  | Property    | Type                   | Required | Description |
+  |-------------|------------------------|----------|-------------|
+  | `template`  | `string` or `object` | ✔️ | The notifiers template, works same as `rules.alert.template` |
+  | `notifiers` | `string []` | ✔️ | An array of strings representing the notifiers for the rule. It will enables all configured `notifiers` by default. |
+  | `errorFilters` | `string[]` | ❌ | An array of strings representing the error to be filtered. Each value can be a strict-equal value or a RegExp. Examples of errors: `Bad Gateway`, `Bad Request` (if `rule.logql` is wrong), `Gateway Timeout`, etc |
+  | `ruleFilters` | `string[]` | ❌ | An array of strings representing the rules to be filtered, **by their name**. Can be useful for instance if you have a rule with a very big potential count of logs that could often get a timeout |
+  | `minimumErrorCount` | `number` | ❌ | The minimum of error before triggering an alert |
+  | `throttle.interval` | `string` | ✔️ | The throttle duration (e.g. `1m`, `1h`) after sending an alert. |
+  | `throttle.count`    | `number` | ❌ | The count threshold to bypass throttle, default to `0` (never send alert before the end of interval). |
+
+> [!WARNING]
+> Self-monitoring templates can be a root template reference, however the available variables are differents.
 
 - `rule.labelFilters` (Object, Optional):
   - This object specifies label filters to add for a given rule.
@@ -278,7 +296,14 @@ You can use any of theses variables, surrounding with `{}` (see example below):
 - `counter`
 - `counter`
 - `interval`
-- `lokiUrl` **Note** you can use hyperlink with Markdown i.e. `[See logs]({lokiUrl})`
+- `lokiUrl` 
+
+> [!NOTE]
+> You can use hyperlink with Markdown i.e. `[See logs]({lokiUrl})`
+
+For self-monitoring, you can use theses variables, surrounding with `{}`:
+- `agentFailure.errors` which is equal to the joined error messages
+- `agentFailure.rules` which is equal to the joined failed rules
 
 You can also use a label variable from your LogQL using `{label.x}`:
 ```json

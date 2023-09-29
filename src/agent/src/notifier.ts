@@ -3,19 +3,26 @@ import { getConfig } from "@sigyn/config";
 import { StreamSelector } from "@sigyn/logql";
 
 // Import Internal Dependencies
-import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "./database";
+import { DbAgentFailure, DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "./database";
 import { NotifierQueue } from "./notifierQueue";
 import * as utils from "./utils/index";
 import { Logger } from ".";
+import { getAgentFailureRules } from "./utils/selfMonitoring";
 
 // CONSTANTS
 const kPrivateInstancier = Symbol("instancier");
+const kAgentFailureSeverity = "critical";
 
 export interface NotifierAlert {
   rule: DbRule & { labels: Record<string, string>; oldestLabelTimestamp: number | null };
   notifier: string;
   notif: Pick<DbAlertNotif, "alertId" | "notifierId">;
   error?: Error;
+}
+
+export interface AgentFailureAlert {
+  failures: DbAgentFailure[];
+  notifier: string;
 }
 
 export class Notifier {
@@ -31,7 +38,7 @@ export class Notifier {
    */
   private static shared: Notifier;
 
-  #queue = new NotifierQueue();
+  #queue = new NotifierQueue<NotifierAlert | AgentFailureAlert>();
   #logger: Logger;
   #notifiersId = new Map<string, number>();
 
@@ -76,32 +83,54 @@ export class Notifier {
     this.#queue.push(...notificationAlerts);
   }
 
-  async #sendNotifications(notificationAlerts: NotifierAlert[]) {
+  sendAgentFailureAlerts(alerts: AgentFailureAlert[]) {
+    this.#queue.push(...alerts);
+  }
+
+  async #sendNotifications(notificationAlerts: (NotifierAlert | AgentFailureAlert)[]) {
     await Promise.allSettled(
       notificationAlerts.map((alert) => this.#sendNotification(alert))
     );
   }
 
-  async #sendNotification(alert: NotifierAlert) {
-    const { notifier, rule } = alert;
+  async #notiferAlertData(alert: NotifierAlert) {
+    const { rule } = alert;
+    const ruleConfig = getConfig().rules.find((configRule) => configRule.name === rule.name)!;
 
-    const db = getDB();
-    const config = getConfig();
-    const ruleConfig = config.rules.find((rule) => rule.name === alert.rule.name)!;
-    const notifierConfig = config.notifiers[notifier]!;
-
-    const ruleTemplate = ruleConfig.alert.template;
-    if (typeof ruleTemplate === "string") {
-      ruleConfig.alert.template = config.templates![ruleTemplate]!;
-    }
-
-    const notifierOptions = {
-      ...notifierConfig,
+    return {
       ruleConfig,
-      counter: alert.rule.threshold,
+      counter: rule.threshold,
       label: { ...new StreamSelector(ruleConfig.logql).kv(), ...rule.labels },
       severity: ruleConfig.alert.severity,
       lokiUrl: await utils.getLokiUrl(rule, ruleConfig)
+    };
+  }
+
+  #agentFailureAlertData(alert: AgentFailureAlert) {
+    const { failures } = alert;
+
+    return {
+      agentFailure: {
+        errors: failures.reduce((pre, { message }) => (pre ? `${pre}, ${message}` : message), ""),
+        rules: getAgentFailureRules(alert)
+      },
+      severity: kAgentFailureSeverity
+    };
+  }
+
+  async #sendNotification(alert: NotifierAlert | AgentFailureAlert) {
+    const { notifier } = alert;
+    const rule = "rule" in alert ? alert.rule : null;
+    const db = getDB();
+    const config = getConfig();
+    const notifierConfig = config.notifiers[notifier]!;
+
+    const ruleConfig = rule ? config.rules.find((configRule) => configRule.name === rule.name)! : null;
+
+    const notifierOptions = {
+      ...notifierConfig,
+      template: rule ? ruleConfig!.alert.template : config.selfMonitoring!.template,
+      data: rule ? await this.#notiferAlertData(alert as NotifierAlert) : this.#agentFailureAlertData(alert as AgentFailureAlert)
     };
     const notifierPackage = Notifier.localPackages.has(notifier) ? `@sigyn/${notifier}` : notifier;
 
@@ -109,18 +138,25 @@ export class Notifier {
       const notifier = await import(notifierPackage);
       await notifier.execute(notifierOptions);
 
-      db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
-        "success", alert.notif.alertId
-      );
+      this.#logger.info(`[SELF-MONITORING](notify: success|notifier: ${alert.notifier})`);
 
-      this.#logger.info(`[${alert.rule.name}](notify: success|notifier: ${alert.notifier})`);
+      if (!rule) {
+        this.#queue.done();
+
+        return;
+      }
+
+      db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
+        "success", (alert as NotifierAlert).notif.alertId
+      );
     }
     catch (error) {
       db.prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?").run(
-        "failed", alert.notif.alertId
+        "failed", (alert as NotifierAlert).notif.alertId
       );
 
-      this.#logger.error(`[${alert.rule.name}](notify: error|notifier: ${alert.notifier}|message: ${error.message})`);
+      const identifier = rule ? rule.name : "SELF-MONITORING";
+      this.#logger.error(`[${identifier}](notify: error|notifier: ${alert.notifier}|message: ${error.message})`);
     }
     finally {
       this.#queue.done();

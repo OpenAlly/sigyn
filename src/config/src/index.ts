@@ -10,12 +10,12 @@ import * as utils from "./utils";
 export * from "./types";
 export { validateConfig, validateExtendedConfig };
 
-let config: SigynInitializedConfig;
+let initializedConfig: SigynInitializedConfig;
 
 export async function initConfig(configPath: string | URL): Promise<SigynInitializedConfig> {
   const rawConfig = fs.readFileSync(configPath, "utf-8");
 
-  config = JSON.parse(rawConfig);
+  const config: SigynInitializedConfig = JSON.parse(rawConfig);
 
   if (config.extends) {
     for (const extendedConfigPath of config.extends) {
@@ -45,14 +45,16 @@ export async function initConfig(configPath: string | URL): Promise<SigynInitial
 
   config.rules = utils.applyRulesLogQLVariables({ ...config, rules });
 
-  return utils.applyDefaultValues(config);
+  initializedConfig = utils.applyDefaultValues(config);
+
+  return initializedConfig;
 }
 
 export function getConfig(): SigynInitializedConfig {
-  if (config === undefined) {
+  if (initializedConfig === undefined) {
     throw new Error("You must init config first");
   }
 
-  return config;
+  return initializedConfig;
 }
 

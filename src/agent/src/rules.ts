@@ -18,18 +18,18 @@ export interface RuleOptions {
 }
 
 export class Rule {
-  #config: SigynRule;
+  config: SigynRule;
   #logger: Logger;
 
   constructor(rule: SigynRule, options: RuleOptions) {
     const { logger } = options;
 
     this.#logger = logger;
-    this.#config = rule;
+    this.config = rule;
   }
 
   getRuleFromDatabase(): DbRule {
-    return getDB().prepare("SELECT * FROM rules WHERE name = ?").get(this.#config.name) as DbRule;
+    return getDB().prepare("SELECT * FROM rules WHERE name = ?").get(this.config.name) as DbRule;
   }
 
   getAlertFormattedRule(): NotifierAlert["rule"] {
@@ -39,8 +39,8 @@ export class Rule {
     const labels = this.getDistinctLabelsFromDatabase(rule.id);
     for (const { key, value } of labels) {
       // if rule is based on current DB label, we take only if matching rule
-      if (key === this.#config.alert.on.label) {
-        const { value: wantedValue, valueMatch } = this.#config.alert.on;
+      if (key === this.config.alert.on.label) {
+        const { value: wantedValue, valueMatch } = this.config.alert.on;
 
         if (wantedValue) {
           const rangeValueMatch = utils.rules.OPERATOR_VALUE_REGEXP.exec(wantedValue);
@@ -67,7 +67,7 @@ export class Rule {
     return {
       ...rule,
       labels: formattedLabels,
-      oldestLabelTimestamp: this.#config.alert.on.label ? getOldestLabelTimestamp(rule.id, this.#config.alert.on.label) : null
+      oldestLabelTimestamp: this.config.alert.on.label ? getOldestLabelTimestamp(rule.id, this.config.alert.on.label) : null
     };
   }
 
@@ -83,9 +83,9 @@ export class Rule {
     const databaseRule = this.getRuleFromDatabase();
 
     if (databaseRule === undefined) {
-      getDB().prepare("INSERT INTO rules (name) VALUES (?)").run(this.#config.name);
+      getDB().prepare("INSERT INTO rules (name) VALUES (?)").run(this.config.name);
 
-      this.#logger.info(`[Database] New rule '${this.#config.name}' added`);
+      this.#logger.info(`[Database] New rule '${this.config.name}' added`);
     }
   }
 
@@ -108,7 +108,7 @@ export class Rule {
         for (const [key, value] of Object.entries(stream)) {
         // If rule is based on label, insert as many label as there is values
         // because we receive only one stream for N values (but the stream is the same for each value)
-          if (this.#config.alert.on.label === key) {
+          if (this.config.alert.on.label === key) {
             let insertedCount = 0;
 
             while (insertedCount++ < values.length) {
@@ -127,12 +127,12 @@ export class Rule {
       }
     })();
 
-    if (this.#config.alert.on.label) {
+    if (this.config.alert.on.label) {
       return this.#checkLabelThreshold(rule);
     }
 
     const timeThreshold = utils.cron
-      .durationOrCronToDate(this.#config.alert.on.interval!, "subtract")
+      .durationOrCronToDate(this.config.alert.on.interval!, "subtract")
       .valueOf();
 
     if (rule.lastIntervalReset === null || rule.lastIntervalReset - timeThreshold < 0) {
@@ -148,7 +148,7 @@ export class Rule {
 
     db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(rule.counter, rule.id);
 
-    const alertThreshold = this.#config.alert.on.count!;
+    const alertThreshold = this.config.alert.on.count!;
     this.#logger.info(`[${rule.name}](state: handle|logs: ${logs.reduce((acc, curr) => acc + curr.values.length, 0)}|polling: ${this.#getCurrentPolling()[1]}|previous: ${lastCounter}|new: ${rule.counter - lastCounter}|next: ${rule.counter}|alertThreshold: ${alertThreshold}|timeThreshold: ${timeThreshold})`);
 
     const [operator, value] = utils.rules.countThresholdOperator(alertThreshold);
@@ -183,7 +183,7 @@ export class Rule {
   }
 
   #checkLabelThreshold(rule: DbRule): boolean {
-    const { label, value, valueMatch, percentThreshold, count, minimumLabelCount, interval } = this.#config.alert.on;
+    const { label, value, valueMatch, percentThreshold, count, minimumLabelCount, interval } = this.config.alert.on;
 
     const labels = getDB().prepare("SELECT * FROM ruleLabels WHERE key = ? AND ruleId = ? ORDER BY timestamp ASC").all(label, rule.id) as DbRuleLabel[];
     const [olderLabel] = labels;
@@ -228,7 +228,7 @@ export class Rule {
   }
 
   #checkThrottle(rule: DbRule, db: Database): boolean {
-    const { throttle } = this.#config.alert;
+    const { throttle } = this.config.alert;
 
     if (!throttle) {
       return false;
@@ -269,7 +269,7 @@ export class Rule {
     const [isCron, polling] = this.#getCurrentPolling();
 
     if (isCron) {
-      if (this.#config.pollingStrategy === "bounded") {
+      if (this.config.pollingStrategy === "bounded") {
         if (this.#shouldSkipCron(polling)) {
           return null;
         }
@@ -319,7 +319,7 @@ export class Rule {
   }
 
   #getCurrentPolling(): utils.rules.RulePolling {
-    const rulePollings = utils.rules.getPollings(this.#config.polling);
+    const rulePollings = utils.rules.getPollings(this.config.polling);
 
     if (rulePollings.length === 1 && rulePollings[0][0] === false) {
       return rulePollings[0];

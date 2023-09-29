@@ -1,6 +1,6 @@
 // Import Third-party Dependencies
 import * as httpie from "@myunisoft/httpie";
-import { NotifierFormattedSigynRule } from "@sigyn/config";
+import { NotifierFormattedSigynRule, SigynInitializedTemplate } from "@sigyn/config";
 
 // CONSTANTS
 const kSeverityEmoji = {
@@ -12,39 +12,45 @@ const kSeverityEmoji = {
 
 interface ExecuteWebhookOptions {
   webhookUrl: string;
-  ruleConfig: NotifierFormattedSigynRule;
-  counter: number;
-  label: Record<string, string>;
+  data: ExecuteWebhookData;
+  template: SigynInitializedTemplate;
+}
+
+interface ExecuteWebhookData {
+  ruleConfig?: NotifierFormattedSigynRule;
+  counter?: number;
   severity: "critical" | "error" | "warning" | "info";
-  lokiUrl: string;
+  label?: Record<string, string>;
+  lokiUrl?: string;
+  agentFailure?: {
+    errors: string;
+    rules: string;
+  }
 }
 
 async function formatWebhook(options: ExecuteWebhookOptions) {
-  const { counter, ruleConfig, label, severity, lokiUrl } = options;
+  const { agentFailure, counter, ruleConfig, label, severity, lokiUrl } = options.data;
 
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
 
-  const {
-    alert: {
-      on: {
-        count, interval
-      },
-      template: {
-        title = "",
-        content: templateContent = []
-      }
-    },
-    name: ruleName,
-    logql
-  } = ruleConfig;
-
-  if (title === "" && templateContent.length === 0) {
+  const { title: templateTitle = "", content: templateContent = [] } = options.template;
+  if (templateTitle === "" && templateContent.length === 0) {
     throw new Error("Invalid rule template: one of the title or content is required.");
   }
 
-  const formattedLogQL = `\`${logql.replaceAll("`", "'")}\``;
-  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label, lokiUrl };
+  function formatLogQL(logql: string) {
+    return `\`${logql.replaceAll("`", "'")}\``;
+  }
+
+  const templateData = {
+    ...ruleConfig ?? {},
+    agentFailure,
+    counter,
+    logql: ruleConfig?.logql ? formatLogQL(ruleConfig.logql) : null,
+    label,
+    lokiUrl
+  };
   const textTemplateOptions = {
     transform: ({ value, key }) => (key === "logql" || key === "lokiUrl" ? value : `**${value ?? "unknown"}**`)
   };
@@ -60,7 +66,7 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
   ));
 
   return {
-    title: pupa(`${kSeverityEmoji[severity]} ${title}`, templateData, titleTemplateOptions),
+    title: pupa(`${kSeverityEmoji[severity]} ${templateTitle}`, templateData, titleTemplateOptions),
     text: content.join("\n")
   };
 }

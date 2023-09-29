@@ -5,7 +5,8 @@ export interface SigynConfig {
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
   missingLabelStrategy: "ignore" | "error";
-  defaultSeverity: AlertSeverity
+  defaultSeverity: AlertSeverity;
+  selfMonitoring?: SigynSelfMonitoring;
 }
 
 export interface SigynInitializedConfig {
@@ -15,7 +16,8 @@ export interface SigynInitializedConfig {
   templates?: Record<string, SigynInitializedTemplate>;
   extends?: string[];
   missingLabelStrategy: "ignore" | "error";
-  defaultSeverity: AlertSeverity
+  defaultSeverity: AlertSeverity;
+  selfMonitoring?: SigynInitializedSelfMonitoring;
 }
 
 export interface PartialSigynConfig {
@@ -25,7 +27,8 @@ export interface PartialSigynConfig {
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
   missingLabelStrategy?: "ignore" | "error";
-  defaultSeverity?: AlertSeverity
+  defaultSeverity?: AlertSeverity;
+  selfMonitoring?: SigynSelfMonitoring;
 }
 
 export type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
@@ -68,9 +71,7 @@ export interface PartialSigynRule {
 }
 
 export type NotifierFormattedSigynRule = Omit<SigynInitializedRule, "alert"> & {
-  alert: Omit<SigynInitializedAlert, "template"> & {
-      template: SigynInitializedTemplate;
-  };
+  alert: Omit<SigynInitializedAlert, "template">
 };
 
 export type AlertSeverity =
@@ -107,7 +108,7 @@ export interface SigynInitializedAlert {
     percentThreshold?: number;
     minimumLabelCount?: number;
   },
-  template: string | SigynInitializedTemplate;
+  template: SigynInitializedTemplate;
   severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
   throttle?: {
     count: number;
@@ -147,4 +148,28 @@ export interface SigynAlertTemplate {
 export interface SigynInitializedTemplate {
   title?: string;
   content?: string[];
+}
+
+export interface SigynSelfMonitoring {
+  template: string | SigynInitializedTemplate;
+  notifiers: string[];
+  errorFilters?: string[];
+  ruleFilters?: string[];
+  minimumErrorCount?: number;
+  throttle?: {
+    count?: number;
+    interval: string;
+  };
+}
+
+export interface SigynInitializedSelfMonitoring {
+  template: SigynInitializedTemplate;
+  notifiers: string[];
+  errorFilters?: string[];
+  ruleFilters?: string[];
+  minimumErrorCount?: number;
+  throttle?: {
+    count?: number;
+    interval: string;
+  };
 }

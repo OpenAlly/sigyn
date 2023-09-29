@@ -1,6 +1,6 @@
 // Import Third-party Dependencies
 import * as httpie from "@myunisoft/httpie";
-import { NotifierFormattedSigynRule } from "@sigyn/config";
+import { NotifierFormattedSigynRule, SigynInitializedTemplate } from "@sigyn/config";
 
 // CONSTANTS
 const kWebhookUsername = "Sigyn Agent";
@@ -21,33 +21,28 @@ const kSeverityEmoji = {
 
 interface ExecuteWebhookOptions {
   webhookUrl: string;
-  ruleConfig: NotifierFormattedSigynRule;
-  counter: number;
-  label: Record<string, string>;
+  data: ExecuteWebhookData;
+  template: SigynInitializedTemplate;
+}
+
+interface ExecuteWebhookData {
+  ruleConfig?: NotifierFormattedSigynRule;
+  counter?: number;
   severity: "critical" | "error" | "warning" | "info";
-  lokiUrl: string;
+  label?: Record<string, string>;
+  lokiUrl?: string;
+  agentFailure?: {
+    errors: string;
+    rules: string;
+  }
 }
 
 async function formatWebhook(options: ExecuteWebhookOptions) {
-  const { counter, ruleConfig, label, severity, lokiUrl } = options;
-
+  const { agentFailure, counter, ruleConfig, label, severity, lokiUrl } = options.data;
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
 
-  const {
-    alert: {
-      on: {
-        count, interval
-      },
-      template: {
-        title: templateTitle = "",
-        content: templateContent = []
-      }
-    },
-    name: ruleName,
-    logql
-  } = ruleConfig;
-
+  const { title: templateTitle = "", content: templateContent = [] } = options.template;
   if (templateTitle === "" && templateContent.length === 0) {
     throw new Error("Invalid rule template: one of the title or content is required.");
   }
@@ -55,8 +50,20 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
   // displaying backtick in code snippet needs code snippet to be surround by double backtick.
   // if the logql ends with a backtick, we need to add a space after it otherwise the string
   // ends with triple backtick and the code snippet is done.
-  const formattedLogQL = logql.includes("`") ? `\`\`${logql.endsWith("`") ? `${logql} ` : logql}\`\`` : `\`${logql}\``;
-  const templateData = { ruleName, count, counter, interval, logql: formattedLogQL, label, lokiUrl };
+  function formatLogQL(logql: string) {
+    return logql.includes("`") ? `\`\`${logql.endsWith("`") ? `${logql} ` : logql}\`\`` : `\`${logql}\``;
+  }
+
+  const templateData = {
+    ...ruleConfig ?? {},
+    ruleName: ruleConfig?.name,
+    agentFailure,
+    counter,
+    logql: ruleConfig?.logql ? formatLogQL(ruleConfig.logql) : null,
+    label,
+    lokiUrl
+  };
+
   const contentTemplateOptions = {
     transform: ({ key, value }) => (key === "lokiUrl" ? value : `**${value === undefined ? "unknown" : value}**`),
     ignoreMissing: true

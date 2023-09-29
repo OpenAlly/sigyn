@@ -7,6 +7,7 @@ import { AsyncTask } from "toad-scheduler";
 import { Rule } from "../rules";
 import { Logger } from "..";
 import { createRuleAlert } from "../alert";
+import { handleAgentFailure } from "../utils/selfMonitoring";
 
 export interface AsyncTaskOptions {
   logger: Logger;
@@ -23,11 +24,10 @@ export function asyncTask(ruleConfig: SigynInitializedRule, options: AsyncTaskOp
       return;
     }
 
-    const { logs } = await lokiApi.queryRangeStream<string>(ruleConfig.logql, {
-      start
-    });
-
     try {
+      const { logs } = await lokiApi.queryRangeStream<string>(ruleConfig.logql, {
+        start
+      });
       logger.info(`[${ruleConfig.name}](state: polling|start: ${start}|end: ${Date.now()}|query: ${ruleConfig.logql})`);
 
       const createAlert = await rule.walkOnLogs(logs);
@@ -38,6 +38,8 @@ export function asyncTask(ruleConfig: SigynInitializedRule, options: AsyncTaskOp
     }
     catch (e) {
       logger.error(`[${ruleConfig.name}](error: ${e.message})`);
+
+      handleAgentFailure(e.message, rule, logger);
     }
   });
 

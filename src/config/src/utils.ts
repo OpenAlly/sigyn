@@ -29,6 +29,9 @@ export async function initializeRules(config: SigynConfig): Promise<SigynRule[]>
     if (typeof rule.alert.template === "object" && rule.alert.template.extends) {
       rule.alert.template = extendsTemplates(rule.alert.template, config);
     }
+    else if (typeof rule.alert.template === "string") {
+      rule.alert.template = config.templates![rule.alert.template];
+    }
 
     if (!rule.labelFilters) {
       mergedRules.push(rule);
@@ -131,7 +134,13 @@ export function applyDefaultValues(
       rule.pollingStrategy ??= kDefaultRulePollingStrategy;
 
       return rule as SigynInitializedRule;
-    })
+    }),
+    selfMonitoring: config.selfMonitoring ? {
+      ...config.selfMonitoring,
+      template: typeof config.selfMonitoring.template === "string" ?
+        config.templates![config.selfMonitoring.template] as SigynInitializedTemplate :
+        config.selfMonitoring.template
+    } : undefined
   };
 }
 

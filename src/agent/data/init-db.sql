@@ -71,3 +71,15 @@ CREATE TABLE IF NOT EXISTS alertNotifs
         ON UPDATE CASCADE
         ON DELETE CASCADE
   ); 
+
+CREATE TABLE IF NOT EXISTS agentFailures
+  (
+    id        INTEGER PRIMARY KEY,
+    ruleId    INTEGER,
+    message   TEXT,
+    timestamp INTEGER,
+    FOREIGN KEY(ruleId)
+      REFERENCES rules(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+  );
