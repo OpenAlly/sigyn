@@ -38,7 +38,7 @@ export class Notifier {
    */
   private static shared: Notifier;
 
-  #queue = new NotifierQueue();
+  #queue = new NotifierQueue<NotifierAlert | AgentFailureAlert>();
   #logger: Logger;
   #notifiersId = new Map<string, number>();
 

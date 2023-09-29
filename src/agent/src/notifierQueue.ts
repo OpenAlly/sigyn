@@ -1,20 +1,17 @@
 // Import Node.js Dependencies
 import EventEmitter from "node:events";
 
-// Import Internal Dependencies
-import { AgentFailureAlert, NotifierAlert } from "./notifier";
-
 // CONSTANTS
 const kNotifsConcurrency = 10;
 
 // TODO: handle 2 (or more) same alert in the queue.
-export class NotifierQueue extends EventEmitter {
+export class NotifierQueue<T> extends EventEmitter {
   static DEQUEUE = Symbol("dequeue");
 
-  #notificationAlerts: (NotifierAlert | AgentFailureAlert)[] = [];
+  #notificationAlerts: T[] = [];
   #inProgress = 0;
 
-  push(...notifications: NotifierAlert[] | AgentFailureAlert[]) {
+  push(...notifications: T[]) {
     this.#notificationAlerts.push(...notifications);
 
     if (this.#inProgress === 0) {
