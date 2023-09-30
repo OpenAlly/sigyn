@@ -4,6 +4,7 @@
   },
   "notifiers": {
     "discord": {
+      "notifier": "discord",
       "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
     }
   },

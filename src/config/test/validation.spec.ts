@@ -355,4 +355,38 @@ describe("Config validation", () => {
       message: "Invalid config: /defaultSeverity: must be equal to one of the allowed values"
     });
   });
+
+  it("property 'notifiers.notifier' should be required", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        notifiers: {
+          discord: {
+            notifier: undefined as any,
+            webhookUrl: "https://foo.bar"
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /notifiers/discord: must have required property 'notifier'"
+    });
+  });
+
+  it("property 'notifiers.notifier' should be string", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        notifiers: {
+          discord: {
+            notifier: true as any,
+            webhookUrl: "https://foo.bar"
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /notifiers/discord/notifier: must be string"
+    });
+  });
 });

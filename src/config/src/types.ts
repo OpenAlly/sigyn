@@ -1,6 +1,9 @@
 export interface SigynConfig {
   loki: LokiConfig;
-  notifiers: Record<string, unknown>;
+  notifiers: Record<string, {
+    notifier: string;
+    [key: string]: unknown;
+  }>;
   rules: SigynRule[];
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
@@ -11,7 +14,10 @@ export interface SigynConfig {
 
 export interface SigynInitializedConfig {
   loki: LokiConfig;
-  notifiers: Record<string, unknown>;
+  notifiers: Record<string, {
+    notifier: string;
+    [key: string]: unknown;
+  }>;
   rules: SigynInitializedRule[];
   templates?: Record<string, SigynInitializedTemplate>;
   extends?: string[];
@@ -22,7 +28,10 @@ export interface SigynInitializedConfig {
 
 export interface PartialSigynConfig {
   loki: LokiConfig;
-  notifiers: Record<string, unknown>;
+  notifiers: Record<string, {
+    notifier: string;
+    [key: string]: unknown;
+  }>;
   rules: PartialSigynRule[];
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];

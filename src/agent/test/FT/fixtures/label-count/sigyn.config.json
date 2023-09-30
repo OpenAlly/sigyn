@@ -4,9 +4,11 @@
   },
   "notifiers": {
     "slack": {
+      "notifier": "slack",
       "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"
     },
     "discord": {
+      "notifier": "discord",
       "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
     }
   },
