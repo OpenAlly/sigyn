@@ -32,7 +32,21 @@
       "title": "Specify the notifiers configurations",
       "description": "Each notifier has its own configuration",
       "type": "object",
-      "additionalProperties": true
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "properties": {
+            "notifier": {
+              "description": "Represents the notifier library to execute notif",
+              "type": "string"
+            }
+          },
+          "required": [
+            "notifier"
+          ],
+          "additionalProperties": true
+        }
+      }
     },
     "extends": {
       "title": "Specify the configuration to extend",

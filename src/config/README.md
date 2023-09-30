@@ -38,15 +38,18 @@ The **Sigyn** configuration object consists of theses properties: `loki`, `templ
     "onlyTitle": {
       "title": "{ruleName} - Triggered {counter} times!"
     }
-  }
+  },
   "notifiers": {
     "slack": {
+      "notifier": "slack",
       "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"
     },
     "discord": {
+      "notifier": "discord",
       "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
     },
     "teams": {
+      "notifier": "teams",
       "webhookUrl": "https://bizoffice9447.webhook.office.com/webhookb2/aaa/bbb"
     }
   },
@@ -287,8 +290,32 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
 - `@sigyn/slack` [See docs](../slack/README.md)
 - `@sigyn/teams` [See docs](../teams/README.md)
 
+Theses notifiers can be set without `@sigyn/` scope in the config file.
+
+Each notifier is a key-value object where key represents the notifier name to reuse in rules and `notifier` the only required value property which represents the notifier library.
+
+**Example**
+```json
+"notifiers": {
+  "my-super-notifier": {
+    "notifier": "@sigyn/discord",
+    "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
+  },
+  "another-discord-notifier": {
+    "notifier": "discord",
+    "webhookUrl": "https://discord.com/api/webhooks/ccc/ddd"
+  }
+},
+"rules": [
+  {
+    ...
+    "notifiers": ["my-super-notifier"]
+  }
+]
+```
+
 > [!NOTE]
-> You can also use your own notifier and use any third-party notifier [more info](./TODO/)
+> You can also use your own notifier or any third-party notifier [more info](./TODO/)
 
 You can use any of theses variables, surrounding with `{}` (see example below):
 - `ruleName`

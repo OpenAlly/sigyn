@@ -2,7 +2,7 @@
 import dayjs from "dayjs";
 
 // Import Third-party Dependencies
-import { SigynRule, SigynSelfMonitoring } from "@sigyn/config";
+import { SigynRule, SigynSelfMonitoring, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { DbAgentFailure, getDB } from "./database";
@@ -20,10 +20,11 @@ export function createRuleAlert(
     rule.id,
     dayjs().valueOf()
   );
+  const { notifiers } = getConfig();
 
   notifier.sendAlerts(
     ruleConfig.notifiers.map((notifierName) => {
-      return { rule, notifier: notifierName };
+      return { rule, notifierConfig: notifiers[notifierName] };
     })
   );
 }
@@ -34,9 +35,11 @@ export function createAgentFailureAlert(
   logger: Logger
 ) {
   const notifier = Notifier.getSharedInstance(logger);
+  const { notifiers } = getConfig();
+
   notifier.sendAgentFailureAlerts(
     config.notifiers.map((notifierName) => {
-      return { failures, notifier: notifierName };
+      return { failures, notifierConfig: notifiers[notifierName] };
     })
   );
 }

@@ -522,4 +522,69 @@ describe("Rule common validations", () => {
       message: "Invalid config: /rules/0/labelFilters/foo/1: must be string"
     });
   });
+
+  it("rule property 'notifiers' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        rules: [
+          {
+            ...VALID_CONFIG.rules[0],
+            notifiers: undefined
+          }
+        ]
+      });
+    });
+  });
+
+  it("rule property 'notifiers' should be an array", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        rules: [
+          {
+            ...VALID_CONFIG.rules[0],
+            notifiers: true as any
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/notifiers: must be array"
+    });
+  });
+
+  it("rule property 'notifiers' items should be string", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        rules: [
+          {
+            ...VALID_CONFIG.rules[0],
+            notifiers: [true] as any
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/notifiers/0: must be string"
+    });
+  });
+
+  it("rule property 'notifiers' must be root referenced notifiers", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        rules: [
+          {
+            ...VALID_CONFIG.rules[0],
+            notifiers: ["slack"]
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Notifier 'slack' not found"
+    });
+  });
 });

@@ -6,7 +6,8 @@ export const VALID_CONFIG: PartialSigynConfig = {
     apiUrl: "http://localhost:3100"
   },
   notifiers: {
-    foo: {
+    discord: {
+      notifier: "discord",
       bar: "baz"
     }
   },

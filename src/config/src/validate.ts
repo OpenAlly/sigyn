@@ -23,6 +23,7 @@ export function validateConfig(config: PartialSigynConfig) {
   }
 
   validateTemplate(config);
+  validateNotifiers(config);
 }
 
 export function validateExtendedConfig(config: ExtendedSigynConfig) {
@@ -61,6 +62,28 @@ function validateTemplate(config: PartialSigynConfig) {
 
     if (configTemplate === undefined) {
       throw new Error(`Template '${template.extends}' not found`);
+    }
+  }
+}
+
+function validateNotifiers(config: PartialSigynConfig) {
+  for (const rule of config.rules) {
+    if (!rule.notifiers) {
+      continue;
+    }
+
+    for (const notifier of rule.notifiers) {
+      if (config.notifiers[notifier] === undefined) {
+        throw new Error(`Notifier '${notifier}' not found`);
+      }
+    }
+  }
+
+  if (config.selfMonitoring?.notifiers) {
+    for (const notifier of config.selfMonitoring.notifiers) {
+      if (config.notifiers[notifier] === undefined) {
+        throw new Error(`Notifier '${notifier}' not found`);
+      }
     }
   }
 }

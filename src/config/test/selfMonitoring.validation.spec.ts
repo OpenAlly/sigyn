@@ -167,7 +167,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           errorFilters: undefined
         }
       });
@@ -180,7 +180,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           errorFilters: "foo" as any
         }
       });
@@ -196,7 +196,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           errorFilters: [true] as any
         }
       });
@@ -212,7 +212,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           ruleFilters: undefined
         }
       });
@@ -225,7 +225,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           ruleFilters: "foo" as any
         }
       });
@@ -241,7 +241,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           ruleFilters: [true] as any
         }
       });
@@ -257,7 +257,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           minimumErrorCount: undefined
         }
       });
@@ -270,7 +270,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           minimumErrorCount: 5.5
         }
       });
@@ -286,7 +286,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           throttle: undefined
         }
       });
@@ -299,7 +299,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           throttle: "hello" as any
         }
       });
@@ -315,7 +315,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           throttle: {
             interval: "1m",
             count: undefined
@@ -331,7 +331,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           throttle: {
             interval: "1m",
             count: 5.5
@@ -350,7 +350,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           throttle: {
             interval: undefined as any
           }
@@ -368,7 +368,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           throttle: {
             interval: 55 as any
           }
@@ -386,7 +386,7 @@ describe("Self-monitoring validations", () => {
         ...VALID_CONFIG,
         selfMonitoring: {
           template: "foo",
-          notifiers: ["foo"],
+          notifiers: ["discord"],
           throttle: {
             interval: "1m",
             count: "5" as any
@@ -396,6 +396,21 @@ describe("Self-monitoring validations", () => {
     }, {
       name: "Error",
       message: "Invalid config: /selfMonitoring/throttle/count: must be integer"
+    });
+  });
+
+  it("property 'selfMonitoring.notifiers' must be root referenced notifiers", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["slack"]
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Notifier 'slack' not found"
     });
   });
 });

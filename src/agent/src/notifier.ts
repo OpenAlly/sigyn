@@ -15,14 +15,20 @@ const kAgentFailureSeverity = "critical";
 
 export interface NotifierAlert {
   rule: DbRule & { labels: Record<string, string>; oldestLabelTimestamp: number | null };
-  notifier: string;
+  notifierConfig: {
+    notifier: string;
+    [key: string]: unknown;
+  };
   notif: Pick<DbAlertNotif, "alertId" | "notifierId">;
   error?: Error;
 }
 
 export interface AgentFailureAlert {
   failures: DbAgentFailure[];
-  notifier: string;
+  notifierConfig: {
+    notifier: string;
+    [key: string]: unknown;
+  };
 }
 
 export class Notifier {
@@ -68,7 +74,7 @@ export class Notifier {
       const { id: alertId } = db
         .prepare("SELECT id from alerts WHERE ruleId = ?")
         .get(alert.rule.id) as Pick<DbAlert, "id">;
-      const notifierId = this.#databaseNotifierId(alert.notifier);
+      const notifierId = this.#databaseNotifierId(alert.notifierConfig.notifier);
 
       notificationAlerts.push({ ...alert, notif: { alertId, notifierId } });
     }
@@ -119,12 +125,10 @@ export class Notifier {
   }
 
   async #sendNotification(alert: NotifierAlert | AgentFailureAlert) {
-    const { notifier } = alert;
+    const { notifierConfig } = alert;
     const rule = "rule" in alert ? alert.rule : null;
     const db = getDB();
     const config = getConfig();
-    const notifierConfig = config.notifiers[notifier]!;
-
     const ruleConfig = rule ? config.rules.find((configRule) => configRule.name === rule.name)! : null;
 
     const notifierOptions = {
@@ -132,13 +136,13 @@ export class Notifier {
       template: rule ? ruleConfig!.alert.template : config.selfMonitoring!.template,
       data: rule ? await this.#notiferAlertData(alert as NotifierAlert) : this.#agentFailureAlertData(alert as AgentFailureAlert)
     };
-    const notifierPackage = Notifier.localPackages.has(notifier) ? `@sigyn/${notifier}` : notifier;
-
+    const notifierLib = notifierConfig.notifier;
+    const notifierPackage = Notifier.localPackages.has(notifierLib) ? `@sigyn/${notifierLib}` : notifierLib;
     try {
       const notifier = await import(notifierPackage);
       await notifier.execute(notifierOptions);
 
-      this.#logger.info(`[SELF-MONITORING](notify: success|notifier: ${alert.notifier})`);
+      this.#logger.info(`[SELF-MONITORING](notify: success|notifier: ${alert.notifierConfig.notifier})`);
 
       if (!rule) {
         this.#queue.done();
@@ -156,7 +160,7 @@ export class Notifier {
       );
 
       const identifier = rule ? rule.name : "SELF-MONITORING";
-      this.#logger.error(`[${identifier}](notify: error|notifier: ${alert.notifier}|message: ${error.message})`);
+      this.#logger.error(`[${identifier}](notify: error|notifier: ${alert.notifierConfig.notifier}|message: ${error.message})`);
     }
     finally {
       this.#queue.done();
