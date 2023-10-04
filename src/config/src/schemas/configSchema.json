@@ -144,6 +144,11 @@
               "title": "The interval of time to pause alert",
               "description": "A duration string (e.g. '1m', '1h', '1d').",
               "type": "string"
+            },
+            "activationThreshold": {
+              "title": "The number of alert before activating the throttle",
+              "type": "integer",
+              "minimum": 1
             }
           },
           "required": [

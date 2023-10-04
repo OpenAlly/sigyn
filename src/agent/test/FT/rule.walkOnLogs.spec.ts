@@ -189,7 +189,6 @@ describe("Rule.walkOnLogs()", () => {
             const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
             assert.equal(createAlert, false);
-            // once alert triggers, counter should be reset to 0
             assert.equal(getRule(ruleConfig).throttleCount, i + 1);
           }
         });
@@ -201,6 +200,88 @@ describe("Rule.walkOnLogs()", () => {
           assert.equal(getRule(ruleConfig).counter, 0);
 
           const createAlert = await pollingIn200ms(rule, Array.from(Array(15)).map(() => "one new log"));
+
+          assert.equal(createAlert, true);
+          // once alert triggers, counter should be reset to 0
+          assert.equal(getRule(ruleConfig).counter, 0);
+        });
+      });
+    });
+
+    describe("A rule with throttle.count = 6, throttle.interval = '2s' & throttle.activationThreshold = '5'", () => {
+      let config: SigynConfig;
+      let ruleConfig: SigynConfig["rules"][0];
+
+      before(async() => {
+        config = await initConfig(kMultiPollingConfigLocation);
+        ruleConfig = {
+          ...config.rules[0],
+          name: "activation throttle",
+          alert: {
+            ...config.rules[0].alert,
+            throttle: {
+              ...config.rules[0].alert.throttle!,
+              activationThreshold: 5,
+              interval: "2s"
+            }
+          }
+        };
+      });
+
+      describe("When receiving less logs than throttle.count within the interval", () => {
+        it("should send a first alert", async() => {
+          const rule = new Rule(ruleConfig, { logger: kLogger });
+          rule.init();
+
+          assert.equal(getRule(ruleConfig).counter, 0);
+
+          const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
+
+          assert.equal(createAlert, true);
+          // once alert triggers, counter should be reset to 0
+          assert.equal(getRule(ruleConfig).counter, 0);
+
+          // Since throttle is based on alerts table, we need to create it ourself
+          createAlertInDB(getRule(ruleConfig));
+        });
+
+        it("should send another alert until activationThreshold satisfies number of alerts", async() => {
+          for (let i = 0; i < 5; i++) {
+            const rule = new Rule(ruleConfig, { logger: kLogger });
+
+            assert.equal(getRule(ruleConfig).counter, 0);
+
+            const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
+
+            assert.equal(createAlert, true);
+            // once alert triggers, counter should be reset to 0
+            assert.equal(getRule(ruleConfig).counter, 0);
+
+            // Since throttle is based on alerts table, we need to create it ourself
+            createAlertInDB(getRule(ruleConfig));
+          }
+        });
+
+        // eslint-disable-next-line max-len
+        it("should then activate threshold and not send another alert whithin interval and with less logs than count threshold", async() => {
+          for (let i = 0; i < 5; i++) {
+            const rule = new Rule(ruleConfig, { logger: kLogger });
+
+            assert.equal(getRule(ruleConfig).counter, 0);
+
+            const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
+
+            assert.equal(createAlert, false);
+            assert.equal(getRule(ruleConfig).throttleCount, i + 1);
+          }
+        });
+
+        it("should then deactivate throttle when more logs than count threshold", async() => {
+          const rule = new Rule(ruleConfig, { logger: kLogger });
+
+          assert.equal(getRule(ruleConfig).counter, 0);
+
+          const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
           assert.equal(createAlert, true);
           // once alert triggers, counter should be reset to 0

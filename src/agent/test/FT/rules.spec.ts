@@ -119,6 +119,7 @@ describe("Rule.getAlertFormattedRule()", () => {
     getDB().exec("DELETE from ruleLabels");
 
     const rule = new Rule(config.rules[0], { logger: kLogger });
+    rule.init();
     await rule.walkOnLogs([
       { values: ["one"], stream: { foo: "bar" } },
       { values: ["two"], stream: { foo: "baz", foz: "boz" } }

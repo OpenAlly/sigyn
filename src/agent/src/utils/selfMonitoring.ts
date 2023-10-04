@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import { SigynSelfMonitoring, getConfig } from "@sigyn/config";
+import { SigynInitializedSelfMonitoring, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { DbAgentFailure, getDB } from "../database";
@@ -18,20 +18,24 @@ export function getAgentFailureRules(alert: AgentFailureAlert): string {
   return failures.map(({ name }) => name).join(", ");
 }
 
-function hasAgentFailureThrottle(throttle: SigynSelfMonitoring["throttle"]) {
+function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throttle"]) {
   if (!throttle) {
     return false;
   }
 
-  const { interval, count = 0 } = throttle;
+  const { interval, count, activationThreshold } = throttle;
 
   const intervalDate = cronUtils.durationOrCronToDate(interval, "subtract").valueOf();
-  const agentFailuresCount = getDB()
-    .prepare("SELECT * FROM agentFailures WHERE timestamp <= ?")
-    .all(intervalDate)
-    .length;
+  const agentFailuresAlert = (getDB()
+    .prepare("SELECT count FROM agentFailures WHERE timestamp >= ? ORDER BY count DESC")
+    .get(intervalDate) as { count: number });
+  const agentFailuresAlertCount = agentFailuresAlert?.count ?? 0;
 
-  return agentFailuresCount <= count;
+  if (agentFailuresAlertCount <= activationThreshold) {
+    return false;
+  }
+
+  return agentFailuresAlertCount === 1 ? false : agentFailuresAlertCount - activationThreshold <= count;
 }
 
 export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Logger) {
@@ -51,6 +55,7 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
 
   try {
     const dbRule = rule.getRuleFromDatabase();
+    getDB().exec("UPDATE agentFailures SET count = count + 1");
     getDB()
       .prepare("INSERT INTO agentFailures (ruleId, message, timestamp) VALUES (?, ?, ?)")
       .run(
@@ -66,7 +71,13 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
       }
 
       createAgentFailureAlert(agentFailures, config.selfMonitoring, logger);
-      getDB().prepare("DELETE FROM agentFailures").run();
+
+      // delete all agentFailures, if there is throttle: delete only the old ones
+      const { interval } = config.selfMonitoring.throttle ?? {};
+      const intervalDate = interval ?
+        cronUtils.durationOrCronToDate(interval, "subtract").valueOf() :
+        Date.now();
+      getDB().prepare("DELETE FROM agentFailures WHERE timestamp < ?").run(intervalDate);
     }
   }
   catch (error) {

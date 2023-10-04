@@ -78,6 +78,7 @@ CREATE TABLE IF NOT EXISTS agentFailures
     ruleId    INTEGER,
     message   TEXT,
     timestamp INTEGER,
+    count     INTEGER DEFAULT 1,
     FOREIGN KEY(ruleId)
       REFERENCES rules(id)
         ON UPDATE CASCADE
