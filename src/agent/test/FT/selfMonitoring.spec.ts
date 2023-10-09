@@ -228,7 +228,7 @@ describe("Self-monitoring", () => {
 
     task.execute();
     await setTimeout(200);
-    // first alert, no (remaining: 2)
+    // first alert, no throttle (remaining: 2)
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
 
     const pool = kMockAgent.get("https://discord.com");
