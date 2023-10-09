@@ -48,7 +48,19 @@ CREATE TABLE IF NOT EXISTS alerts
       REFERENCES rules(id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
-  ); 
+  );
+
+CREATE TABLE IF NOT EXISTS alertLabels
+  (
+    id        INTEGER PRIMARY KEY,
+    alertId   INTEGER,
+    key       TEXT,
+    value     TEXT,
+    FOREIGN KEY(alertId)
+      REFERENCES alerts(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+  );
 
 CREATE TABLE IF NOT EXISTS notifiers
   (

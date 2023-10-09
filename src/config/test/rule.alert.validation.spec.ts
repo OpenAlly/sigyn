@@ -501,4 +501,43 @@ describe("Rule alert validations", () => {
       message: "Invalid config: /rules/0/alert/throttle/count: must be integer"
     });
   });
+
+  it("rule alert property 'throttle.labelScope' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig(mergeAlert({
+        throttle: {
+          interval: "1m",
+          labelScope: undefined as any
+        }
+      }));
+    });
+  });
+
+  it("rule alert property 'throttle.labelScope' must be an array", () => {
+    assert.throws(() => {
+      validateConfig(mergeAlert({
+        throttle: {
+          interval: "1m",
+          labelScope: "foo" as any
+        }
+      }));
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/throttle/labelScope: must be array"
+    });
+  });
+
+  it("rule alert property 'throttle.labelScope' items must be string", () => {
+    assert.throws(() => {
+      validateConfig(mergeAlert({
+        throttle: {
+          interval: "1m",
+          labelScope: [5] as any
+        }
+      }));
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/throttle/labelScope/0: must be string"
+    });
+  });
 });

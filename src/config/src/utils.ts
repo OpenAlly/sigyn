@@ -129,6 +129,7 @@ export function applyDefaultValues(
       if (rule.alert.throttle) {
         rule.alert.throttle.count ??= kDefaultAlertThrottleCount;
         rule.alert.throttle.activationThreshold ??= 0;
+        rule.alert.throttle.labelScope ??= [];
       }
       rule.disabled ??= false;
       rule.notifiers ??= Object.keys(config.notifiers!);

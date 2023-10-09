@@ -7,7 +7,7 @@ import { after, before, describe, it } from "node:test";
 
 // Import Third-party Dependencies
 import dayjs from "dayjs";
-import { SigynConfig, SigynRule, initConfig } from "@sigyn/config";
+import { SigynInitializedConfig, SigynRule, initConfig } from "@sigyn/config";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 
 // Import Internal Dependencies
@@ -21,6 +21,7 @@ const kLabelConfigLocation = path.join(__dirname, "/fixtures/label/sigyn.config.
 const kLabelRangeValueConfigLocation = path.join(__dirname, "/fixtures/label-range-value/sigyn.config.json");
 const kLabelValueMatchConfigLocation = path.join(__dirname, "/fixtures/label-value-match/sigyn.config.json");
 const kLabelCountConfigLocation = path.join(__dirname, "/fixtures/label-count/sigyn.config.json");
+const kLabelScopeThrottleConfigLocation = path.join(__dirname, "/fixtures/throttle-label-scope/sigyn.config.json");
 const kLokiFixtureApiUrl = "http://localhost:3100";
 const kMockAgent = new MockAgent();
 const kGlobalDispatcher = getGlobalDispatcher();
@@ -55,9 +56,18 @@ function resetRuleCounter(rule: SigynRule): void {
   })();
 }
 
-function createAlertInDB(rule: DbRule): void {
-  getDB().prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)").run(rule.id, dayjs().valueOf());
+function createAlertInDB(rule: DbRule, labels = {}): void {
+  const { lastInsertRowid } = getDB().prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)")
+    .run(rule.id, dayjs().valueOf());
   getDB().prepare("UPDATE ruleLogs SET processed = 1 WHERE ruleId = ?").run(rule.id);
+
+  for (const [key, value] of Object.entries(labels)) {
+    getDB().prepare("INSERT INTO alertLabels (alertId, key, value) VALUES (?, ?, ?)").run(
+      lastInsertRowid,
+      key,
+      value
+    );
+  }
 }
 
 describe("Rule.walkOnLogs()", () => {
@@ -82,7 +92,7 @@ describe("Rule.walkOnLogs()", () => {
   });
 
   describe("A rule with polling = '200ms', alert.on.count = 5 and alert.on.interval = '1s'", () => {
-    let config: SigynConfig;
+    let config: SigynInitializedConfig;
 
     before(async() => {
       config = await initConfig(kMultiPollingConfigLocation);
@@ -209,8 +219,8 @@ describe("Rule.walkOnLogs()", () => {
     });
 
     describe("A rule with throttle.count = 6, throttle.interval = '2s' & throttle.activationThreshold = '5'", () => {
-      let config: SigynConfig;
-      let ruleConfig: SigynConfig["rules"][0];
+      let config: SigynInitializedConfig;
+      let ruleConfig: SigynInitializedConfig["rules"][0];
 
       before(async() => {
         config = await initConfig(kMultiPollingConfigLocation);
@@ -438,7 +448,7 @@ describe("Rule.walkOnLogs()", () => {
   });
 
   describe("A rule based on percent threshold label matching", () => {
-    let config: SigynConfig;
+    let config: SigynInitializedConfig;
 
     before(async() => {
       config = await initConfig(kLabelConfigLocation);
@@ -496,8 +506,98 @@ describe("Rule.walkOnLogs()", () => {
     });
   });
 
+  describe("A rule with a throttle scoped to label 'app'", () => {
+    let config: SigynInitializedConfig;
+
+    before(async() => {
+      config = await initConfig(kLabelScopeThrottleConfigLocation);
+    });
+
+    it("When receiving logs for app 'foo', it should send a first alert then activate throttle", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.init();
+
+      const createAlert = await rule.walkOnLogs([
+        { values: ["one new log"], stream: { app: "foo" } }
+      ]);
+
+      assert.equal(createAlert, true);
+      assert.equal(getRule(config.rules[0]).counter, 0);
+
+      // Since throttle is based on alerts table, we need to create it ourself
+      createAlertInDB(getRule(config.rules[0]), { app: "foo" });
+    });
+
+    it("Should then not send another alert because throttle is ON for app 'foo'", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.init();
+
+      const createAlert = await rule.walkOnLogs([
+        { values: ["one new log"], stream: { app: "foo" } }
+      ]);
+
+      assert.equal(createAlert, false);
+      assert.equal(getRule(config.rules[0]).counter, 1);
+    });
+
+    it("Should send another alert because app is 'bar' & throttle is off for this app", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.init();
+
+      const createAlert = await rule.walkOnLogs([
+        { values: ["one new log"], stream: { app: "bar" } }
+      ]);
+
+      assert.equal(createAlert, true);
+      assert.equal(getRule(config.rules[0]).counter, 0);
+
+      // Since throttle is based on alerts table, we need to create it ourself
+      createAlertInDB(getRule(config.rules[0]), { app: "bar" });
+    });
+
+    it("Should then not send another alert because throttle is ON for app 'bar'", async() => {
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.init();
+
+      const createAlert = await rule.walkOnLogs([
+        { values: ["one new log"], stream: { app: "bar" } }
+      ]);
+
+      assert.equal(createAlert, false);
+      assert.equal(getRule(config.rules[0]).counter, 1);
+    });
+
+    it("should then send alert for both app 'foo' & 'bar' because throttle is done for both (interval done)", async() => {
+      // throttle interval is 500ms, just wait even if first alert is sent 800ms ago
+      await timers.setTimeout(500);
+      const rule = new Rule(config.rules[0], { logger: kLogger });
+
+      // APP FOO
+      {
+        const createAlert = await rule.walkOnLogs([
+          { values: ["one new log"], stream: { app: "foo" } }
+        ]);
+
+        assert.equal(createAlert, true);
+        // Since throttle is based on alerts table, we need to create it ourself
+        createAlertInDB(getRule(config.rules[0]), { app: "foo" });
+      }
+
+      // APP BAR
+      {
+        const createAlert = await rule.walkOnLogs([
+          { values: ["one new log"], stream: { app: "bar" } }
+        ]);
+
+        assert.equal(createAlert, true);
+        // Since throttle is based on alerts table, we need to create it ourself
+        createAlertInDB(getRule(config.rules[0]), { app: "bar" });
+      }
+    });
+  });
+
   describe("A rule based on percent threshold label matching a range value", () => {
-    let config: SigynConfig;
+    let config: SigynInitializedConfig;
 
     before(async() => {
       config = await initConfig(kLabelRangeValueConfigLocation);
@@ -556,7 +656,7 @@ describe("Rule.walkOnLogs()", () => {
   });
 
   describe("A rule based on percent threshold label matching valueMatch", () => {
-    let config: SigynConfig;
+    let config: SigynInitializedConfig;
 
     before(async() => {
       config = await initConfig(kLabelValueMatchConfigLocation);
@@ -615,7 +715,7 @@ describe("Rule.walkOnLogs()", () => {
   });
 
   describe("A rule based on count label", () => {
-    let config: SigynConfig;
+    let config: SigynInitializedConfig;
 
     before(async() => {
       config = await initConfig(kLabelCountConfigLocation);

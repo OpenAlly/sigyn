@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 // Import Third-party Dependencies
-import { SigynRule } from "@sigyn/config";
+import { SigynInitializedRule } from "@sigyn/config";
 import { LokiStreamResult } from "@myunisoft/loki";
 import dayjs from "dayjs";
 import ms from "ms";
@@ -18,10 +18,11 @@ export interface RuleOptions {
 }
 
 export class Rule {
-  config: SigynRule;
+  config: SigynInitializedRule;
   #logger: Logger;
+  #lastFetchedStream: Record<string, string> | null = null;
 
-  constructor(rule: SigynRule, options: RuleOptions) {
+  constructor(rule: SigynInitializedRule, options: RuleOptions) {
     const { logger } = options;
 
     this.#logger = logger;
@@ -34,7 +35,7 @@ export class Rule {
 
   getAlertFormattedRule(): NotifierAlert["rule"] {
     const rule = this.getRuleFromDatabase();
-    const formattedLabels = {};
+    const formattedLabels = Object.create(null);
 
     const labels = this.getDistinctLabelsFromDatabase(rule.id);
     for (const { key, value } of labels) {
@@ -90,8 +91,9 @@ export class Rule {
   }
 
   async walkOnLogs(logs: LokiStreamResult[]): Promise<boolean> {
-    const db = getDB();
+    this.#lastFetchedStream = null;
 
+    const db = getDB();
     const now = dayjs().valueOf();
     const rule = this.getRuleFromDatabase();
     const ruleLabels = this.getDistinctLabelsFromDatabase(rule.id);
@@ -105,9 +107,16 @@ export class Rule {
 
     db.transaction(() => {
       for (const { stream, values } of logs) {
+        if (this.#lastFetchedStream === null) {
+          this.#lastFetchedStream = stream;
+        }
         for (const [key, value] of Object.entries(stream)) {
-        // If rule is based on label, insert as many label as there is values
-        // because we receive only one stream for N values (but the stream is the same for each value)
+          if (!(this.#lastFetchedStream![key] ??= value).split(",").includes(value)) {
+            this.#lastFetchedStream![key] += `,${value}`;
+          }
+
+          // If rule is based on label, insert as many label as there is values
+          // because we receive only one stream for N values (but the stream is the same for each value)
           if (this.config.alert.on.label === key) {
             let insertedCount = 0;
 
@@ -227,6 +236,41 @@ export class Rule {
     return utils.rules.countMatchOperator(operator, labelMatchCount, countValue);
   }
 
+  #ruleAlertsCount(rule: DbRule, interval: number): number {
+    const labelScope = this.config.alert.throttle!.labelScope;
+    if (labelScope.length > 0) {
+      if (this.#lastFetchedStream === null) {
+        return 0;
+      }
+
+      const alerts = getDB().prepare(
+        "SELECT alertId, key, value FROM alertLabels WHERE key IN (?)"
+      ).all(labelScope) as { alertId: number; key: string; value: string }[];
+
+      const alertIds = alerts.flatMap((alert) => {
+        if (this.#lastFetchedStream![alert.key].split(",").includes(alert.value)) {
+          return [alert.alertId];
+        }
+
+        return [];
+      });
+
+      if (alertIds.length === 0) {
+        return 0;
+      }
+
+      return (getDB().prepare("SELECT COUNT(id) as count FROM alerts WHERE id IN (?) AND createdAt >= ?").get(
+        alertIds,
+        interval
+      ) as { count: number }).count;
+    }
+
+    return (getDB().prepare("SELECT COUNT(id) as count FROM alerts WHERE ruleId = ? AND createdAt >= ?").get(
+      rule.id,
+      interval
+    ) as { count: number }).count;
+  }
+
   #checkThrottle(rule: DbRule, db: Database): boolean {
     const { throttle } = this.config.alert;
 
@@ -236,11 +280,10 @@ export class Rule {
 
     const { interval, count, activationThreshold } = throttle;
     const intervalDate = utils.cron.durationOrCronToDate(interval, "subtract").valueOf();
-    const ruleAlertsCount = db.prepare("SELECT * FROM alerts WHERE ruleId = ? AND createdAt >= ?").all(
-      rule.id,
-      intervalDate
-    ).length;
-    this.#logger.error(`[${rule.name}](activationThreshold: ${activationThreshold}|actual: ${ruleAlertsCount})`);
+    const ruleAlertsCount = this.#ruleAlertsCount(rule, intervalDate);
+    const labelScope = throttle.labelScope.length > 0 ? throttle.labelScope.join(", ") : "*";
+    this.#logger.error(`[${rule.name}](activationThreshold: ${activationThreshold}|actual: ${ruleAlertsCount}|labelScope: ${labelScope})`);
+
     if (count === 0 && ruleAlertsCount > 0) {
       this.#logger.error(`[${rule.name}](state: throttle|count: ${count}|actual: ${ruleAlertsCount})`);
 

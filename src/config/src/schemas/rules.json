@@ -327,6 +327,15 @@
                 "title": "The number of alert before activating the throttle",
                 "type": "integer",
                 "minimum": 1
+              },
+              "labelScope": {
+                "title": "The label scope to apply the throttle",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1,
+                "nullable": true
               }
             },
             "required": [
