@@ -257,6 +257,7 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   |------------|------------|----------|-------------|
   | `interval` | `string`   | ✔️       | The throttle duration (e.g. `1m`, `1h`) after sending an alert. |
   | `count`    | `number`   | ❌       | The count threshold to bypass throttle, default to `0` (never send alert before the end of interval). |
+  | `activationThreshold`    | `number`   | ❌       | The number of alerts allowed to be sent before the throttle to be activated. |
 
 - `selfMonitoring` (Object, Optional):
   - Represents the configuration to enable self-monitoring.
@@ -270,6 +271,7 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   | `minimumErrorCount` | `number` | ❌ | The minimum of error before triggering an alert |
   | `throttle.interval` | `string` | ✔️ | The throttle duration (e.g. `1m`, `1h`) after sending an alert. |
   | `throttle.count`    | `number` | ❌ | The count threshold to bypass throttle, default to `0` (never send alert before the end of interval). |
+  | `throttle.activationThreshold`    | `number` | ❌ | The number of alerts allowed to be sent before the throttle to be activated. |
 
 > [!WARNING]
 > Self-monitoring templates can be a root template reference, however the available variables are differents.
@@ -490,6 +492,7 @@ interface SigynAlert {
   throttle?: {
     count: number;
     interval: string;
+    activationThreshold: number;
   };
 }
 
@@ -508,6 +511,7 @@ interface SigynInitializedAlert {
   throttle?: {
     count: number;
     interval: string;
+    activationThreshold: number;
   };
 }
 
@@ -526,6 +530,7 @@ interface PartialSigynAlert {
   throttle?: {
     count?: number;
     interval: string;
+    activationThreshold: number;
   };
 }
 

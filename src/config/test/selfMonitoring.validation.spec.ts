@@ -399,6 +399,41 @@ describe("Self-monitoring validations", () => {
     });
   });
 
+  it("rule alert property 'throttle.activationThreshold' can be set", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["discord"],
+          throttle: {
+            interval: "1m",
+            activationThreshold: 5
+          }
+        }
+      });
+    });
+  });
+
+  it("rule alert property 'throttle.activationThreshold' cannot be float", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        selfMonitoring: {
+          template: "foo",
+          notifiers: ["discord"],
+          throttle: {
+            interval: "1m",
+            activationThreshold: 5.5
+          }
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /selfMonitoring/throttle/activationThreshold: must be integer"
+    });
+  });
+
   it("property 'selfMonitoring.notifiers' must be root referenced notifiers", () => {
     assert.throws(() => {
       validateConfig({

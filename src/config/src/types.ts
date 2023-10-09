@@ -104,6 +104,7 @@ export interface SigynAlert {
   throttle?: {
     count: number;
     interval: string;
+    activationThreshold?: number;
   };
 }
 
@@ -122,6 +123,7 @@ export interface SigynInitializedAlert {
   throttle?: {
     count: number;
     interval: string;
+    activationThreshold: number;
   };
 }
 
@@ -140,6 +142,7 @@ export interface PartialSigynAlert {
   throttle?: {
     count?: number;
     interval: string;
+    activationThreshold?: number;
   };
 }
 
@@ -168,6 +171,7 @@ export interface SigynSelfMonitoring {
   throttle?: {
     count?: number;
     interval: string;
+    activationThreshold?: number;
   };
 }
 
@@ -178,7 +182,8 @@ export interface SigynInitializedSelfMonitoring {
   ruleFilters?: string[];
   minimumErrorCount?: number;
   throttle?: {
-    count?: number;
+    count: number;
     interval: string;
+    activationThreshold: number;
   };
 }

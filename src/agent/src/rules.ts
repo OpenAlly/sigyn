@@ -234,23 +234,29 @@ export class Rule {
       return false;
     }
 
-    const { interval, count } = throttle;
+    const { interval, count, activationThreshold } = throttle;
     const intervalDate = utils.cron.durationOrCronToDate(interval, "subtract").valueOf();
     const ruleAlertsCount = db.prepare("SELECT * FROM alerts WHERE ruleId = ? AND createdAt >= ?").all(
       rule.id,
       intervalDate
     ).length;
-
+    this.#logger.error(`[${rule.name}](activationThreshold: ${activationThreshold}|actual: ${ruleAlertsCount})`);
     if (count === 0 && ruleAlertsCount > 0) {
       this.#logger.error(`[${rule.name}](state: throttle|count: ${count}|actual: ${ruleAlertsCount})`);
 
       return true;
     }
+    else if (ruleAlertsCount <= activationThreshold!) {
+      this.#logger.error(`[${rule.name}](activationThreshold: ${activationThreshold}|actual: ${ruleAlertsCount})`);
 
-    if (ruleAlertsCount > 0 && (ruleAlertsCount + rule.throttleCount) < count) {
+      return false;
+    }
+
+    if (
+      ruleAlertsCount > 0 &&
+      (ruleAlertsCount + rule.throttleCount - activationThreshold < count)
+    ) {
       db.prepare("UPDATE rules SET throttleCount = ?, counter = 0 WHERE id = ?").run(rule.throttleCount + 1, rule.id);
-
-      this.#logger.error(`[${rule.name}](state: throttle|count: ${count}|actual: ${ruleAlertsCount}|throttle: ${rule.throttleCount})`);
 
       return true;
     }

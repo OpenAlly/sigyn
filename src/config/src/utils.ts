@@ -128,6 +128,7 @@ export function applyDefaultValues(
       rule.alert.severity = getSeverity(rule.alert.severity ?? config.defaultSeverity ?? kDefaultAlertSeverity);
       if (rule.alert.throttle) {
         rule.alert.throttle.count ??= kDefaultAlertThrottleCount;
+        rule.alert.throttle.activationThreshold ??= 0;
       }
       rule.disabled ??= false;
       rule.notifiers ??= Object.keys(config.notifiers!);
@@ -139,7 +140,12 @@ export function applyDefaultValues(
       ...config.selfMonitoring,
       template: typeof config.selfMonitoring.template === "string" ?
         config.templates![config.selfMonitoring.template] as SigynInitializedTemplate :
-        config.selfMonitoring.template
+        config.selfMonitoring.template,
+      throttle: config.selfMonitoring.throttle ? {
+        ...config.selfMonitoring.throttle,
+        activationThreshold: config.selfMonitoring.throttle.activationThreshold ?? 0,
+        count: config.selfMonitoring.throttle.count ?? 0
+      } : undefined
     } : undefined
   };
 }

@@ -60,9 +60,11 @@ describe("Utils", () => {
       },
       notifiers: {
         discord: {
+          notifier: "discord",
           webhookUrl: "https://discord.com/api/webhooks/1234567890/abcdefg"
         },
         slack: {
+          notifier: "slack",
           webhookUrl: "https://hooks.slack.com/services/1234567890/abcdefg"
         }
       },
@@ -95,9 +97,11 @@ describe("Utils", () => {
         templates: undefined,
         notifiers: {
           discord: {
+            notifier: "discord",
             webhookUrl: "https://discord.com/api/webhooks/1234567890/abcdefg"
           },
           slack: {
+            notifier: "slack",
             webhookUrl: "https://hooks.slack.com/services/1234567890/abcdefg"
           }
         },
@@ -118,7 +122,8 @@ describe("Utils", () => {
               },
               throttle: {
                 interval: "1h",
-                count: 0
+                count: 0,
+                activationThreshold: 0
               },
               severity: "error",
               template: {
@@ -184,9 +189,11 @@ describe("Utils", () => {
       },
       notifiers: {
         discord: {
+          notifier: "discord",
           webhookUrl: "https://discord.com/api/webhooks/1234567890/abcdefg"
         },
         slack: {
+          notifier: "slack",
           webhookUrl: "https://hooks.slack.com/services/1234567890/abcdefg"
         }
       },
