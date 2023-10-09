@@ -7,6 +7,7 @@ import { setTimeout } from "node:timers/promises";
 // Import Third-party Dependencies
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 import { initConfig } from "@sigyn/config";
+import isCI from "is-ci";
 
 // Import Internal Dependencies
 import { asyncTask } from "../../src/tasks/asyncTask";
@@ -31,6 +32,8 @@ const kMockLokiApi = {
 };
 const kMockAgent = new MockAgent();
 const kGlobalDispatcher = getGlobalDispatcher();
+// time to wait for the task to be fully executed (alert sent)
+const kTimeout = isCI ? 350 : 200;
 
 describe("Self-monitoring", () => {
   before(async() => {
@@ -67,8 +70,9 @@ describe("Self-monitoring", () => {
     );
 
     assert.ok(task);
+    task.execute();
 
-    await setTimeout(200);
+    await setTimeout(kTimeout);
 
     assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
       name: "UndiciError",
@@ -92,7 +96,7 @@ describe("Self-monitoring", () => {
 
     task.execute();
 
-    await setTimeout(200);
+    await setTimeout(kTimeout);
 
     assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
       name: "UndiciError",
@@ -116,7 +120,7 @@ describe("Self-monitoring", () => {
 
     task.execute();
 
-    await setTimeout(200);
+    await setTimeout(kTimeout);
 
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
   });
@@ -137,7 +141,7 @@ describe("Self-monitoring", () => {
 
     task.execute();
 
-    await setTimeout(200);
+    await setTimeout(kTimeout);
 
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
   });
@@ -158,7 +162,7 @@ describe("Self-monitoring", () => {
 
     task.execute();
 
-    await setTimeout(200);
+    await setTimeout(kTimeout);
 
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
   });
@@ -179,7 +183,7 @@ describe("Self-monitoring", () => {
 
     task.execute();
 
-    await setTimeout(200);
+    await setTimeout(kTimeout);
 
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
 
@@ -191,7 +195,7 @@ describe("Self-monitoring", () => {
 
     task.execute();
 
-    await setTimeout(200);
+    await setTimeout(kTimeout);
 
     assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
       name: "UndiciError",
@@ -199,14 +203,14 @@ describe("Self-monitoring", () => {
     });
 
     task.execute();
-    await setTimeout(200);
+    await setTimeout(kTimeout);
     assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
       name: "UndiciError",
       message: /1 interceptor is pending:/
     });
 
     task.execute();
-    await setTimeout(200);
+    await setTimeout(kTimeout);
 
     // // We have throttle.count set to 3 so this alert should be sent
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
@@ -227,7 +231,7 @@ describe("Self-monitoring", () => {
     );
 
     task.execute();
-    await setTimeout(200);
+    await setTimeout(kTimeout);
     // first alert, no throttle (remaining: 2)
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
 
@@ -238,7 +242,7 @@ describe("Self-monitoring", () => {
     }).reply(200);
 
     task.execute();
-    await setTimeout(200);
+    await setTimeout(kTimeout);
 
     // because of activationThreshold, no throttle (remaining: 1)
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
@@ -248,7 +252,7 @@ describe("Self-monitoring", () => {
       path: () => true
     }).reply(200);
     task.execute();
-    await setTimeout(200);
+    await setTimeout(kTimeout);
 
     // because of activationThreshold, no throttle (remaining: 0 -> now throttle is ON)
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
@@ -259,7 +263,7 @@ describe("Self-monitoring", () => {
     }).reply(200);
 
     task.execute();
-    await setTimeout(200);
+    await setTimeout(kTimeout);
     // Now that throttle is activated (count = 3, 2 more to get OFF), alert not sent.
     assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
       name: "UndiciError",
@@ -267,7 +271,7 @@ describe("Self-monitoring", () => {
     });
 
     task.execute();
-    await setTimeout(200);
+    await setTimeout(kTimeout);
     // Throttle is still activated (count = 3, 1 more to get OFF), alert not sent.
     assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
       name: "UndiciError",
@@ -275,7 +279,7 @@ describe("Self-monitoring", () => {
     });
 
     task.execute();
-    await setTimeout(200);
+    await setTimeout(kTimeout);
     // Throttle is still activated (count = 3, 0 more, throttle is off now), alert not sent.
     assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
       name: "UndiciError",
@@ -284,7 +288,7 @@ describe("Self-monitoring", () => {
 
     // Throttle is OFF, alert sent again.
     task.execute();
-    await setTimeout(200);
+    await setTimeout(kTimeout);
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
   });
 });
