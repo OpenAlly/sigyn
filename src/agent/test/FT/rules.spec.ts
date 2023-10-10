@@ -6,7 +6,7 @@ import { before, describe, it } from "node:test";
 // Import Third-party Dependencies
 import dayjs from "dayjs";
 import MockDate from "mockdate";
-import { SigynConfig, initConfig } from "@sigyn/config";
+import { SigynInitializedConfig, initConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { getDB, initDB } from "../../src/database";
@@ -19,7 +19,7 @@ const kLabelValueMatchConfigLocation = path.join(__dirname, "/fixtures/label-val
 const kLogger = new MockLogger();
 
 describe("Rule.getQueryRangeStartUnixTimestamp()", () => {
-  let config: SigynConfig;
+  let config: SigynInitializedConfig;
 
   before(async() => {
     process.env.GRAFANA_API_TOKEN = "toto";
@@ -107,7 +107,7 @@ describe("Rule.getQueryRangeStartUnixTimestamp()", () => {
 });
 
 describe("Rule.getAlertFormattedRule()", () => {
-  let config: SigynConfig;
+  let config: SigynInitializedConfig;
 
   before(async() => {
     initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });

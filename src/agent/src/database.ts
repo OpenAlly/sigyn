@@ -94,7 +94,7 @@ export interface InitDbOptions {
 
 export function initDB(
   logger: Logger,
-  options: InitDbOptions = {}
+  options: InitDbOptions = Object.create(null)
 ): SQLite3.Database {
   if (db && !options.force) {
     // This is workaround to use the initialized DB from functional tests

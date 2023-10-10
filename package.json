@@ -19,7 +19,7 @@
   ],
   "devDependencies": {
     "@nodesecure/eslint-config": "^1.8.0",
-    "@types/node": "^20.8.2",
+    "@types/node": "^20.8.4",
     "c8": "^8.0.1",
     "cross-env": "^7.0.3",
     "glob": "^10.3.10",

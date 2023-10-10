@@ -52,6 +52,12 @@ const kExpectedTablesColumns = {
     { name: "status", dflt_value: "\"pending\"", type: "TEXT", pk: 0 },
     { name: "retries", dflt_value: 0, type: "INTEGER", pk: 0 }
   ],
+  alertLabels: [
+    { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
+    { name: "alertId", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "key", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 },
+    { name: "value", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 }
+  ],
   agentFailures: [
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
     { name: "ruleId", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },

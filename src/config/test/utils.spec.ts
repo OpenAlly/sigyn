@@ -123,7 +123,8 @@ describe("Utils", () => {
               throttle: {
                 interval: "1h",
                 count: 0,
-                activationThreshold: 0
+                activationThreshold: 0,
+                labelScope: []
               },
               severity: "error",
               template: {

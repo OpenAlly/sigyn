@@ -105,6 +105,7 @@ export interface SigynAlert {
     count: number;
     interval: string;
     activationThreshold?: number;
+    labelScope?: string[];
   };
 }
 
@@ -124,6 +125,7 @@ export interface SigynInitializedAlert {
     count: number;
     interval: string;
     activationThreshold: number;
+    labelScope: string[];
   };
 }
 
@@ -143,6 +145,7 @@ export interface PartialSigynAlert {
     count?: number;
     interval: string;
     activationThreshold?: number;
+    labelScope?: string[];
   };
 }
 

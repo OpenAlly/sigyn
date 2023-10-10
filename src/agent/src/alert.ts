@@ -16,10 +16,21 @@ export function createRuleAlert(
 ) {
   const notifier = Notifier.getSharedInstance(logger);
 
-  getDB().prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)").run(
+  const { lastInsertRowid } = getDB().prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)").run(
     rule.id,
     dayjs().valueOf()
   );
+
+  if (rule.labels) {
+    const insertAlertLabels = getDB().prepare("INSERT INTO alertLabels (alertId, key, value) VALUES (?, ?, ?)");
+
+    getDB().transaction(() => {
+      for (const [key, value] of Object.entries(rule.labels)) {
+        insertAlertLabels.run(lastInsertRowid, key, value);
+      }
+    })();
+  }
+
   const { notifiers } = getConfig();
 
   notifier.sendAlerts(

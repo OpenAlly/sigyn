@@ -1,0 +1,38 @@
+{
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
+  "notifiers": {
+    "discord": {
+      "notifier": "discord",
+      "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
+    }
+  },
+  "rules": [
+    {
+      "name": "Label scope throttle",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}",
+            "- Threshold: {count}",
+            "- Interval: {interval}"
+          ]
+        },
+        "throttle": {
+          "interval": "500ms",
+          "labelScope": [
+            "app"
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -258,6 +258,7 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   | `interval` | `string`   | ✔️       | The throttle duration (e.g. `1m`, `1h`) after sending an alert. |
   | `count`    | `number`   | ❌       | The count threshold to bypass throttle, default to `0` (never send alert before the end of interval). |
   | `activationThreshold`    | `number`   | ❌       | The number of alerts allowed to be sent before the throttle to be activated. |
+  | `labelScope`    | `string[]`   | ❌       | Allow for the implementation of a dedicated throttle mechanism per label value. For example, when the labelScope is `["app"]`, if an alert is triggered by logs from the 'foo' app, then subsequently, if new logs come from the 'bar' app, a second alert will also be triggered, resulting in a total of two alerts where both app have its own throttle. |
 
 - `selfMonitoring` (Object, Optional):
   - Represents the configuration to enable self-monitoring.
