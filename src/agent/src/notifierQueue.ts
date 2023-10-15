@@ -4,7 +4,7 @@ import EventEmitter from "node:events";
 // CONSTANTS
 const kNotifsConcurrency = 10;
 
-// TODO: handle 2 (or more) same alert in the queue.
+// TODO: handle 2 (or more) same alert in the queue. (if a pushed alert is already in the queue, just skip the new one)
 export class NotifierQueue<T> extends EventEmitter {
   static DEQUEUE = Symbol("dequeue");
 

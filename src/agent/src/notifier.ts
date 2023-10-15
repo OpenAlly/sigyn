@@ -12,23 +12,27 @@ import { getAgentFailureRules } from "./utils/selfMonitoring";
 // CONSTANTS
 const kPrivateInstancier = Symbol("instancier");
 const kAgentFailureSeverity = "critical";
+const kCompositeRuleSeverity = "critical";
 
-export interface NotifierAlert {
-  rule: DbRule & { labels: Record<string, string>; oldestLabelTimestamp: number | null };
+export interface Alert {
   notifierConfig: {
     notifier: string;
     [key: string]: unknown;
   };
+}
+
+export interface NotifierAlert extends Alert {
+  rule: DbRule & { labels: Record<string, string>; oldestLabelTimestamp: number | null };
   notif: Pick<DbAlertNotif, "alertId" | "notifierId">;
   error?: Error;
 }
 
-export interface AgentFailureAlert {
+export interface AgentFailureAlert extends Alert {
   failures: DbAgentFailure[];
-  notifierConfig: {
-    notifier: string;
-    [key: string]: unknown;
-  };
+}
+
+export interface CompositeRuleAlert extends Alert {
+  compositeRuleName: string;
 }
 
 export class Notifier {
@@ -44,7 +48,7 @@ export class Notifier {
    */
   private static shared: Notifier;
 
-  #queue = new NotifierQueue<NotifierAlert | AgentFailureAlert>();
+  #queue = new NotifierQueue<Alert>();
   #logger: Logger;
   #notifiersId = new Map<string, number>();
 
@@ -66,7 +70,7 @@ export class Notifier {
     return this.shared;
   }
 
-  sendAlerts(alerts: Omit<NotifierAlert, "notif">[]) {
+  sendRuleAlerts(alerts: Omit<NotifierAlert, "notif">[]) {
     const db = getDB();
     const notificationAlerts: NotifierAlert[] = [];
 
@@ -93,7 +97,11 @@ export class Notifier {
     this.#queue.push(...alerts);
   }
 
-  async #sendNotifications(notificationAlerts: (NotifierAlert | AgentFailureAlert)[]) {
+  sendCompositeRuleAlerts(alerts: CompositeRuleAlert[]) {
+    this.#queue.push(...alerts);
+  }
+
+  async #sendNotifications(notificationAlerts: (NotifierAlert | AgentFailureAlert | CompositeRuleAlert)[]) {
     await Promise.allSettled(
       notificationAlerts.map((alert) => this.#sendNotification(alert))
     );
@@ -124,25 +132,55 @@ export class Notifier {
     };
   }
 
-  async #sendNotification(alert: NotifierAlert | AgentFailureAlert) {
+  #compositeRuleAlertData(alert: CompositeRuleAlert) {
+    const { compositeRuleName } = alert;
+
+    return {
+      // TODO: make it configurable
+      severity: kCompositeRuleSeverity,
+      compositeRuleName
+    };
+  }
+
+  async #sendNotification(alert: NotifierAlert | AgentFailureAlert | CompositeRuleAlert) {
     const { notifierConfig } = alert;
     const rule = "rule" in alert ? alert.rule : null;
+    const compositeRuleName = "compositeRuleName" in alert ? alert.compositeRuleName : null;
     const db = getDB();
     const config = getConfig();
     const ruleConfig = rule ? config.rules.find((configRule) => configRule.name === rule.name)! : null;
 
     const notifierOptions = {
-      ...notifierConfig,
-      template: rule ? ruleConfig!.alert.template : config.selfMonitoring!.template,
-      data: rule ? await this.#notiferAlertData(alert as NotifierAlert) : this.#agentFailureAlertData(alert as AgentFailureAlert)
+      ...notifierConfig
     };
+    if (rule) {
+      Object.assign(notifierOptions, {
+        data: await this.#notiferAlertData(alert as NotifierAlert),
+        template: ruleConfig!.alert.template
+      });
+    }
+    else if ("failures" in alert) {
+      Object.assign(notifierOptions, {
+        data: this.#agentFailureAlertData(alert as AgentFailureAlert),
+        template: config.selfMonitoring!.template
+      });
+    }
+    else {
+      Object.assign(notifierOptions, {
+        data: this.#compositeRuleAlertData(alert as CompositeRuleAlert),
+        template: config.compositeRules!.find((rule) => rule.name === compositeRuleName)!.template
+      });
+    }
     const notifierLib = notifierConfig.notifier;
     const notifierPackage = Notifier.localPackages.has(notifierLib) ? `@sigyn/${notifierLib}` : notifierLib;
+
     try {
       const notifier = await import(notifierPackage);
       await notifier.execute(notifierOptions);
 
-      this.#logger.info(`[SELF-MONITORING](notify: success|notifier: ${alert.notifierConfig.notifier})`);
+      // eslint-disable-next-line no-nested-ternary
+      const identifier = rule ? rule.name : compositeRuleName ? compositeRuleName : "SELF-MONITORING";
+      this.#logger.info(`[${identifier}](notify: success|notifier: ${alert.notifierConfig.notifier})`);
 
       if (!rule) {
         this.#queue.done();
@@ -159,7 +197,8 @@ export class Notifier {
         "failed", (alert as NotifierAlert).notif.alertId
       );
 
-      const identifier = rule ? rule.name : "SELF-MONITORING";
+      // eslint-disable-next-line no-nested-ternary
+      const identifier = rule ? rule.name : compositeRuleName ? compositeRuleName : "SELF-MONITORING";
       this.#logger.error(`[${identifier}](notify: error|notifier: ${alert.notifierConfig.notifier}|message: ${error.message})`);
     }
     finally {

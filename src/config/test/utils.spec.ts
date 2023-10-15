@@ -133,7 +133,8 @@ describe("Utils", () => {
             }
           }
         ],
-        selfMonitoring: undefined
+        selfMonitoring: undefined,
+        compositeRules: undefined
       });
     });
 

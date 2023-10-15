@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 /* eslint-disable max-len */
 // Import Node.js Dependencies
 import assert from "node:assert";

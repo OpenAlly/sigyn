@@ -40,16 +40,30 @@ function buildValidationErrorMessage(errors: ErrorObject[]) {
 
 function validateTemplate(config: PartialSigynConfig) {
   for (const rule of config.rules) {
-    const templateMustExists = typeof rule.alert.template === "string" ? rule.alert.template : rule.alert.template.extends;
+    const rootTemplate = typeof rule.alert.template === "string" ? rule.alert.template : rule.alert.template.extends;
 
-    if (templateMustExists === undefined) {
+    if (rootTemplate === undefined) {
       continue;
     }
 
-    const template = config.templates?.[templateMustExists];
+    const template = config.templates?.[rootTemplate];
 
     if (template === undefined) {
-      throw new Error(`Template '${templateMustExists}' not found`);
+      throw new Error(`Template '${rootTemplate}' not found`);
+    }
+  }
+
+  for (const rule of config.compositeRules ?? []) {
+    const rootTemplate = typeof rule.template === "string" ? rule.template : rule.template.extends;
+
+    if (rootTemplate === undefined) {
+      continue;
+    }
+
+    const template = config.templates?.[rootTemplate];
+
+    if (template === undefined) {
+      throw new Error(`Template '${rootTemplate}' not found`);
     }
   }
 
@@ -67,7 +81,7 @@ function validateTemplate(config: PartialSigynConfig) {
 }
 
 function validateNotifiers(config: PartialSigynConfig) {
-  for (const rule of config.rules) {
+  for (const rule of [...config.rules, ...(config.compositeRules ?? [])]) {
     if (!rule.notifiers) {
       continue;
     }

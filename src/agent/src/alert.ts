@@ -1,13 +1,12 @@
 // Import Third-party Dependencies
 import dayjs from "dayjs";
-
-// Import Third-party Dependencies
 import { SigynRule, SigynSelfMonitoring, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { DbAgentFailure, getDB } from "./database";
 import { Notifier, NotifierAlert } from "./notifier";
 import { Logger } from ".";
+import { handleCompositeRules } from "./compositeRules";
 
 export function createRuleAlert(
   rule: NotifierAlert["rule"],
@@ -21,6 +20,8 @@ export function createRuleAlert(
     dayjs().valueOf()
   );
 
+  handleCompositeRules(logger);
+
   if (rule.labels) {
     const insertAlertLabels = getDB().prepare("INSERT INTO alertLabels (alertId, key, value) VALUES (?, ?, ?)");
 
@@ -33,7 +34,7 @@ export function createRuleAlert(
 
   const { notifiers } = getConfig();
 
-  notifier.sendAlerts(
+  notifier.sendRuleAlerts(
     ruleConfig.notifiers.map((notifierName) => {
       return { rule, notifierConfig: notifiers[notifierName] };
     })

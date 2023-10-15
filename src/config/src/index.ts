@@ -44,8 +44,10 @@ export async function initConfig(configPath: string | URL): Promise<SigynInitial
   validateConfig(config);
 
   config.rules = utils.applyRulesLogQLVariables({ ...config, rules });
-
-  initializedConfig = utils.applyDefaultValues(config);
+  initializedConfig = utils.applyDefaultValues({
+    ...config,
+    compositeRules: utils.handleCompositeRulesTemplates(config)
+  });
 
   return initializedConfig;
 }

@@ -10,6 +10,7 @@ export interface SigynConfig {
   missingLabelStrategy: "ignore" | "error";
   defaultSeverity: AlertSeverity;
   selfMonitoring?: SigynSelfMonitoring;
+  compositeRules?: SigynCompositeRule[];
 }
 
 export interface SigynInitializedConfig {
@@ -24,6 +25,7 @@ export interface SigynInitializedConfig {
   missingLabelStrategy: "ignore" | "error";
   defaultSeverity: AlertSeverity;
   selfMonitoring?: SigynInitializedSelfMonitoring;
+  compositeRules?: SigynInitializedCompositeRule[];
 }
 
 export interface PartialSigynConfig {
@@ -38,6 +40,7 @@ export interface PartialSigynConfig {
   missingLabelStrategy?: "ignore" | "error";
   defaultSeverity?: AlertSeverity;
   selfMonitoring?: SigynSelfMonitoring;
+  compositeRules?: SigynCompositeRule[];
 }
 
 export type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
@@ -184,6 +187,38 @@ export interface SigynInitializedSelfMonitoring {
   errorFilters?: string[];
   ruleFilters?: string[];
   minimumErrorCount?: number;
+  throttle?: {
+    count: number;
+    interval: string;
+    activationThreshold: number;
+  };
+}
+
+export interface SigynCompositeRule {
+  name: string;
+  include?: string[];
+  exclude?: string[];
+  notifCount: number;
+  notifiedCount?: number;
+  interval?: string;
+  template: string | SigynAlertTemplate;
+  notifiers?: string[];
+  throttle?: {
+    count?: number;
+    interval: string;
+    activationThreshold?: number;
+  };
+}
+
+export interface SigynInitializedCompositeRule {
+  name: string;
+  include: string[];
+  exclude: string[];
+  notifCount: number;
+  notifiedCount?: number;
+  interval: string;
+  template: string | SigynInitializedTemplate;
+  notifiers: string[];
   throttle?: {
     count: number;
     interval: string;

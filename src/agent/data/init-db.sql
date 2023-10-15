@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS alerts
     id        INTEGER PRIMARY KEY,
     ruleId    INTEGER,
     createdAt INTEGER,
+    processed INTEGER DEFAULT 0,
     FOREIGN KEY(ruleId)
       REFERENCES rules(id)
         ON UPDATE CASCADE
@@ -96,3 +97,10 @@ CREATE TABLE IF NOT EXISTS agentFailures
         ON UPDATE CASCADE
         ON DELETE CASCADE
   );
+
+CREATE TABLE IF NOT EXISTS compositeRuleAlerts
+  (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    createdAt INTEGER
+  )

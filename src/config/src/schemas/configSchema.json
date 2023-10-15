@@ -161,6 +161,94 @@
         "notifiers"
       ],
       "additionalProperties": false
+    },
+    "compositeRules": {
+      "title": "Defines rules based on rules",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "title": "The name of the composite rule",
+            "description": "Shall be unique and non-empty.",
+            "type": "string",
+            "minLength": 1
+          },
+          "include": {
+            "title": "Defines the rule to be included",
+            "description": "A list of rule name, glob supported",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "exclude": {
+            "title": "Defines the rule to be excluded",
+            "description": "A list of rule name, glob supported",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "notifCount": {
+            "title": "The count of notifications sent by the rules to trigger alert",
+            "type": "integer"
+          },
+          "interval": {
+            "title": "Defines the maximum interval, default one day",
+            "description": "A duration string (e.g. '1m', '1h', '1d').",
+            "type": "string"
+          },
+          "template": {
+            "title": "The template used to send the alert",
+            "description": "Can be a string or an object.\nIf it's a string, it must be a reference to a root template key.\nIf it's an object, it will be used as the template itself.",
+            "oneOf": [
+              {
+                "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/templates.json"
+              },
+              {
+                "type": "string",
+                "minLength": 1
+              }
+            ]
+          },
+          "notifiers": {
+            "title": "The notifiers used to send the alert",
+            "description": "An array of notifier names. Theses notifiers must be installed.\nSigyn notifiers can be unscopped (e.g. 'discord') or scopped (e.g. '@sigyn/discord').\nIf not specified, default to each notifiers configured.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "throttle": {
+            "title": "The alert throttle",
+            "description": "Can be useful to avoid spam",
+            "type": "object",
+            "properties": {
+              "count": {
+                "title": "The number of alert to unlock the interval, default to 0",
+                "type": "integer",
+                "nullable": true
+              },
+              "interval": {
+                "title": "The interval of time to pause alert",
+                "description": "A duration string (e.g. '1m', '1h', '1d').",
+                "type": "string"
+              }
+            },
+            "required": ["interval"],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "name",
+          "notifCount",
+          "template"
+        ]
+      }
     }
   },
   "required": [

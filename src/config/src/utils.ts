@@ -1,3 +1,7 @@
+// Import Third-party Dependencies
+import { GrafanaLoki } from "@myunisoft/loki";
+import { minimatch } from "minimatch";
+
 // Import Internal Dependencies
 import {
   AlertSeverity,
@@ -7,11 +11,10 @@ import {
   SigynInitializedTemplate,
   SigynInitializedConfig,
   SigynInitializedRule,
-  SigynRule
+  SigynRule,
+  SigynInitializedCompositeRule,
+  SigynCompositeRule
 } from "./types";
-
-// Import Third-party Dependencies
-import { GrafanaLoki } from "@myunisoft/loki";
 
 // CONSTANTS
 const kDefaultMissingLabelStrategy = "ignore";
@@ -19,6 +22,7 @@ const kDefaultRulePolling = "1m";
 const kDefaultAlertSeverity = "error";
 const kDefaultAlertThrottleCount = 0;
 const kDefaultRulePollingStrategy = "unbounded";
+const kDefaultCompositeRuleInterval = "1d";
 
 export async function initializeRules(config: SigynConfig): Promise<SigynRule[]> {
   const labels = await fetchRulesLabels(config);
@@ -68,8 +72,30 @@ export async function initializeRules(config: SigynConfig): Promise<SigynRule[]>
     }
   }
 
-
   return mergedRules;
+}
+
+export function handleCompositeRulesTemplates(
+  config: SigynConfig
+): SigynCompositeRule[] {
+  const { compositeRules } = config;
+
+  if (compositeRules === undefined) {
+    return [];
+  }
+
+  const clonedRules = structuredClone(compositeRules);
+
+  for (const rule of clonedRules) {
+    if (typeof rule.template === "object" && rule.template.extends) {
+      rule.template = extendsTemplates(rule.template, config);
+    }
+    else if (typeof rule.template === "string") {
+      rule.template = config.templates![rule.template];
+    }
+  }
+
+  return clonedRules;
 }
 
 function* getRuleLabelFilters(rule: SigynRule) {
@@ -147,7 +173,37 @@ export function applyDefaultValues(
         activationThreshold: config.selfMonitoring.throttle.activationThreshold ?? 0,
         count: config.selfMonitoring.throttle.count ?? 0
       } : undefined
-    } : undefined
+    } : undefined,
+    compositeRules: config.compositeRules ? config.compositeRules.map((rule) => {
+      rule.include ??= config.rules.map((rule) => rule.name);
+      rule.exclude ??= [];
+      rule.interval ??= kDefaultCompositeRuleInterval;
+      rule.notifiers ??= Object.keys(config.notifiers!);
+      if (rule.throttle) {
+        rule.throttle.count ??= kDefaultAlertThrottleCount;
+        rule.throttle.activationThreshold ??= 0;
+      }
+
+      rule.include = rule.include.flatMap((include) => {
+        const matchRule = config.rules.find((rule) => rule.name === include);
+        if (matchRule) {
+          return [include];
+        }
+
+        return config.rules.filter((rule) => minimatch(rule.name, include)).map((rule) => rule.name);
+      });
+
+      rule.exclude = rule.exclude.flatMap((exclude) => {
+        const matchRule = config.rules.find((rule) => rule.name === exclude);
+        if (matchRule) {
+          return [exclude];
+        }
+
+        return config.rules.filter((rule) => minimatch(rule.name, exclude)).map((rule) => rule.name);
+      });
+
+      return rule as SigynInitializedCompositeRule;
+    }) : undefined
   };
 }
 
