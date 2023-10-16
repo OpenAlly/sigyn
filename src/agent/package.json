@@ -41,7 +41,7 @@
   "license": "MIT",
   "dependencies": {
     "@myunisoft/loki": "^2.1.0",
-    "better-sqlite3": "^8.7.0",
+    "better-sqlite3": "^9.0.0",
     "cron-parser": "^4.9.0",
     "croner": "^7.0.2",
     "dayjs": "^1.11.10",
