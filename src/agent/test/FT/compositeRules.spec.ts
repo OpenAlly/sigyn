@@ -1,5 +1,6 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
+import fs from "node:fs";
 import path from "node:path";
 import { before, beforeEach, after, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
@@ -28,6 +29,10 @@ describe("Composite Rules", { concurrency: 1 }, () => {
   let rules: any;
 
   before(async() => {
+    if (!fs.existsSync("test/.temp")) {
+      fs.mkdirSync("test/.temp");
+    }
+
     process.env.GRAFANA_API_TOKEN = "toto";
     setGlobalDispatcher(kMockAgent);
 
