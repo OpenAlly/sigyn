@@ -3,9 +3,9 @@ import { getConfig, SigynInitializedCompositeRule } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { getDB } from "./database";
-import { Notifier } from "./notifier";
 import { Logger } from ".";
 import * as utils from "./utils";
+import { CompositeRuleNotifier } from "./notifiers/compositeRules.notifier";
 
 function compositeRuleHasThrottle(
   compositeRule: SigynInitializedCompositeRule,
@@ -109,10 +109,10 @@ export function handleCompositeRules(logger: Logger) {
 
     getDB().prepare("INSERT INTO compositeRuleAlerts (name, createdAt) VALUES (?, ?)").run(compositeRule.name, Date.now());
 
-    const notifier = Notifier.getSharedInstance(logger);
+    const notifier = CompositeRuleNotifier.getSharedInstance(logger);
     const { notifiers } = getConfig();
 
-    notifier.sendCompositeRuleAlerts(
+    notifier.sendAlerts(
       compositeRule.notifiers.map((notifierName) => {
         return {
           notifierConfig: notifiers[notifierName],

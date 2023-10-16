@@ -282,15 +282,14 @@ export class Rule {
     const intervalDate = utils.cron.durationOrCronToDate(interval, "subtract").valueOf();
     const ruleAlertsCount = this.#ruleAlertsCount(rule, intervalDate);
     const labelScope = throttle.labelScope.length > 0 ? throttle.labelScope.join(", ") : "*";
-    this.#logger.error(`[${rule.name}](activationThreshold: ${activationThreshold}|actual: ${ruleAlertsCount}|labelScope: ${labelScope})`);
 
     if (count === 0 && ruleAlertsCount > 0) {
-      this.#logger.error(`[${rule.name}](state: throttle|count: ${count}|actual: ${ruleAlertsCount})`);
+      this.#logger.error(`[${rule.name}](state: throttle|count: ${count}|actual: ${ruleAlertsCount}|labelScope: ${labelScope})`);
 
       return true;
     }
     else if (ruleAlertsCount <= activationThreshold!) {
-      this.#logger.error(`[${rule.name}](activationThreshold: ${activationThreshold}|actual: ${ruleAlertsCount})`);
+      this.#logger.error(`[${rule.name}](activationThreshold: ${activationThreshold}|actual: ${ruleAlertsCount}|labelScope: ${labelScope})`);
 
       return false;
     }
