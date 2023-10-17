@@ -56,6 +56,33 @@ describe("Composite rules validations", () => {
     });
   });
 
+  it("compositeRules property 'name' should be unique", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo"
+          },
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo"
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules: must pass \"uniqueItemProperties\" keyword validation"
+    });
+  });
+
   it("compositeRules property 'notifCount' should be required", () => {
     assert.throws(() => {
       validateConfig({

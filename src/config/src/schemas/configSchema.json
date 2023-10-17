@@ -253,7 +253,10 @@
           "notifCount",
           "template"
         ]
-      }
+      },
+      "uniqueItemProperties": [
+        "name"
+      ]
     }
   },
   "required": [
