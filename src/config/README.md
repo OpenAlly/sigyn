@@ -622,7 +622,7 @@ interface SigynCompositeRule {
   include?: string[];
   exclude?: string[];
   notifCount: number;
-  notifiedCount?: number;
+  ruleCountThreshold?: number;
   interval?: string;
   template: string | SigynAlertTemplate;
   notifiers?: string[];
@@ -638,7 +638,7 @@ interface SigynInitializedCompositeRule {
   include: string[];
   exclude: string[];
   notifCount: number;
-  notifiedCount?: number;
+  ruleCountThreshold?: number;
   interval: string;
   template: string | SigynInitializedTemplate;
   notifiers: string[];

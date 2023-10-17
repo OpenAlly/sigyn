@@ -70,7 +70,7 @@ describe("Composite Rules", { concurrency: 1 }, () => {
     assert.throws(() => kMockAgent.assertNoPendingInterceptors());
   });
 
-  it("should not trigger an alert because notifiedCount is 1 and it require 2", async() => {
+  it("should not trigger an alert because ruleCountThreshold is 1 and it require 2", async() => {
     getDB().prepare("DELETE FROM compositeRuleAlerts").run();
     createRuleAlert(rules[0], 6);
 

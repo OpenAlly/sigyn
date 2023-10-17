@@ -196,6 +196,10 @@
             "title": "The count of notifications sent by the rules to trigger alert",
             "type": "integer"
           },
+          "ruleCountThreshold": {
+            "title": "The number of rule that must have trigger an alert",
+            "type": "integer"
+          },
           "interval": {
             "title": "Defines the maximum interval, default one day",
             "description": "A duration string (e.g. '1m', '1h', '1d').",
@@ -243,6 +247,7 @@
             "additionalProperties": false
           }
         },
+        "additionalProperties": false,
         "required": [
           "name",
           "notifCount",

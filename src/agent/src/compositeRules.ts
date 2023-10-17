@@ -86,7 +86,7 @@ export function handleCompositeRules(logger: Logger) {
       continue;
     }
 
-    if (compositeRule.notifiedCount) {
+    if (compositeRule.ruleCountThreshold) {
       const { distinctCount } = getDB()
       // eslint-disable-next-line max-len
         .prepare(`SELECT COUNT(DISTINCT ruleId) as distinctCount FROM alerts WHERE processed = 0 AND createdAt >= ? AND ruleId IN (${ruleIds.map(() => "?").join(",")})`)
@@ -95,8 +95,10 @@ export function handleCompositeRules(logger: Logger) {
           ...ruleIds.map(({ id }) => id)
         ) as { distinctCount: number };
 
-      if (distinctCount < compositeRule.notifiedCount) {
-        logger.info(`[${compositeRule.name}](distinctCount:${distinctCount}|notifiedCount:${compositeRule.notifiedCount})`);
+      if (distinctCount < compositeRule.ruleCountThreshold) {
+        logger.info(
+          `[${compositeRule.name}](distinctCount:${distinctCount}|ruleCountThreshold:${compositeRule.ruleCountThreshold})`
+        );
         continue;
       }
     }

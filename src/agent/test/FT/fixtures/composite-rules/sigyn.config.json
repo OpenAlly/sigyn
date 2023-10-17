@@ -73,7 +73,7 @@
         "interval": "5m",
         "count": 3
       },
-      "notifiedCount": 2
+      "ruleCountThreshold": 2
     }
   ]
 }
