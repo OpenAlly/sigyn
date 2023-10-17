@@ -15,6 +15,7 @@ import {
   SigynInitializedCompositeRule,
   SigynCompositeRule
 } from "./types";
+import { isDeepStrictEqual } from "util";
 
 // CONSTANTS
 const kDefaultMissingLabelStrategy = "ignore";
@@ -75,12 +76,49 @@ export async function initializeRules(config: SigynConfig): Promise<SigynRule[]>
   return mergedRules;
 }
 
-export function handleCompositeRulesTemplates(
-  config: SigynConfig
-): SigynCompositeRule[] {
-  const { compositeRules } = config;
+export function initializeCompositeRules(config: SigynConfig): SigynInitializedCompositeRule[] {
+  if (!config.compositeRules) {
+    return [];
+  }
 
-  if (compositeRules === undefined) {
+  const ruleNames = config.rules.map((rule) => rule.name);
+  const compositeRules: SigynInitializedCompositeRule[] = [];
+
+  for (const compositeRule of config.compositeRules) {
+    const excludeRules = (compositeRule.exclude ?? []).flatMap(
+      (ruleToExclude) => ruleNames.filter((ruleName) => minimatch(ruleName, ruleToExclude))
+    );
+    const includeRules = compositeRule.include?.flatMap(
+      (ruleToInclude) => ruleNames.filter((ruleName) => minimatch(ruleName, ruleToInclude))
+    ) ?? ruleNames;
+    const rules = ruleNames.filter((rule) => includeRules.includes(rule) && !excludeRules.includes(rule));
+
+    compositeRules.push({
+      ...compositeRule,
+      rules,
+      interval: compositeRule.interval ?? kDefaultCompositeRuleInterval
+    } as SigynInitializedCompositeRule);
+
+    {
+      const compositeRule = compositeRules.at(-1)!;
+      if (compositeRule.rules.length <= 1) {
+        throw new Error(`Composite rule ${compositeRule.name} require at least 2 matching rules`);
+      }
+
+      if (compositeRules.filter((rule) => isDeepStrictEqual(rule.rules, compositeRule.rules)).length > 1) {
+        throw new Error("Found multiple composite rules wich scope the same rules");
+      }
+    }
+  }
+
+  return compositeRules;
+}
+
+export function handleCompositeRulesTemplates(
+  config: SigynConfig,
+  compositeRules: SigynCompositeRule[]
+): SigynCompositeRule[] {
+  if (compositeRules.length === 0) {
     return [];
   }
 
@@ -175,32 +213,12 @@ export function applyDefaultValues(
       } : undefined
     } : undefined,
     compositeRules: config.compositeRules ? config.compositeRules.map((rule) => {
-      rule.include ??= config.rules.map((rule) => rule.name);
-      rule.exclude ??= [];
-      rule.interval ??= kDefaultCompositeRuleInterval;
+      // Note: rules, template & interval is already initialized with `initializeCompositeRules()`.
       rule.notifiers ??= Object.keys(config.notifiers!);
       if (rule.throttle) {
         rule.throttle.count ??= kDefaultAlertThrottleCount;
         rule.throttle.activationThreshold ??= 0;
       }
-
-      rule.include = rule.include.flatMap((include) => {
-        const matchRule = config.rules.find((rule) => rule.name === include);
-        if (matchRule) {
-          return [include];
-        }
-
-        return config.rules.filter((rule) => minimatch(rule.name, include)).map((rule) => rule.name);
-      });
-
-      rule.exclude = rule.exclude.flatMap((exclude) => {
-        const matchRule = config.rules.find((rule) => rule.name === exclude);
-        if (matchRule) {
-          return [exclude];
-        }
-
-        return config.rules.filter((rule) => minimatch(rule.name, exclude)).map((rule) => rule.name);
-      });
 
       return rule as SigynInitializedCompositeRule;
     }) : undefined

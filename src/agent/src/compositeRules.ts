@@ -58,21 +58,15 @@ function compositeRuleHasThrottle(
 }
 
 export function handleCompositeRules(logger: Logger) {
-  const { compositeRules, rules } = getConfig();
+  const { compositeRules } = getConfig();
   if (!compositeRules) {
     return;
   }
 
   for (const compositeRule of compositeRules) {
-    const matchRules = rules.filter(({ name }) => compositeRule.include.includes(name) && !compositeRule.exclude.includes(name));
-    if (matchRules.length === 0) {
-      // TODO: this should be checked upon config initialization
-      continue;
-    }
-
     const ruleIds = getDB().prepare(
-      `SELECT id FROM rules WHERE name IN (${matchRules.map(() => "?").join(",")})`
-    ).all(matchRules.map((rule) => rule.name)) as { id: number }[];
+      `SELECT id FROM rules WHERE name IN (${compositeRule.rules.map(() => "?").join(",")})`
+    ).all(compositeRule.rules) as { id: number }[];
     const { count } = getDB()
       // eslint-disable-next-line max-len
       .prepare(`SELECT COUNT(id) as count FROM alerts WHERE processed = 0 AND createdAt >= ? AND ruleId IN (${ruleIds.map(() => "?").join(",")})`)

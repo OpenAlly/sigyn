@@ -635,8 +635,7 @@ interface SigynCompositeRule {
 
 interface SigynInitializedCompositeRule {
   name: string;
-  include: string[];
-  exclude: string[];
+  rules: string[];
   notifCount: number;
   ruleCountThreshold?: number;
   interval: string;
