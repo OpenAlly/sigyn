@@ -159,5 +159,24 @@ describe("Composite rules initialization", () => {
         } as any);
       });
     });
+
+    it("ruleCountThreshold cannot be higher than total matching rules", () => {
+      assert.throws(() => {
+        utils.initializeCompositeRules({
+          rules,
+          compositeRules: [
+            {
+              name: "foo",
+              notifCount: 5,
+              template: { title: "foo" },
+              ruleCountThreshold: 15
+            }
+          ]
+        } as any);
+      }, {
+        name: "Error",
+        message: "ruleCountThreshold (15) cannot be higher than total rule (3)"
+      });
+    });
   });
 });

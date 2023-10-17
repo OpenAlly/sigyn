@@ -108,6 +108,12 @@ export function initializeCompositeRules(config: SigynConfig): SigynInitializedC
       if (compositeRules.filter((rule) => isDeepStrictEqual(rule.rules, compositeRule.rules)).length > 1) {
         throw new Error("Found multiple composite rules wich scope the same rules");
       }
+
+      const ruleCount = compositeRule.rules.length;
+      const ruleCountThreshold = compositeRule.ruleCountThreshold ?? 0;
+      if (ruleCountThreshold > ruleCount) {
+        throw new Error(`ruleCountThreshold (${ruleCountThreshold}) cannot be higher than total rule (${ruleCount})`);
+      }
     }
   }
 

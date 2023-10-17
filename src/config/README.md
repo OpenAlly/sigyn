@@ -297,6 +297,7 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   | `include` | `string[]` | ❌ | An array of strings representing the rule to  monitor. You can use glob syntax i.e `["PROD*"]` |
   | `exclude` | `string[]` | ❌ | An array of strings representing the rule to exclude from monitoring. You can use glob syntax i.e `["PROD*"]` |
   | `notifCount` | `number` | ✔️ | The minimum alerts to be sent from each watched rules |
+  | `ruleCountThreshold` | `number` | ❌ | The minimum count of matching rules to triggers an alert to unlock composite rule. For instance, if you have 10 rules and `ruleCountThreshold` is 7, it means 7 rules must triggers an alert |
   | `interval`    | `string` | ❌ | A duration (i.e `1d`, `15m`) that represents the maximum interval date to count rules alerts |
   | `template`    | `object` | ✔️ | The number of alerts allowed to be sent before the throttle to be activated. Works same as `rules`. |
   | `template.title`    | `string`   | ❌       | The title of the notification template. |

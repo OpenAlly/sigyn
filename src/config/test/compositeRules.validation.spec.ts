@@ -123,6 +123,45 @@ describe("Composite rules validations", () => {
     });
   });
 
+  it("compositeRules property 'ruleCountThreshold' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 5,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            ruleCountThreshold: undefined
+          }
+        ]
+      });
+    });
+  });
+
+  it("compositeRules property 'ruleCountThreshold' should be integer", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 5,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            ruleCountThreshold: 5.5
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/ruleCountThreshold: must be integer"
+    });
+  });
+
   it("compositeRules property 'template' should be required", () => {
     assert.throws(() => {
       validateConfig({
