@@ -7,7 +7,7 @@ import { setTimeout } from "node:timers/promises";
 
 // Import Third-party Dependencies
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
-import { SigynInitializedConfig, SigynRule, initConfig } from "@sigyn/config";
+import { SigynInitializedConfig, initConfig } from "@sigyn/config";
 import isCI from "is-ci";
 
 // Import Internal Dependencies

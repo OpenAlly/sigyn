@@ -42,10 +42,11 @@ CREATE TABLE IF NOT EXISTS ruleLabels
 
 CREATE TABLE IF NOT EXISTS alerts
   (
-    id        INTEGER PRIMARY KEY,
-    ruleId    INTEGER,
-    createdAt INTEGER,
-    processed INTEGER DEFAULT 0,
+    id                 INTEGER PRIMARY KEY,
+    ruleId             INTEGER,
+    createdAt          INTEGER,
+    processed          INTEGER DEFAULT 0,
+    compositeProcessed INTEGER DEFAULT 0,
     FOREIGN KEY(ruleId)
       REFERENCES rules(id)
         ON UPDATE CASCADE

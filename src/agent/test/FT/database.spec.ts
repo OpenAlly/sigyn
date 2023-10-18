@@ -42,7 +42,8 @@ const kExpectedTablesColumns = {
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
     { name: "ruleId", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
     { name: "createdAt", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
-    { name: "processed", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 }
+    { name: "processed", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "compositeProcessed", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 }
   ],
   notifiers: [
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },

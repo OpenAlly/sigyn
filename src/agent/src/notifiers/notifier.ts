@@ -1,11 +1,11 @@
 // Import Internal Dependencies
 import { Logger } from "..";
+import { getDB } from "../database";
 import { NotifierQueue } from "./notifierQueue";
 
 // Import Third-party Dependencies
 import SQLite3 from "better-sqlite3";
 import { SigynInitializedConfig, getConfig } from "@sigyn/config";
-import { getDB } from "../database";
 
 export interface Alert {
   notifierConfig: {

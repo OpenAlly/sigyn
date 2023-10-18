@@ -85,7 +85,7 @@ export function handleCompositeRules(logger: Logger) {
     if (compositeRule.ruleCountThreshold) {
       const { distinctCount } = getDB()
       // eslint-disable-next-line max-len
-        .prepare(`SELECT COUNT(DISTINCT ruleId) as distinctCount FROM alerts WHERE processed = 0 AND createdAt >= ? AND ruleId IN (${ruleIdsPlaceholder})`)
+        .prepare(`SELECT COUNT(DISTINCT ruleId) as distinctCount FROM alerts WHERE compositeProcessed = 0 AND createdAt >= ? AND ruleId IN (${ruleIdsPlaceholder})`)
         .get(
           utils.cron.durationOrCronToDate(compositeRule.interval, "subtract").valueOf(),
           ...ruleIds
@@ -124,6 +124,9 @@ export function handleCompositeRules(logger: Logger) {
         utils.cron.durationOrCronToDate(compositeRule.interval, "subtract").valueOf(),
         ...ruleIds
       );
+
+    getDB().prepare(`UPDATE alerts SET compositeProcessed = 1 WHERE ruleId IN (${ruleIdsPlaceholder})`)
+      .run(ruleIds);
 
     if (!compositeRule.muteRules) {
       return;

@@ -362,6 +362,11 @@ For self-monitoring, you can use theses variables, surrounding with `{}`:
 - `agentFailure.errors` which is equal to the joined error messages
 - `agentFailure.rules` which is equal to the joined failed rules
 
+For composite rules, you can use theses variables, surrounding with `{}`:
+- `compositeRuleName`
+- `label` which includes each combined labels from all rules
+- `rules` joined rules names
+
 You can also use a label variable from your LogQL using `{label.x}`:
 ```json
 {

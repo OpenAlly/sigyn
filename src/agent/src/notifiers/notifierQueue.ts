@@ -36,8 +36,9 @@ export class NotifierQueue<T = any> extends EventEmitter {
 
   push(...notifications: NotifierQueueAlert<T>[]) {
     for (const newNotification of notifications) {
+      const { _id } = newNotification;
       const alreadyInQueue = this.#notificationAlerts
-        .find((notification) => notification._nonUniqueMatcher(newNotification, notification));
+        .find((notification) => notification._id === _id && notification._nonUniqueMatcher(newNotification, notification));
 
       if (alreadyInQueue === undefined) {
         this.#notificationAlerts.push(newNotification);

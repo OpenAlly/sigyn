@@ -1,5 +1,6 @@
 // Import Internal Dependencies
 import { Logger } from "..";
+import { Rule } from "../rules";
 import { Alert, Notifier } from "./notifier";
 
 // CONSTANTS
@@ -49,13 +50,31 @@ export class CompositeRuleNotifier extends Notifier<CompositeRuleAlert> {
     }
   }
 
-  async #compositeRuleAlertData(alert: CompositeRuleAlert) {
+  #compositeRuleAlertData(alert: CompositeRuleAlert) {
     const { compositeRuleName } = alert;
+
+    const compositeRule = this.config.compositeRules!.find((compositeRule) => compositeRule.name === compositeRuleName)!;
+    const rulesLabels = Object.create(null);
+
+    this.config.rules
+      .filter((rule) => compositeRule.rules.includes(rule.name))
+      .map((ruleConfig) => {
+        const rule = new Rule(ruleConfig, { logger: this.logger });
+
+        rule.init();
+
+        const { labels } = rule.getAlertFormattedRule();
+        Object.assign(rulesLabels, labels);
+
+        return void 0;
+      });
 
     return {
       // TODO: make it configurable
       severity: kCompositeRuleSeverity,
-      compositeRuleName
+      compositeRuleName,
+      label: rulesLabels,
+      rules: compositeRule.rules.join(", ")
     };
   }
 }
