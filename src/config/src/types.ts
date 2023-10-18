@@ -208,6 +208,8 @@ export interface SigynCompositeRule {
     interval: string;
     activationThreshold?: number;
   };
+  muteRules?: boolean;
+  muteDuration?: string;
 }
 
 export interface SigynInitializedCompositeRule {
@@ -223,4 +225,6 @@ export interface SigynInitializedCompositeRule {
     interval: string;
     activationThreshold: number;
   };
+  muteRules: boolean;
+  muteDuration: string;
 }

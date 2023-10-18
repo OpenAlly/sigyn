@@ -73,7 +73,8 @@
         "interval": "5m",
         "count": 3
       },
-      "ruleCountThreshold": 2
+      "ruleCountThreshold": 2,
+      "muteRules": true
     }
   ]
 }

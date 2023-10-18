@@ -11,7 +11,7 @@ import { Database } from "better-sqlite3";
 import { DbRule, DbRuleLabel, getDB, getOldestLabelTimestamp } from "./database";
 import * as utils from "./utils/index";
 import { Logger } from ".";
-import { NotifierAlert } from "./notifier";
+import { RuleNotifierAlert } from "./notifiers/rules.notifier";
 
 export interface RuleOptions {
   logger: Logger;
@@ -33,7 +33,7 @@ export class Rule {
     return getDB().prepare("SELECT * FROM rules WHERE name = ?").get(this.config.name) as DbRule;
   }
 
-  getAlertFormattedRule(): NotifierAlert["rule"] {
+  getAlertFormattedRule(): RuleNotifierAlert["rule"] {
     const rule = this.getRuleFromDatabase();
     const formattedLabels = Object.create(null);
 
@@ -96,12 +96,17 @@ export class Rule {
     const db = getDB();
     const now = dayjs().valueOf();
     const rule = this.getRuleFromDatabase();
+    if (rule.muteUntil > now) {
+      return false;
+    }
+
     const ruleLabels = this.getDistinctLabelsFromDatabase(rule.id);
     const lastCounter = rule.counter;
     const existingLabels = new Set();
     for (const label of ruleLabels) {
       existingLabels.add(`${label.key}:${label.value}`);
     }
+
     const ruleLabelsInsertStmt = db.prepare("INSERT INTO ruleLabels (ruleId, key, value, timestamp) VALUES (?, ?, ?, ?)");
     const ruleLogInsertStmt = db.prepare("INSERT INTO ruleLogs (ruleId, log, timestamp) VALUES (?, ?, ?)");
 

@@ -24,6 +24,7 @@ const kDefaultAlertSeverity = "error";
 const kDefaultAlertThrottleCount = 0;
 const kDefaultRulePollingStrategy = "unbounded";
 const kDefaultCompositeRuleInterval = "1d";
+const kMuteCompositeRulesDefaultDuration = "30m";
 
 export async function initializeRules(config: SigynConfig): Promise<SigynRule[]> {
   const labels = await fetchRulesLabels(config);
@@ -225,6 +226,9 @@ export function applyDefaultValues(
         rule.throttle.count ??= kDefaultAlertThrottleCount;
         rule.throttle.activationThreshold ??= 0;
       }
+
+      rule.muteRules ??= false;
+      rule.muteDuration ??= kMuteCompositeRulesDefaultDuration;
 
       return rule as SigynInitializedCompositeRule;
     }) : undefined

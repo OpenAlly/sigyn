@@ -245,6 +245,14 @@
             },
             "required": ["interval"],
             "additionalProperties": false
+          },
+          "muteRules": {
+            "title": "Weither matched rules should stop trigger alert when a higher-lever composite rule triggers",
+            "type": "boolean"
+          },
+          "muteDuration": {
+            "title": "Defines the duration for which rules should be muted",
+            "type": "string"
           }
         },
         "additionalProperties": false,

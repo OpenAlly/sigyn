@@ -24,6 +24,7 @@ export interface DbRule {
   throttleCount: number;
   lastIntervalReset: null | number;
   firstReset: 0 | 1;
+  muteUntil: number;
 }
 
 export interface DbRuleLog {

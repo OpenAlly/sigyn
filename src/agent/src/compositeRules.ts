@@ -64,15 +64,16 @@ export function handleCompositeRules(logger: Logger) {
   }
 
   for (const compositeRule of compositeRules) {
-    const ruleIds = getDB().prepare(
+    const ruleIdsObj = getDB().prepare(
       `SELECT id FROM rules WHERE name IN (${compositeRule.rules.map(() => "?").join(",")})`
     ).all(compositeRule.rules) as { id: number }[];
+    const ruleIds = ruleIdsObj.map(({ id }) => id);
     const { count } = getDB()
       // eslint-disable-next-line max-len
       .prepare(`SELECT COUNT(id) as count FROM alerts WHERE processed = 0 AND createdAt >= ? AND ruleId IN (${ruleIds.map(() => "?").join(",")})`)
       .get(
         utils.cron.durationOrCronToDate(compositeRule.interval, "subtract").valueOf(),
-        ...ruleIds.map(({ id }) => id)
+        ...ruleIds
       ) as { count: number };
 
     if (count < compositeRule.notifCount) {
@@ -80,13 +81,14 @@ export function handleCompositeRules(logger: Logger) {
       continue;
     }
 
+    const ruleIdsPlaceholder = ruleIds.map(() => "?").join(",");
     if (compositeRule.ruleCountThreshold) {
       const { distinctCount } = getDB()
       // eslint-disable-next-line max-len
-        .prepare(`SELECT COUNT(DISTINCT ruleId) as distinctCount FROM alerts WHERE processed = 0 AND createdAt >= ? AND ruleId IN (${ruleIds.map(() => "?").join(",")})`)
+        .prepare(`SELECT COUNT(DISTINCT ruleId) as distinctCount FROM alerts WHERE processed = 0 AND createdAt >= ? AND ruleId IN (${ruleIdsPlaceholder})`)
         .get(
           utils.cron.durationOrCronToDate(compositeRule.interval, "subtract").valueOf(),
-          ...ruleIds.map(({ id }) => id)
+          ...ruleIds
         ) as { distinctCount: number };
 
       if (distinctCount < compositeRule.ruleCountThreshold) {
@@ -117,10 +119,22 @@ export function handleCompositeRules(logger: Logger) {
       })
     );
 
-    getDB().prepare(`UPDATE alerts SET processed = 1 WHERE createdAt >= ? AND ruleId IN (${ruleIds.map(() => "?").join(",")})`)
+    getDB().prepare(`UPDATE alerts SET processed = 1 WHERE createdAt >= ? AND ruleId IN (${ruleIdsPlaceholder})`)
       .run(
         utils.cron.durationOrCronToDate(compositeRule.interval, "subtract").valueOf(),
-        ...ruleIds.map(({ id }) => id)
+        ...ruleIds
+      );
+
+    if (!compositeRule.muteRules) {
+      return;
+    }
+
+    const muteUntilTimestamp = utils.cron.durationOrCronToDate(compositeRule.muteDuration, "add").valueOf();
+    getDB()
+      .prepare(`UPDATE rules SET muteUntil = ? WHERE id IN (${ruleIdsPlaceholder})`)
+      .run(
+        muteUntilTimestamp,
+        ...ruleIds
       );
   }
 }

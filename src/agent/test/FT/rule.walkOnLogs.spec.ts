@@ -171,6 +171,25 @@ describe("Rule.walkOnLogs()", () => {
       });
     });
 
+    describe("When muteUntil is a future timestamp and receiving 5 new logs on first polling", () => {
+      it("should not send alert", async() => {
+        const ruleConfig = config.rules[0];
+        const rule = new Rule(ruleConfig, { logger: kLogger });
+
+        getDB()
+          .prepare("UPDATE rules SET muteUntil = ? WHERE name = ?")
+          .run(Date.now() + 50000, ruleConfig.name);
+
+        const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
+        assert.equal(createAlert, false);
+
+        // reset mute for next tests
+        getDB()
+          .prepare("UPDATE rules SET muteUntil = ? WHERE name = ?")
+          .run(0, ruleConfig.name);
+      });
+    });
+
     describe("A rule with throttle.count = 6 and throttle.interval = '1s'", () => {
       describe("When receiving less logs than throttle.count within the interval", () => {
         it("should send a first alert", async() => {

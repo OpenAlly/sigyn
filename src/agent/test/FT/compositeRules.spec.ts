@@ -7,7 +7,7 @@ import { setTimeout } from "node:timers/promises";
 
 // Import Third-party Dependencies
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
-import { SigynInitializedConfig, initConfig } from "@sigyn/config";
+import { SigynInitializedConfig, SigynRule, initConfig } from "@sigyn/config";
 import isCI from "is-ci";
 
 // Import Internal Dependencies
@@ -29,8 +29,8 @@ describe("Composite Rules", { concurrency: 1 }, () => {
   let rules: any;
 
   before(async() => {
-    if (!fs.existsSync("test/.temp")) {
-      fs.mkdirSync("test/.temp");
+    if (!fs.existsSync(".temp")) {
+      fs.mkdirSync(".temp");
     }
 
     initDB(kLogger, { databaseFilename: ".temp/test.sqlite3" });
@@ -149,6 +149,29 @@ describe("Composite Rules", { concurrency: 1 }, () => {
     // We have throttle.count set to 3 so this alert should be sent
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
   });
+
+  it("should mute rules", async() => {
+    resetRuteMuteUntil(rules[0]);
+    resetRuteMuteUntil(rules[1]);
+    resetRuteMuteUntil(rules[2]);
+
+    getDB().prepare("DELETE FROM compositeRuleAlerts").run();
+
+    assert.equal(ruleMuteUntilTimestamp(rules[0]), 0);
+    assert.equal(ruleMuteUntilTimestamp(rules[1]), 0);
+    assert.equal(ruleMuteUntilTimestamp(rules[2]), 0);
+
+    createRuleAlert(rules[0], 2);
+    createRuleAlert(rules[1], 2);
+    createRuleAlert(rules[2], 2);
+
+    handleCompositeRules(kLogger);
+    await setTimeout(kTimeout);
+
+    assert.ok(ruleMuteUntilTimestamp(rules[0]) > Date.now());
+    assert.ok(ruleMuteUntilTimestamp(rules[1]) > Date.now());
+    assert.ok(ruleMuteUntilTimestamp(rules[2]) > Date.now());
+  });
 });
 
 function createRuleAlert(rule: Rule, times: number) {
@@ -158,4 +181,18 @@ function createRuleAlert(rule: Rule, times: number) {
       .prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)")
       .run(rule.getRuleFromDatabase().id, Date.now());
   }
+}
+
+function ruleMuteUntilTimestamp(rule: Rule): number {
+  const { muteUntil } = getDB()
+    .prepare("SELECT muteUntil FROM rules WHERE name = ?")
+    .get(rule.config.name) as { muteUntil: number };
+
+  return muteUntil;
+}
+
+function resetRuteMuteUntil(rule: Rule): void {
+  getDB()
+    .prepare("UPDATE rules SET muteUntil = ? WHERE name = ?")
+    .run(0, rule.config.name);
 }

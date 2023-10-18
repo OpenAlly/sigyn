@@ -535,6 +535,84 @@ describe("Composite rules validations", () => {
     });
   });
 
+  it("compositeRules property 'muteRules' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            muteRules: undefined
+          }
+        ]
+      });
+    });
+  });
+
+  it("compositeRules property 'muteRules' must be boolean", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            muteRules: "yes" as any
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/muteRules: must be boolean"
+    });
+  });
+
+  it("compositeRules property 'muteDuration' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            muteDuration: undefined
+          }
+        ]
+      });
+    });
+  });
+
+  it("compositeRules property 'muteDuration' must be string", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            muteDuration: false as any
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/muteDuration: must be string"
+    });
+  });
+
   it("compositeRules cannot have additional property", () => {
     assert.throws(() => {
       validateConfig({

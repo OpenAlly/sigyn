@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS rules
     throttleCount     INTEGER DEFAULT 0,
     lastRunAt         INTEGER,
     lastIntervalReset INTEGER,
-    firstReset        INTEGER DEFAULT 1
+    firstReset        INTEGER DEFAULT 1,
+    muteUntil         INTEGER DEFAULT 0
   );
 
 CREATE TABLE IF NOT EXISTS ruleLogs
