@@ -33,6 +33,8 @@ describe("Composite Rules", { concurrency: 1 }, () => {
       fs.mkdirSync("test/.temp");
     }
 
+    initDB(kLogger, { databaseFilename: ".temp/test.sqlite3" });
+
     process.env.GRAFANA_API_TOKEN = "toto";
     setGlobalDispatcher(kMockAgent);
 
