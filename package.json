@@ -19,12 +19,12 @@
   ],
   "devDependencies": {
     "@nodesecure/eslint-config": "^1.8.0",
-    "@types/node": "^20.8.4",
+    "@types/node": "^20.8.7",
     "c8": "^8.0.1",
     "cross-env": "^7.0.3",
     "glob": "^10.3.10",
     "tsup": "^7.2.0",
-    "tsx": "^3.13.0",
+    "tsx": "^3.14.0",
     "typescript": "^5.2.2"
   }
 }
