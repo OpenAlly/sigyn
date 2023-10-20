@@ -56,18 +56,16 @@ export class CompositeRuleNotifier extends Notifier<CompositeRuleAlert> {
     const compositeRule = this.config.compositeRules!.find((compositeRule) => compositeRule.name === compositeRuleName)!;
     const rulesLabels = Object.create(null);
 
-    this.config.rules
-      .filter((rule) => compositeRule.rules.includes(rule.name))
-      .map((ruleConfig) => {
-        const rule = new Rule(ruleConfig, { logger: this.logger });
+    this.config.rules.forEach((ruleConfig) => {
+      if (compositeRule.rules.includes(ruleConfig.name) === false) {
+        return;
+      }
 
-        rule.init();
-
-        const { labels } = rule.getAlertFormattedRule();
-        Object.assign(rulesLabels, labels);
-
-        return void 0;
-      });
+      const rule = new Rule(ruleConfig, { logger: this.logger });
+      rule.init();
+      const { labels } = rule.getAlertFormattedRule();
+      Object.assign(rulesLabels, labels);
+    });
 
     return {
       // TODO: make it configurable

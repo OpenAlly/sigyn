@@ -99,10 +99,8 @@ export function handleCompositeRules(logger: Logger) {
       }
     }
 
-    if (compositeRule.throttle) {
-      if (compositeRuleHasThrottle(compositeRule, count, logger)) {
-        continue;
-      }
+    if (compositeRuleHasThrottle(compositeRule, count, logger)) {
+      continue;
     }
 
     getDB().prepare("INSERT INTO compositeRuleAlerts (name, createdAt) VALUES (?, ?)").run(compositeRule.name, Date.now());
