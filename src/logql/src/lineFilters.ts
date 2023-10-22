@@ -2,11 +2,11 @@
 const kLineFilterOperators = {
   lineContains: {
     operator: "|=",
-    delimiters: ["`", "'"]
+    delimiters: ["`", "'", "\""]
   },
   lineDoesNotContain: {
     operator: "!=",
-    delimiters: ["`", "'"]
+    delimiters: ["`", "'", "\""]
   },
   lineContainsRegexMatch: {
     operator: "|~",
@@ -44,7 +44,8 @@ export class LineFilters extends Map<LineFilterOperator, string[]> {
         continue;
       }
 
-      const regex = new RegExp(`\\${operator}\\s*?[${delimiters.join("")}](.*?)[${delimiters.join("")}]`, "g");
+      const operatorDelimiter = delimiters.join("");
+      const regex = new RegExp(`\\${operator}\\s*?[${operatorDelimiter}](.*?)[${operatorDelimiter}]`, "g");
       const values = [...query.matchAll(regex)].flatMap((value) => value[1]);
 
       if (values.length > 0) {

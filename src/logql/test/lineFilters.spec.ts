@@ -43,6 +43,13 @@ describe("LineFilters", () => {
       assert.strictEqual(lineFilters.lineDoesNotContain()[0], "foo");
     });
 
+    it("should parse a lineDoesNotContain with double quote", () => {
+      const lineFilters = new LineFilters("!= \"foo\"");
+
+      assert.equal(lineFilters.lineDoesNotContain().length, 1);
+      assert.strictEqual(lineFilters.lineDoesNotContain()[0], "foo");
+    });
+
     it("should parse multiple lineDoesNotContain", () => {
       const lineFilters = new LineFilters("!= `foo` != `bar`");
 
