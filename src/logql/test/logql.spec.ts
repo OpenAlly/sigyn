@@ -62,6 +62,10 @@ describe("LogQL", () => {
 
     assert.equal(logql.lineFilters.lineContains().length, 1);
     assert.strictEqual(logql.lineFilters.lineContains()[0], "my super logql");
+    assert.strictEqual(
+      logql.toString(),
+      "{app=\"foo\",env=\"preprod\"} |= `my super logql`"
+    );
   });
 
   it("should build and serialize a LogQL query", () => {
@@ -80,11 +84,26 @@ describe("LogQL", () => {
     logql.parserExpression.toJson({ foo: "bar" });
     logql.parserExpression.toUnpack();
 
-    const toString = logql.toString();
+    assert.strictEqual(
+      logql.toString(),
+      "{app=\"foo\",env=\"preprod\"} |= `foo` != `bar` |~ `baz` !~ `qux` | foo = \"bar\" | size > 5 | json foo=\"bar\" | unpack"
+    );
+  });
+
+  it("should parse a LogQL with lineFilter, labelFilter and parseExpression", () => {
+    const logql = new LogQL(
+      // eslint-disable-next-line max-len
+      `{app="discussion",env="production"} |= "returned "GET /rooms/availableUsers" | regexp \`((?P<execTime>[0-9.]+)ms)\` | execTime > 500`
+    );
+
+    assert.ok(logql.streamSelector.size === 2);
+    assert.ok(logql.lineFilters.size === 1);
+    assert.ok(logql.labelFilters.size === 1);
+    assert.ok(logql.parserExpression.regexp?.length === 1);
 
     assert.strictEqual(
-      toString,
-      "{app=\"foo\",env=\"preprod\"} |= `foo` != `bar` |~ `baz` !~ `qux` | foo = \"bar\" | size > 5 | json foo=\"bar\" | unpack"
+      logql.toString(),
+      "{app=\"discussion\",env=\"production\"} |= `returned ` | execTime > 500 | regexp `((?P<execTime>[0-9.]+)ms)`"
     );
   });
 });
