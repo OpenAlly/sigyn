@@ -14,7 +14,7 @@ describe("LabelFilters", () => {
     });
 
     describe("Parsing", () => {
-      it("should parse stict equal label", () => {
+      it("should parse strict equal label", () => {
         const labels = new LabelFilters("app=\"foo\"");
 
         assert.strictEqual(labels.get("app")![0].value, "foo");
@@ -23,7 +23,7 @@ describe("LabelFilters", () => {
         assert.equal(labels.size, 1);
       });
 
-      it("should parse multiple stict equal labels", () => {
+      it("should parse multiple strict equal labels", () => {
         const labels = new LabelFilters("app=\"foo\",env=\"dev\",job=\"bar\"");
 
         assert.strictEqual(labels.get("app")![0].value, "foo");
@@ -38,7 +38,7 @@ describe("LabelFilters", () => {
         assert.equal(labels.size, 3);
       });
 
-      it("should parse multiple stict equal labels with spaces", () => {
+      it("should parse multiple strict equal labels with spaces", () => {
         const labels = new LabelFilters("app=\"foo\", env=\"dev\",   job=\"bar\"");
 
         assert.strictEqual(labels.get("app")![0].value, "foo");
@@ -53,7 +53,7 @@ describe("LabelFilters", () => {
         assert.equal(labels.size, 3);
       });
 
-      it("should parse stict double equal label", () => {
+      it("should parse strict double equal label", () => {
         const labels = new LabelFilters("app==\"foo\"");
 
         assert.strictEqual(labels.get("app")![0].value, "foo");
@@ -62,7 +62,7 @@ describe("LabelFilters", () => {
         assert.equal(labels.size, 1);
       });
 
-      it("should parse multiple stict double equal labels", () => {
+      it("should parse multiple strict double equal labels", () => {
         const labels = new LabelFilters("app==\"foo\",env==\"dev\",job==\"bar\"");
 
         assert.strictEqual(labels.get("app")![0].value, "foo");
@@ -77,7 +77,7 @@ describe("LabelFilters", () => {
         assert.equal(labels.size, 3);
       });
 
-      it("should parse multiple stict double equal labels with spaces", () => {
+      it("should parse multiple strict double equal labels with spaces", () => {
         const labels = new LabelFilters("app==\"foo\", env==\"dev\",   job==\"bar\"");
 
         assert.strictEqual(labels.get("app")![0].value, "foo");
@@ -369,6 +369,16 @@ describe("LabelFilters", () => {
         assert.strictEqual(labels.get("err")![0].operator, "!~");
 
         assert.equal(labels.size, 6);
+      });
+
+      it("should remove upfront stream selector", () => {
+        const labels = new LabelFilters("{env=`production`} | size > 10");
+
+        assert.strictEqual(labels.size, 1);
+
+        const sizeLabels = labels.get("size")!;
+        assert.strictEqual(sizeLabels.length, 1);
+        assert.deepEqual(sizeLabels[0], { value: 10, operator: ">" });
       });
     });
 
