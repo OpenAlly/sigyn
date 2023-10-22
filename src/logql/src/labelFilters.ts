@@ -13,6 +13,12 @@ export interface LabelFilter {
 export type LabelValue = Partial<LabelFilter> & Pick<LabelFilter, "value">
 
 export class LabelFilters extends Map<string, LabelFilter[]> {
+  static removeStreamSelector(query: string) {
+    const closeBracketIndex = query.indexOf("}");
+
+    return closeBracketIndex > -1 ? query.slice(closeBracketIndex + 1) : query;
+  }
+
   constructor(init?: string | LabelFilters) {
     super();
 
@@ -20,7 +26,7 @@ export class LabelFilters extends Map<string, LabelFilter[]> {
       this.#clone(init);
     }
     else if (init) {
-      this.#parse(init);
+      this.#parse(LabelFilters.removeStreamSelector(init));
     }
   }
 
