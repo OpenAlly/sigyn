@@ -3,11 +3,11 @@ import { SigynInitializedSelfMonitoring, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
 import { DbAgentFailure, getDB } from "../database";
-import { AgentFailureAlert } from "../notifier";
 import * as cronUtils from "./cron";
 import { Rule } from "../rules";
 import { Logger } from "..";
 import { createAgentFailureAlert } from "../alert";
+import { AgentFailureAlert } from "../notifiers/agentFailure.notifier";
 
 export function getAgentFailureRules(alert: AgentFailureAlert): string {
   const ruleIds = new Set(alert.failures.map(({ ruleId }) => ruleId));

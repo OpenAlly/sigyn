@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS rules
     throttleCount     INTEGER DEFAULT 0,
     lastRunAt         INTEGER,
     lastIntervalReset INTEGER,
-    firstReset        INTEGER DEFAULT 1
+    firstReset        INTEGER DEFAULT 1,
+    muteUntil         INTEGER DEFAULT 0
   );
 
 CREATE TABLE IF NOT EXISTS ruleLogs
@@ -41,9 +42,11 @@ CREATE TABLE IF NOT EXISTS ruleLabels
 
 CREATE TABLE IF NOT EXISTS alerts
   (
-    id        INTEGER PRIMARY KEY,
-    ruleId    INTEGER,
-    createdAt INTEGER,
+    id                 INTEGER PRIMARY KEY,
+    ruleId             INTEGER,
+    createdAt          INTEGER,
+    processed          INTEGER DEFAULT 0,
+    compositeProcessed INTEGER DEFAULT 0,
     FOREIGN KEY(ruleId)
       REFERENCES rules(id)
         ON UPDATE CASCADE
@@ -96,3 +99,10 @@ CREATE TABLE IF NOT EXISTS agentFailures
         ON UPDATE CASCADE
         ON DELETE CASCADE
   );
+
+CREATE TABLE IF NOT EXISTS compositeRuleAlerts
+  (
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    createdAt INTEGER
+  )

@@ -25,7 +25,7 @@
 
 ## ⚙️ Configuration
 
-The **Sigyn** configuration object consists of theses properties: `loki`, `templates`, `rules`,  `notifiers` and `selfMonitoring`.
+The **Sigyn** configuration object consists of theses properties: `loki`, `templates`, `rules`, `compositeRules`, `notifiers` and `selfMonitoring`.
 
 ### Example configuration
 
@@ -145,18 +145,18 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   | Property   | Type       | Required | Description |
   |------------|------------|----------|-------------|
   | `apiUrl`   | `string`   | ✔️       | The Loki API url |
-
+---
 - `templates` (Object, Optional):
   - This object specifies templates to be used in the `rules`.
 
   | Property       | Type     | Required | Description |
   |----------------|----------|----------|-------------|
   | `[key:string]` | `object` | ✔️       | A record of template object that can have either of `title`, `content` or `extends` properties (**See below**) |
-
+---
 - `extends` (String[], Optional):
   - This array specifies the configuration paths to extends from.
   - The paths can be either `foo` or `foo.sigyn.config.json` where the `foo` configuration file **must** be `foo.sigyn.config.json`.
-
+---
 - `missingLabelStrategy` (String, Optional):
   - This property defines whether Sigyn should throw if a given label value is not found via Loki API.
 
@@ -164,7 +164,7 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   |----------|-------------|
   | `ignore` | (**Default**) Skip the rule creation for each unknown label |
   | `error`  | Invalidate config and throws when an unknown label is given |
-
+---
 - `rules` (Required, Array of Objects):
   - This property holds an array of monitoring rules.
   - Each rule object must have the following properties:
@@ -260,6 +260,14 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   | `activationThreshold`    | `number`   | ❌       | The number of alerts allowed to be sent before the throttle to be activated. |
   | `labelScope`    | `string[]`   | ❌       | Allow for the implementation of a dedicated throttle mechanism per label value. For example, when the labelScope is `["app"]`, if an alert is triggered by logs from the 'foo' app, then subsequently, if new logs come from the 'bar' app, a second alert will also be triggered, resulting in a total of two alerts where both app have its own throttle. |
 
+- `rule.labelFilters` (Object, Optional):
+  - This object specifies label filters to add for a given rule.
+  - Each key represents a label
+
+  | Property       | Type       | Required | Description |
+  |----------------|------------|----------|-------------|
+  | `[key:string]` | `string[]` | ✔️       | A list of label values |
+---
 - `selfMonitoring` (Object, Optional):
   - Represents the configuration to enable self-monitoring.
 
@@ -276,15 +284,34 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
 
 > [!WARNING]
 > Self-monitoring templates can be a root template reference, however the available variables are differents.
+---
+- `compositeRules` (Required, Array of Objects):
+  - This property holds an array of composite rules.
+  - Composite rules are based on rules and allow to send alert when a given set of rules triggers too much alert
+  - Each composite rule object must have the following properties:
 
-- `rule.labelFilters` (Object, Optional):
-  - This object specifies label filters to add for a given rule.
-  - Each key represents a label
-
-  | Property       | Type       | Required | Description |
-  |----------------|------------|----------|-------------|
-  | `[key:string]` | `string[]` | ✔️       | A list of label values |
-
+  | Property    | Type                   | Required | Description |
+  |-------------|------------------------|----------|-------------|
+  | `name`      | `string`               | ✔️       | The name of the rule. Must be unique between each rule. |
+  | `notifiers` | `string []` | ✔️ | An array of strings representing the notifiers for the rule. It will enables all configured `notifiers` by default. |
+  | `include` | `string[]` | ❌ | An array of strings representing the rule to  monitor. You can use glob syntax i.e `["PROD*"]` |
+  | `exclude` | `string[]` | ❌ | An array of strings representing the rule to exclude from monitoring. You can use glob syntax i.e `["PROD*"]` |
+  | `notifCount` | `number` | ✔️ | The minimum alerts to be sent from each watched rules |
+  | `ruleCountThreshold` | `number` | ❌ | The minimum count of matching rules to triggers an alert to unlock composite rule. For instance, if you have 10 rules and `ruleCountThreshold` is 7, it means 7 rules must triggers an alert |
+  | `interval`    | `string` | ❌ | A duration (i.e `1d`, `15m`) that represents the maximum interval date to count rules alerts |
+  | `template`    | `object` | ✔️ | The number of alerts allowed to be sent before the throttle to be activated. Works same as `rules`. |
+  | `template.title`    | `string`   | ❌       | The title of the notification template. |
+  | `template.content`  | `string[]` or `object` | ❌       | The content of the notification template. It can be an object when extending another template |
+  | `template.content.before`  | `string[]` | ❌       | The content of the notification template to add **after** the extended template's content |
+  | `template.content.after`  | `string[]` | ❌       | The content of the notification template to add **before** the extended template's content |
+  | `template.extends`  | `string` | ❌       | The content of the notification template. |
+  | `throttle`    | `object`   | ❌       | The maximum amount of alert in a given interval. |
+  | `throttle.interval` | `string`   | ✔️       | The throttle duration (e.g. `1m`, `1h`) after sending an alert. |
+  | `throttle.count`    | `number`   | ❌       | The count threshold to bypass throttle, default to `0` (never send alert before the end of interval). |
+  | `throttle.activationThreshold`    | `number`   | ❌       | The number of alerts allowed to be sent before the throttle to be activated. |
+  | `muteRules`  | `boolean` | ❌       | Weither matched rules should stop trigger alert when a higher-lever composite rule triggers. <br>Default `false`. |
+  | `muteDuration`  | `string` | ❌       | Defines the duration for which rules should be muted.<br>Default `30m` |
+---
 **Notifiers**
 
 **Sigyn** provide its set of notifiers, each one have its own configuration rules.
@@ -334,6 +361,11 @@ You can use any of theses variables, surrounding with `{}` (see example below):
 For self-monitoring, you can use theses variables, surrounding with `{}`:
 - `agentFailure.errors` which is equal to the joined error messages
 - `agentFailure.rules` which is equal to the joined failed rules
+
+For composite rules, you can use theses variables, surrounding with `{}`:
+- `compositeRuleName`
+- `label` which includes each combined labels from all rules
+- `rules` joined rules names
 
 You can also use a label variable from your LogQL using `{label.x}`:
 ```json
@@ -399,32 +431,47 @@ Validate Sigyn extended configuration against an internal AJV Schema.
 ```ts
 interface SigynConfig {
   loki: LokiConfig;
-  notifiers: Record<string, unknown>;
+  notifiers: Record<string, {
+    notifier: string;
+    [key: string]: unknown;
+  }>;
   rules: SigynRule[];
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
   missingLabelStrategy: "ignore" | "error";
-  defaultSeverity: AlertSeverity
+  defaultSeverity: AlertSeverity;
+  selfMonitoring?: SigynSelfMonitoring;
+  compositeRules?: SigynCompositeRule[];
 }
 
 interface SigynInitializedConfig {
   loki: LokiConfig;
-  notifiers: Record<string, unknown>;
+  notifiers: Record<string, {
+    notifier: string;
+    [key: string]: unknown;
+  }>;
   rules: SigynInitializedRule[];
   templates?: Record<string, SigynInitializedTemplate>;
   extends?: string[];
   missingLabelStrategy: "ignore" | "error";
-  defaultSeverity: AlertSeverity
+  defaultSeverity: AlertSeverity;
+  selfMonitoring?: SigynInitializedSelfMonitoring;
+  compositeRules?: SigynInitializedCompositeRule[];
 }
 
 interface PartialSigynConfig {
   loki: LokiConfig;
-  notifiers: Record<string, unknown>;
+  notifiers: Record<string, {
+    notifier: string;
+    [key: string]: unknown;
+  }>;
   rules: PartialSigynRule[];
   templates?: Record<string, SigynAlertTemplate>;
   extends?: string[];
   missingLabelStrategy?: "ignore" | "error";
-  defaultSeverity?: AlertSeverity
+  defaultSeverity?: AlertSeverity;
+  selfMonitoring?: SigynSelfMonitoring;
+  compositeRules?: SigynCompositeRule[];
 }
 
 type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
@@ -467,9 +514,7 @@ interface PartialSigynRule {
 }
 
 type NotifierFormattedSigynRule = Omit<SigynInitializedRule, "alert"> & {
-  alert: Omit<SigynInitializedAlert, "template"> & {
-    template: SigynInitializedTemplate;
-  };
+  alert: Omit<SigynInitializedAlert, "template">
 };
 
 type AlertSeverity =
@@ -493,7 +538,8 @@ interface SigynAlert {
   throttle?: {
     count: number;
     interval: string;
-    activationThreshold: number;
+    activationThreshold?: number;
+    labelScope?: string[];
   };
 }
 
@@ -507,12 +553,13 @@ interface SigynInitializedAlert {
     percentThreshold?: number;
     minimumLabelCount?: number;
   },
-  template: string | SigynInitializedTemplate;
+  template: SigynInitializedTemplate;
   severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
   throttle?: {
     count: number;
     interval: string;
     activationThreshold: number;
+    labelScope: string[];
   };
 }
 
@@ -531,7 +578,8 @@ interface PartialSigynAlert {
   throttle?: {
     count?: number;
     interval: string;
-    activationThreshold: number;
+    activationThreshold?: number;
+    labelScope?: string[];
   };
 }
 
@@ -549,6 +597,63 @@ interface SigynAlertTemplate {
 interface SigynInitializedTemplate {
   title?: string;
   content?: string[];
+}
+
+interface SigynSelfMonitoring {
+  template: string | SigynInitializedTemplate;
+  notifiers: string[];
+  errorFilters?: string[];
+  ruleFilters?: string[];
+  minimumErrorCount?: number;
+  throttle?: {
+    count?: number;
+    interval: string;
+    activationThreshold?: number;
+  };
+}
+
+interface SigynInitializedSelfMonitoring {
+  template: SigynInitializedTemplate;
+  notifiers: string[];
+  errorFilters?: string[];
+  ruleFilters?: string[];
+  minimumErrorCount?: number;
+  throttle?: {
+    count: number;
+    interval: string;
+    activationThreshold: number;
+  };
+}
+
+interface SigynCompositeRule {
+  name: string;
+  include?: string[];
+  exclude?: string[];
+  notifCount: number;
+  ruleCountThreshold?: number;
+  interval?: string;
+  template: string | SigynAlertTemplate;
+  notifiers?: string[];
+  throttle?: {
+    count?: number;
+    interval: string;
+    activationThreshold?: number;
+  };
+}
+
+interface SigynInitializedCompositeRule {
+  name: string;
+  rules: string[];
+  notifCount: number;
+  ruleCountThreshold?: number;
+  interval: string;
+  template: string | SigynInitializedTemplate;
+  notifiers: string[];
+  throttle?: {
+    count: number;
+    interval: string;
+    activationThreshold: number;
+  };
 }
 ```
 > [!NOTE]

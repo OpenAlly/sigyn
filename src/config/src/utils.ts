@@ -1,3 +1,7 @@
+// Import Third-party Dependencies
+import { GrafanaLoki } from "@myunisoft/loki";
+import { minimatch } from "minimatch";
+
 // Import Internal Dependencies
 import {
   AlertSeverity,
@@ -7,11 +11,11 @@ import {
   SigynInitializedTemplate,
   SigynInitializedConfig,
   SigynInitializedRule,
-  SigynRule
+  SigynRule,
+  SigynInitializedCompositeRule,
+  SigynCompositeRule
 } from "./types";
-
-// Import Third-party Dependencies
-import { GrafanaLoki } from "@myunisoft/loki";
+import { isDeepStrictEqual } from "util";
 
 // CONSTANTS
 const kDefaultMissingLabelStrategy = "ignore";
@@ -19,6 +23,8 @@ const kDefaultRulePolling = "1m";
 const kDefaultAlertSeverity = "error";
 const kDefaultAlertThrottleCount = 0;
 const kDefaultRulePollingStrategy = "unbounded";
+const kDefaultCompositeRuleInterval = "1d";
+const kMuteCompositeRulesDefaultDuration = "30m";
 
 export async function initializeRules(config: SigynConfig): Promise<SigynRule[]> {
   const labels = await fetchRulesLabels(config);
@@ -68,8 +74,73 @@ export async function initializeRules(config: SigynConfig): Promise<SigynRule[]>
     }
   }
 
-
   return mergedRules;
+}
+
+export function initializeCompositeRules(config: SigynConfig): SigynInitializedCompositeRule[] {
+  if (!config.compositeRules) {
+    return [];
+  }
+
+  const ruleNames = config.rules.map((rule) => rule.name);
+  const compositeRules: SigynInitializedCompositeRule[] = [];
+
+  for (const compositeRule of config.compositeRules) {
+    const excludeRules = (compositeRule.exclude ?? []).flatMap(
+      (ruleToExclude) => ruleNames.filter((ruleName) => minimatch(ruleName, ruleToExclude))
+    );
+    const includeRules = compositeRule.include?.flatMap(
+      (ruleToInclude) => ruleNames.filter((ruleName) => minimatch(ruleName, ruleToInclude))
+    ) ?? ruleNames;
+    const rules = ruleNames.filter((rule) => includeRules.includes(rule) && !excludeRules.includes(rule));
+
+    compositeRules.push({
+      ...compositeRule,
+      rules,
+      interval: compositeRule.interval ?? kDefaultCompositeRuleInterval
+    } as SigynInitializedCompositeRule);
+
+    {
+      const compositeRule = compositeRules.at(-1)!;
+      if (compositeRule.rules.length <= 1) {
+        throw new Error(`Composite rule ${compositeRule.name} require at least 2 matching rules`);
+      }
+
+      if (compositeRules.filter((rule) => isDeepStrictEqual(rule.rules, compositeRule.rules)).length > 1) {
+        throw new Error("Found multiple composite rules wich scope the same rules");
+      }
+
+      const ruleCount = compositeRule.rules.length;
+      const ruleCountThreshold = compositeRule.ruleCountThreshold ?? 0;
+      if (ruleCountThreshold > ruleCount) {
+        throw new Error(`ruleCountThreshold (${ruleCountThreshold}) cannot be higher than total rule (${ruleCount})`);
+      }
+    }
+  }
+
+  return compositeRules;
+}
+
+export function handleCompositeRulesTemplates(
+  config: SigynConfig,
+  compositeRules: SigynCompositeRule[]
+): SigynCompositeRule[] {
+  if (compositeRules.length === 0) {
+    return [];
+  }
+
+  const clonedRules = structuredClone(compositeRules);
+
+  for (const rule of clonedRules) {
+    if (typeof rule.template === "object" && rule.template.extends) {
+      rule.template = extendsTemplates(rule.template, config);
+    }
+    else if (typeof rule.template === "string") {
+      rule.template = config.templates![rule.template];
+    }
+  }
+
+  return clonedRules;
 }
 
 function* getRuleLabelFilters(rule: SigynRule) {
@@ -147,7 +218,20 @@ export function applyDefaultValues(
         activationThreshold: config.selfMonitoring.throttle.activationThreshold ?? 0,
         count: config.selfMonitoring.throttle.count ?? 0
       } : undefined
-    } : undefined
+    } : undefined,
+    compositeRules: config.compositeRules ? config.compositeRules.map((rule) => {
+      // Note: rules, template & interval is already initialized with `initializeCompositeRules()`.
+      rule.notifiers ??= Object.keys(config.notifiers!);
+      if (rule.throttle) {
+        rule.throttle.count ??= kDefaultAlertThrottleCount;
+        rule.throttle.activationThreshold ??= 0;
+      }
+
+      rule.muteRules ??= false;
+      rule.muteDuration ??= kMuteCompositeRulesDefaultDuration;
+
+      return rule as SigynInitializedCompositeRule;
+    }) : undefined
   };
 }
 

@@ -21,7 +21,8 @@ const kExpectedTablesColumns = {
     { name: "lastRunAt", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
     { name: "throttleCount", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 },
     { name: "lastIntervalReset", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
-    { name: "firstReset", dflt_value: "1", type: "INTEGER", pk: 0, notnull: 0 }
+    { name: "firstReset", dflt_value: "1", type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "muteUntil", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 }
   ],
   ruleLogs: [
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
@@ -40,7 +41,9 @@ const kExpectedTablesColumns = {
   alerts: [
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
     { name: "ruleId", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
-    { name: "createdAt", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 }
+    { name: "createdAt", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "processed", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "compositeProcessed", dflt_value: "0", type: "INTEGER", pk: 0, notnull: 0 }
   ],
   notifiers: [
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
@@ -64,6 +67,11 @@ const kExpectedTablesColumns = {
     { name: "message", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 },
     { name: "timestamp", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
     { name: "count", dflt_value: 1, type: "INTEGER", pk: 0, notnull: 0 }
+  ],
+  compositeRuleAlerts: [
+    { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },
+    { name: "name", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 },
+    { name: "createdAt", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 }
   ]
 };
 

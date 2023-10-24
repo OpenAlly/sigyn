@@ -35,10 +35,11 @@ interface ExecuteWebhookData {
     errors: string;
     rules: string;
   }
+  rules?: string;
 }
 
 async function formatWebhook(options: ExecuteWebhookOptions) {
-  const { agentFailure, counter, ruleConfig, label, severity, lokiUrl } = options.data;
+  const { agentFailure, counter, ruleConfig, label, severity, lokiUrl, rules } = options.data;
   // pupa is ESM only, need a dynamic import for CommonJS.
   const { default: pupa } = await import("pupa");
 
@@ -61,7 +62,8 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
     counter,
     logql: ruleConfig?.logql ? formatLogQL(ruleConfig.logql) : null,
     label,
-    lokiUrl
+    lokiUrl,
+    rules
   };
 
   const contentTemplateOptions = {

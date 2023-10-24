@@ -13,6 +13,10 @@
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
     "rootDir": "./src",
+    "typeRoots": [
+      "../../node_modules/@types",
+      "../config/dist"
+    ],
     "types": ["node"]
   },
   "include": ["src"],
