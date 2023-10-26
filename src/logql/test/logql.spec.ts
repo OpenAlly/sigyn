@@ -13,6 +13,7 @@ describe("LogQL", () => {
       const logql = new LogQL();
 
       assert.ok(logql instanceof LogQL);
+      assert.strictEqual(logql.type, "query");
     });
 
     it("should be a lineContains given a string", () => {
@@ -105,5 +106,13 @@ describe("LogQL", () => {
       logql.toString(),
       "{app=\"discussion\",env=\"production\"} |= `returned ` | regexp `((?P<execTime>[0-9.]+)ms)` | execTime > 500"
     );
+  });
+
+  it("should preserve metric without modifications", () => {
+    const originalQL = `count_over_time({job="mysql"}[5m])`;
+    const logql = new LogQL(originalQL);
+
+    assert.strictEqual(logql.type, "metric");
+    assert.strictEqual(logql.toString(), originalQL);
   });
 });

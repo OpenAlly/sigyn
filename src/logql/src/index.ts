@@ -7,6 +7,9 @@ import { ParserExpression } from "./parserExpression";
 export { StreamSelector, LineFilters, LabelFilters, ParserExpression };
 
 export class LogQL {
+  #type: "metric" | "query" = "query";
+  #rawInit: string;
+
   streamSelector = new StreamSelector();
   lineFilters = new LineFilters();
   labelFilters = new LabelFilters();
@@ -16,10 +19,16 @@ export class LogQL {
     init?: string | string[] | StreamSelector | LineFilters | LabelFilters | ParserExpression
   ) {
     if (typeof init === "string") {
-      this.streamSelector = new StreamSelector(init);
-      this.lineFilters = new LineFilters(init);
-      this.labelFilters = new LabelFilters(init);
-      this.parserExpression = new ParserExpression(init);
+      this.#type = /^[a-zA-Z_\s]+\(/g.test(init) ? "metric" : "query";
+
+      if (this.#type === "metric") {
+        this.#rawInit = init;
+      }
+      const finalInit = this.#type === "query" ? init : void 0;
+      this.streamSelector = new StreamSelector(finalInit);
+      this.lineFilters = new LineFilters(finalInit);
+      this.labelFilters = new LabelFilters(finalInit);
+      this.parserExpression = new ParserExpression(finalInit);
 
       return this;
     }
@@ -49,6 +58,10 @@ export class LogQL {
     }
   }
 
+  get type() {
+    return this.#type;
+  }
+
   lineEq(value: string) {
     this.lineFilters.add(value, "lineContains");
 
@@ -74,6 +87,10 @@ export class LogQL {
   }
 
   toString() {
+    if (this.#type === "metric") {
+      return this.#rawInit;
+    }
+
     return `
       ${this.streamSelector.toString()}
       ${this.lineFilters.toString()}
