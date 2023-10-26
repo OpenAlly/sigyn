@@ -138,15 +138,22 @@ export class ParserExpression {
     return this.unpack ? "| unpack" : "";
   }
 
-  toString() {
+  lowStringEnd() {
+    const expressions = [
+      this.#serializeObjectExpression("pattern"),
+      this.#serializeObjectExpression("regexp")
+    ];
+
+    return expressions.join(" ").trim();
+  }
+
+  highStringEnd() {
     const expressions = [
       this.#serializeArrayExpression("json"),
       this.#serializeArrayExpression("logfmt"),
-      this.#serializeObjectExpression("pattern"),
-      this.#serializeObjectExpression("regexp"),
       this.#unpackToString()
     ];
 
-    return expressions.filter(Boolean).join(" ").trim();
+    return expressions.join(" ").trim();
   }
 }

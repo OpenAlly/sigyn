@@ -103,7 +103,7 @@ describe("LogQL", () => {
 
     assert.strictEqual(
       logql.toString(),
-      "{app=\"discussion\",env=\"production\"} |= `returned ` | execTime > 500 | regexp `((?P<execTime>[0-9.]+)ms)`"
+      "{app=\"discussion\",env=\"production\"} |= `returned ` | regexp `((?P<execTime>[0-9.]+)ms)` | execTime > 500"
     );
   });
 });

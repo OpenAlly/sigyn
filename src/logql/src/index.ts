@@ -77,8 +77,9 @@ export class LogQL {
     return `
       ${this.streamSelector.toString()}
       ${this.lineFilters.toString()}
+      ${this.parserExpression.lowStringEnd()}
       ${this.labelFilters.toString()}
-      ${this.parserExpression.toString()}
+      ${this.parserExpression.highStringEnd()}
     `.trim().replace(/\s\s+/g, " ");
   }
 }
