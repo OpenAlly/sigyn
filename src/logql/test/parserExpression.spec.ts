@@ -378,7 +378,8 @@ describe("ParserExpression", () => {
     it("should serialize empty string", () => {
       const parserExpression = new ParserExpression();
 
-      assert.deepEqual(parserExpression.toString(), "");
+      assert.deepEqual(parserExpression.lowStringEnd(), "");
+      assert.deepEqual(parserExpression.highStringEnd(), "");
     });
 
     describe("Json", () => {
@@ -387,7 +388,8 @@ describe("ParserExpression", () => {
 
         parserExpression.toJson();
 
-        assert.deepEqual(parserExpression.toString(), "| json");
+        assert.strictEqual(parserExpression.lowStringEnd(), "");
+        assert.strictEqual(parserExpression.highStringEnd(), "| json");
       });
 
       it("should serialize json with params", () => {
@@ -395,7 +397,8 @@ describe("ParserExpression", () => {
 
         parserExpression.toJson({ foo: "bar" });
 
-        assert.deepEqual(parserExpression.toString(), "| json foo=\"bar\"");
+        assert.strictEqual(parserExpression.lowStringEnd(), "");
+        assert.strictEqual(parserExpression.highStringEnd(), "| json foo=\"bar\"");
       });
     });
 
@@ -405,7 +408,8 @@ describe("ParserExpression", () => {
 
         parserExpression.toLogfmt();
 
-        assert.deepEqual(parserExpression.toString(), "| logfmt");
+        assert.strictEqual(parserExpression.lowStringEnd(), "");
+        assert.strictEqual(parserExpression.highStringEnd(), "| logfmt");
       });
 
       it("should serialize logfmt with params", () => {
@@ -413,7 +417,8 @@ describe("ParserExpression", () => {
 
         parserExpression.toLogfmt({ foo: "bar" });
 
-        assert.deepEqual(parserExpression.toString(), "| logfmt foo=\"bar\"");
+        assert.strictEqual(parserExpression.lowStringEnd(), "");
+        assert.strictEqual(parserExpression.highStringEnd(), "| logfmt foo=\"bar\"");
       });
     });
 
@@ -423,7 +428,8 @@ describe("ParserExpression", () => {
 
         parserExpression.toPattern("<ip>");
 
-        assert.deepEqual(parserExpression.toString(), "| pattern `<ip>`");
+        assert.strictEqual(parserExpression.lowStringEnd(), "| pattern `<ip>`");
+        assert.strictEqual(parserExpression.highStringEnd(), "");
       });
 
       it("should serialize multiple patterns", () => {
@@ -431,7 +437,8 @@ describe("ParserExpression", () => {
 
         parserExpression.toPattern(["<ip>", "<pi>"]);
 
-        assert.deepEqual(parserExpression.toString(), "| pattern `<ip>` | pattern `<pi>`");
+        assert.strictEqual(parserExpression.lowStringEnd(), "| pattern `<ip>` | pattern `<pi>`");
+        assert.strictEqual(parserExpression.highStringEnd(), "");
       });
     });
 
@@ -441,7 +448,8 @@ describe("ParserExpression", () => {
 
         parserExpression.toRegexp("(?P<name>re)");
 
-        assert.deepEqual(parserExpression.toString(), "| regexp `(?P<name>re)`");
+        assert.strictEqual(parserExpression.lowStringEnd(), "| regexp `(?P<name>re)`");
+        assert.strictEqual(parserExpression.highStringEnd(), "");
       });
 
       it("should serialize multiple regexp", () => {
@@ -449,7 +457,8 @@ describe("ParserExpression", () => {
 
         parserExpression.toRegexp(["(?P<name>re)", "(?P<name>ree)"]);
 
-        assert.deepEqual(parserExpression.toString(), "| regexp `(?P<name>re)` | regexp `(?P<name>ree)`");
+        assert.strictEqual(parserExpression.lowStringEnd(), "| regexp `(?P<name>re)` | regexp `(?P<name>ree)`");
+        assert.strictEqual(parserExpression.highStringEnd(), "");
       });
     });
 
@@ -459,7 +468,8 @@ describe("ParserExpression", () => {
 
         parserExpression.toUnpack();
 
-        assert.deepEqual(parserExpression.toString(), "| unpack");
+        assert.strictEqual(parserExpression.lowStringEnd(), "");
+        assert.strictEqual(parserExpression.highStringEnd(), "| unpack");
       });
     });
 
@@ -473,8 +483,8 @@ describe("ParserExpression", () => {
           .toRegexp("(?P<name>re)")
           .toUnpack();
 
-        // eslint-disable-next-line max-len
-        assert.deepEqual(parserExpression.toString(), "| json foo=\"bar\" | logfmt foo=\"bar\" | pattern `<ip>` | regexp `(?P<name>re)` | unpack");
+        assert.strictEqual(parserExpression.lowStringEnd(), "| pattern `<ip>` | regexp `(?P<name>re)`");
+        assert.strictEqual(parserExpression.highStringEnd(), "| json foo=\"bar\" | logfmt foo=\"bar\" | unpack");
       });
     });
   });
