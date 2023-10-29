@@ -10,6 +10,20 @@ import { PartialSigynAlert } from "../src/types";
 
 // CONSTANTS
 const kValidRule = VALID_CONFIG.rules[0];
+const kDurations = [
+  "20milliseconds", "20 milliseconds",
+  "20msecs", "20 msecs",
+  "20ms", "20 ms",
+  "20seconds", "20 seconds",
+  "20secs", "20 secs",
+  "20s", "20 s",
+  "20minutes", "20 minutes",
+  "20mins", "20 mins",
+  "20m", "20 m",
+  "20hours", "20 hours",
+  "20hrs", "20 hrs",
+  "20h", "20 h"
+];
 
 function mergeAlert(alert: Partial<PartialSigynAlert>) {
   return {
@@ -205,6 +219,48 @@ describe("Rule alert validations", () => {
       message: "Invalid config: /rules/0/alert/on: must have required property 'interval'"
     });
   });
+
+  it("rule alert property 'on.interval' must be string", () => {
+    assert.throws(() => {
+      validateConfig(mergeAlert({
+        on: {
+          ...kValidRule.alert.on,
+          interval: true as any
+        }
+      }));
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/on/interval: must be string"
+    });
+  });
+
+  it("rule alert property 'on.interval' must be a duration", () => {
+    assert.throws(() => {
+      validateConfig(mergeAlert({
+        on: {
+          ...kValidRule.alert.on,
+          interval: "foo"
+        }
+      }));
+    }, {
+      name: "Error",
+      // eslint-disable-next-line max-len
+      message: "Invalid config: /rules/0/alert/on/interval: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
+    });
+  });
+
+  for (const duration of kDurations) {
+    it(`rule alert property 'on.interval' can be '${duration}'`, () => {
+      assert.doesNotThrow(() => {
+        validateConfig(mergeAlert({
+          on: {
+            ...kValidRule.alert.on,
+            interval: duration
+          }
+        }));
+      });
+    });
+  }
 
   it("rule alert property 'on.interval' or 'on.minimumLabelCount' should be required when rule is label percent threhsold based (value)", () => {
     assert.throws(() => {
@@ -475,7 +531,7 @@ describe("Rule alert validations", () => {
     });
   });
 
-  it("rule alert property 'throttle.interval' must be a duration", () => {
+  it("rule alert property 'throttle.interval' must be string", () => {
     assert.throws(() => {
       validateConfig(mergeAlert({
         throttle: {
@@ -487,6 +543,32 @@ describe("Rule alert validations", () => {
       message: "Invalid config: /rules/0/alert/throttle/interval: must be string"
     });
   });
+
+  it("rule alert property 'throttle.interval' must be a duration", () => {
+    assert.throws(() => {
+      validateConfig(mergeAlert({
+        throttle: {
+          interval: "foo"
+        }
+      }));
+    }, {
+      name: "Error",
+      // eslint-disable-next-line max-len
+      message: "Invalid config: /rules/0/alert/throttle/interval: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
+    });
+  });
+
+  for (const duration of kDurations) {
+    it(`rule alert property 'throttle.interval' can be '${duration}'`, () => {
+      assert.doesNotThrow(() => {
+        validateConfig(mergeAlert({
+          throttle: {
+            interval: duration
+          }
+        }));
+      });
+    });
+  }
 
   it("rule alert property 'throttle.count' must be an integer", () => {
     assert.throws(() => {
