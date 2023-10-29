@@ -2,8 +2,11 @@
 import assert from "node:assert";
 import { describe, it } from "node:test";
 
+// Import Third-party Dependencies
+import esmock from "esmock";
+
 // Import Internal Dependencies
-import { morphix } from "../src/index";
+import { morphix } from "../dist/index.mjs";
 
 describe("Morphix", () => {
   it("main", async() => {
@@ -79,6 +82,22 @@ describe("Morphix", () => {
   });
 
   it("should find ip hostname", async() => {
-    assert.equal(await morphix("{foo | dnsresolve}", { foo: "8.8.8.8" }), "dns.google");
+    const { morphix } = await esmock("../dist/index.mjs", {
+      "node:dns/promises": {
+        reverse: async() => ["dns.google"]
+      }
+    });
+    assert.equal(await morphix("host: {foo | dnsresolve}", { foo: "8.8.8.8" }), "host: dns.google");
+  });
+
+  it("should not find ip hostname", async() => {
+    const { morphix } = await esmock("../dist/index.mjs", {
+      "node:dns/promises": {
+        reverse: async() => {
+          throw new Error("Not found");
+        }
+      }
+    });
+    assert.equal(await morphix("host: {foo | dnsresolve}", { foo: "8.8.8.8" }), "host: 8.8.8.8");
   });
 });
