@@ -39,6 +39,7 @@ Click on one of the links to access the documentation of the package:
 | name | package and link |
 | --- | --- |
 | logql | [@sigyn/logql](./src/logql) |
+| morphix | [@sigyn/morphix](./src/morphix) |
 
 ### Notifiers
 | name | package and link |

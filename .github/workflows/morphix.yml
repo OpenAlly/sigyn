@@ -1,15 +1,15 @@
-name: Sigyn Teams
+name: Morphix
 
 on:
   push:
     branches: [main]
     paths:
-      - src/teams/src/**
-      - src/teams/test/**
+      - src/morphix/src/**
+      - src/morphix/test/**
   pull_request:
     paths:
-      - src/teams/src/**
-      - src/teams/test/**
+      - src/morphix/src/**
+      - src/morphix/test/**
 
 permissions:
   contents: read
@@ -26,6 +26,8 @@ jobs:
         uses: step-security/harden-runner@1b05615854632b887b69ae1be8cbefe72d3ae423 # v2.6.0
         with:
           egress-policy: audit
+          allowed-endpoints: >
+            dns.google
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
@@ -34,4 +36,4 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run tests
-        run: npm run test --workspace=src/teams
+        run: npm run test --workspace=src/morphix

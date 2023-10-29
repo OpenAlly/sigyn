@@ -13,13 +13,14 @@
     "src/config",
     "src/logql",
     "src/agent",
+    "src/morphix",
     "src/discord",
     "src/slack",
     "src/teams"
   ],
   "devDependencies": {
     "@nodesecure/eslint-config": "^1.8.0",
-    "@types/node": "^20.8.7",
+    "@types/node": "^20.8.9",
     "c8": "^8.0.1",
     "cross-env": "^7.0.3",
     "glob": "^10.3.10",

@@ -1,6 +1,7 @@
 // Import Third-party Dependencies
 import * as httpie from "@myunisoft/httpie";
 import { NotifierFormattedSigynRule, SigynInitializedTemplate } from "@sigyn/config";
+import { morphix } from "@sigyn/morphix";
 
 // CONSTANTS
 const kSeverityEmoji = {
@@ -32,9 +33,6 @@ interface ExecuteWebhookData {
 async function formatWebhook(options: ExecuteWebhookOptions) {
   const { agentFailure, counter, ruleConfig, label, severity, lokiUrl, rules } = options.data;
 
-  // pupa is ESM only, need a dynamic import for CommonJS.
-  const { default: pupa } = await import("pupa");
-
   const { title: templateTitle = "", content: templateContent = [] } = options.template;
   if (templateTitle === "" && templateContent.length === 0) {
     throw new Error("Invalid rule template: one of the title or content is required.");
@@ -61,14 +59,14 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
     ignoreMissing: true
   };
 
-  const content: string[] = templateContent.map((content) => pupa(
+  const content: string[] = await Promise.all(templateContent.map(async(content) => await morphix(
     content,
     templateData,
     textTemplateOptions
-  ));
+  )));
 
   return {
-    title: pupa(`${kSeverityEmoji[severity]} ${templateTitle}`, templateData, titleTemplateOptions),
+    title: await morphix(`${kSeverityEmoji[severity]} ${templateTitle}`, templateData, titleTemplateOptions),
     text: content.join("\n")
   };
 }

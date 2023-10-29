@@ -47,8 +47,7 @@
     "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
     "ms": "^2.1.3",
-    "pino": "^8.16.0",
-    "pupa": "^3.1.0",
+    "pino": "^8.16.1",
     "toad-scheduler": "^3.0.0"
   },
   "devDependencies": {
