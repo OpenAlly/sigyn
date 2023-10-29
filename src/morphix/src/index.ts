@@ -65,7 +65,7 @@ export async function morphix(
     return await kFunctions[func](String(transformedValue));
   };
 
-  const braceFnRegex = /{\s*([a-z0-9-.]*)\s*(?:\|\s*((?:(?!{)[a-z0-9-.]*)*?)\s*)?}/gi;
+  const braceFnRegex = /{\s{0,1}([a-z0-9-.]*)\s{0,1}(?:\|\s{0,1}((?:(?!{)[a-z0-9-]*)*?)\s{0,1})?}/gi;
   let formattedTemplate = template;
 
   for (const [match, placeholder, func] of template.matchAll(braceFnRegex)) {
