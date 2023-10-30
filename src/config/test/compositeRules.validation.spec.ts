@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // Import Node.js Dependencies
 import assert from "node:assert";
 import { describe, it } from "node:test";
@@ -5,6 +6,22 @@ import { describe, it } from "node:test";
 // Import Internal Dependencies
 import { validateConfig } from "../src/validate";
 import { VALID_CONFIG } from "./helpers";
+
+// CONSTANTS
+const kDurations = [
+  "20milliseconds", "20 milliseconds",
+  "20msecs", "20 msecs",
+  "20ms", "20 ms",
+  "20seconds", "20 seconds",
+  "20secs", "20 secs",
+  "20s", "20 s",
+  "20minutes", "20 minutes",
+  "20mins", "20 mins",
+  "20m", "20 m",
+  "20hours", "20 hours",
+  "20hrs", "20 hrs",
+  "20h", "20 h"
+];
 
 describe("Composite rules validations", () => {
   it("property 'compositeRules' should be optional", () => {
@@ -378,7 +395,7 @@ describe("Composite rules validations", () => {
     });
   });
 
-  it("compositeRules property 'interval' can must be string", () => {
+  it("compositeRules property 'interval' must be string", () => {
     assert.throws(() => {
       validateConfig({
         ...VALID_CONFIG,
@@ -398,6 +415,48 @@ describe("Composite rules validations", () => {
       message: "Invalid config: /compositeRules/0/interval: must be string"
     });
   });
+
+  it("compositeRules property 'interval' must be a duration", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            interval: "foo"
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      // eslint-disable-next-line max-len
+      message: "Invalid config: /compositeRules/0/interval: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
+    });
+  });
+
+  for (const duration of kDurations) {
+    it(`compositeRules property 'interval' can be '${duration}'`, () => {
+      assert.doesNotThrow(() => {
+        validateConfig({
+          ...VALID_CONFIG,
+          compositeRules: [
+            {
+              notifCount: 12,
+              template: {
+                title: "title"
+              },
+              name: "foo",
+              interval: duration
+            }
+          ]
+        });
+      });
+    });
+  }
 
   it("compositeRules property 'throttle' can be set", () => {
     assert.doesNotThrow(() => {
@@ -511,6 +570,75 @@ describe("Composite rules validations", () => {
     });
   });
 
+  it("compositeRules property 'throttle.interval' must be string", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            throttle: {
+              interval: true as any
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/throttle/interval: must be string"
+    });
+  });
+
+  it("compositeRules property 'throttle.interval' must be a duration", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            throttle: {
+              interval: "foo"
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      // eslint-disable-next-line max-len
+      message: "Invalid config: /compositeRules/0/throttle/interval: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
+    });
+  });
+
+  for (const duration of kDurations) {
+    it(`compositeRules property 'throttle.interval' can be '${duration}'`, () => {
+      assert.doesNotThrow(() => {
+        validateConfig({
+          ...VALID_CONFIG,
+          compositeRules: [
+            {
+              notifCount: 12,
+              template: {
+                title: "title"
+              },
+              name: "foo",
+              throttle: {
+                interval: duration
+              }
+            }
+          ]
+        });
+      });
+    });
+  }
+
   it("compositeRules property 'throttle.count' must be an integer", () => {
     assert.throws(() => {
       validateConfig({
@@ -612,6 +740,48 @@ describe("Composite rules validations", () => {
       message: "Invalid config: /compositeRules/0/muteDuration: must be string"
     });
   });
+
+  it("compositeRules property 'muteDuration' must be a duration", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            muteDuration: "foo"
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      // eslint-disable-next-line max-len
+      message: "Invalid config: /compositeRules/0/muteDuration: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
+    });
+  });
+
+  for (const duration of kDurations) {
+    it(`compositeRules property 'muteDuration' can be '${duration}'`, () => {
+      assert.doesNotThrow(() => {
+        validateConfig({
+          ...VALID_CONFIG,
+          compositeRules: [
+            {
+              notifCount: 12,
+              template: {
+                title: "title"
+              },
+              name: "foo",
+              muteDuration: duration
+            }
+          ]
+        });
+      });
+    });
+  }
 
   it("compositeRules cannot have additional property", () => {
     assert.throws(() => {

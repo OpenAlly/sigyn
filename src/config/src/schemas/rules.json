@@ -117,7 +117,8 @@
               "interval": {
                 "title": "The interval of time in which the logs will be counted",
                 "description": "A duration string (e.g. '1m', '1h', '1d').",
-                "type": "string"
+                "type": "string",
+                "pattern": "^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$"
               },
               "label": {
                 "title": "The label to watch",
@@ -321,7 +322,8 @@
               "interval": {
                 "title": "The interval of time to pause alert",
                 "description": "A duration string (e.g. '1m', '1h', '1d').",
-                "type": "string"
+                "type": "string",
+                "pattern": "^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$"
               },
               "activationThreshold": {
                 "title": "The number of alert before activating the throttle",
