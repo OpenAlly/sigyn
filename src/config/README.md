@@ -345,13 +345,14 @@ Each notifier is a key-value object where key represents the notifier name to re
 ```
 
 > [!NOTE]
-> You can also use your own notifier or any third-party notifier [more info](./TODO/)
+> [You can also use your own notifier](../notifiers/README.md) or any third-party notifier
 
 You can use any of theses variables, surrounding with `{}` (see example below):
 - `ruleName`
 - `logql`
+- `count` (count of logs retrievied within the interval)
 - `counter`
-- `counter`
+- `threshold` (`alert.on.count`)
 - `interval`
 - `lokiUrl` 
 

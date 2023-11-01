@@ -123,7 +123,10 @@ export class RuleNotifier extends Notifier<RuleNotifierAlert> {
 
     return {
       ruleConfig,
-      counter: rule.threshold,
+      ruleName: rule.name,
+      count: rule.counter,
+      threshold: ruleConfig.alert.on.count,
+      interval: ruleConfig.alert.on.interval,
       label: { ...new StreamSelector(ruleConfig.logql).kv(), ...rule.labels },
       severity: ruleConfig.alert.severity,
       lokiUrl: await utils.getLokiUrl(rule, ruleConfig)

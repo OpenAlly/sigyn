@@ -42,7 +42,8 @@ describe("Extended configs", () => {
         ]
       },
       foo: {
-        title: "🚨 {ruleName} - Triggered {counter} times!"
+        title: "🚨 {ruleName} - Triggered {counter} times!",
+        content: []
       }
     });
 
@@ -83,7 +84,8 @@ describe("Extended configs", () => {
             interval: "1m"
           },
           template: {
-            title: "🚨 {ruleName} - Triggered {counter} times!"
+            title: "🚨 {ruleName} - Triggered {counter} times!",
+            content: []
           },
           severity: "error"
         }

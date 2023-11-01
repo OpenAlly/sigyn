@@ -1,7 +1,5 @@
 // Import Third-party Dependencies
-import * as httpie from "@myunisoft/httpie";
-import { NotifierFormattedSigynRule, SigynInitializedTemplate } from "@sigyn/config";
-import { morphix } from "@sigyn/morphix";
+import { ExecuteWebhookOptions, WebhookNotifier } from "@sigyn/notifiers";
 
 // CONSTANTS
 const kAttachmentColor = {
@@ -10,114 +8,65 @@ const kAttachmentColor = {
   warning: "#FFE333",
   info: "#E7E7E7"
 };
-const kSeverityEmoji = {
-  critical: "💥",
-  error: "❗️",
-  warning: "⚠️",
-  info: "📢"
-};
 
-interface ExecuteWebhookOptions {
-  webhookUrl: string;
-  data: ExecuteWebhookData;
-  template: SigynInitializedTemplate;
-}
+class SlackNotifier extends WebhookNotifier {
+  contentTemplateOptions() {
+    return {
+      transform: ({ value, key }) => {
+        if (key === "logql" || key === "lokiUrl") {
+          return value;
+        }
 
-interface ExecuteWebhookData {
-  ruleConfig?: NotifierFormattedSigynRule;
-  counter?: number;
-  severity: "critical" | "error" | "warning" | "info";
-  label?: Record<string, string>;
-  lokiUrl?: string;
-  agentFailure?: {
-    errors: string;
-    rules: string;
-  },
-  rules?: string;
-}
-
-async function formatWebhook(options: ExecuteWebhookOptions) {
-  const { agentFailure, counter, ruleConfig, label, severity, lokiUrl, rules } = options.data;
-
-  const { title: templateTitle = "", content: templateContent = [] } = options.template;
-  if (templateTitle === "" && templateContent.length === 0) {
-    throw new Error("Invalid rule template: one of the title or content is required.");
+        return `*${value ?? "unknown"}*`;
+      },
+      ignoreMissing: true
+    };
   }
 
-  // Slack doesn't support backtick escape in inline code
-  function formatLogQL(logql: string) {
+  async formatWebhook(): Promise<any> {
+    if (this.data.ruleConfig?.logql) {
+      this.data.ruleConfig.logql = this.#formatLogQL(this.data.ruleConfig.logql);
+    }
+
+    this.template.content = this.template.content.map((text) => {
+      let formattedText = text;
+      // Slack doesn't supports [label](url) format but <url|label> instead.
+      const mdUrlRegex = /\[([^[\]]+)\]\(([^()]+)\)/g;
+      const [url, label, link] = mdUrlRegex.exec(text) ?? [];
+      if (url !== undefined) {
+        formattedText = formattedText.replace(url, `<${link}|${label}>`);
+      }
+
+      return formattedText;
+    });
+
+    const title = await this.formatTitle();
+    const content = await this.formatContent();
+
+    return {
+      attachments: [
+        {
+          mrkdwn_in: ["text"],
+          color: kAttachmentColor[this.data.severity],
+          title,
+          fields: [
+            {
+              value: content.join("\n").replaceAll(/>(?!\s|$)/g, "›"),
+              short: false
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  #formatLogQL(logql: string): string {
     return `\`${logql.replaceAll("`", "'")}\``;
   }
-  // Slack doesn't support header format
-  const formattedTitle = `${kSeverityEmoji[severity]} ${templateTitle}`;
-
-  const templateData = {
-    ...ruleConfig ?? {},
-    agentFailure,
-    counter,
-    logql: ruleConfig?.logql ? formatLogQL(ruleConfig.logql) : null,
-    label,
-    lokiUrl,
-    rules
-  };
-  const templateOptions = {
-    transform: ({ value, key }) => {
-      if (key === "logql" || key === "lokiUrl") {
-        return value;
-      }
-
-      return `*${value ?? "unknown"}*`;
-    }
-  };
-  const titleTemplateOptions = {
-    transform: ({ value }) => (value ?? "unknown"),
-    ignoreMissing: true
-  };
-
-  const body = {
-    attachments: [
-      {
-        mrkdwn_in: ["text"],
-        color: kAttachmentColor[severity],
-        title: morphix(formattedTitle, templateData, titleTemplateOptions),
-        fields: [
-          {
-            value: (await Promise.all(templateContent.map(async(text) => {
-              if (text === "") {
-                return "";
-              }
-
-              let formattedText = text;
-              // Slack doesn't supports [label](url) format but <url|label> instead.
-              const mdUrlRegex = /\[([^[\]]+)\]\(([^()]+)\)/g;
-              const [url, label, link] = mdUrlRegex.exec(text) ?? [];
-              if (url !== undefined) {
-                formattedText = formattedText.replace(url, `<${link}|${label}>`);
-              }
-
-              return await morphix(
-                formattedText,
-                templateData,
-                templateOptions
-              );
-            }))).join("\n").replaceAll(/>(?!\s|$)/g, "›"),
-            short: false
-          }
-        ]
-      }
-    ]
-  };
-
-  return body;
 }
 
-export async function execute(options: ExecuteWebhookOptions) {
-  const body = await formatWebhook(options);
+export function execute(options: ExecuteWebhookOptions) {
+  const notifier = new SlackNotifier(options);
 
-  return httpie.post<string>(options.webhookUrl, {
-    body,
-    headers: {
-      "content-type": "application/json"
-    }
-  });
+  return notifier.execute();
 }

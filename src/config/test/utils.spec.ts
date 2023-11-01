@@ -94,7 +94,7 @@ describe("Utils", () => {
         loki: {
           apiUrl: kDummyUrl
         },
-        templates: undefined,
+        templates: {},
         notifiers: {
           discord: {
             notifier: "discord",
@@ -128,7 +128,8 @@ describe("Utils", () => {
               },
               severity: "error",
               template: {
-                title: "Alert for foo"
+                title: "Alert for foo",
+                content: []
               }
             }
           }
@@ -218,7 +219,8 @@ describe("Utils", () => {
               interval: "1h"
             },
             template: {
-              title: "Alert for foo"
+              title: "Alert for foo",
+              content: []
             }
           }
 

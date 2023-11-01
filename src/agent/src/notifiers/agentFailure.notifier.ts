@@ -40,7 +40,7 @@ export class AgentFailureNotifier extends Notifier<AgentFailureAlert> {
     const { notifierConfig } = alert;
     const notifierOptions = {
       ...notifierConfig,
-      data: this.#agentFailureAlertData(alert),
+      data: await this.#agentFailureAlertData(alert),
       template: this.config.selfMonitoring!.template
     };
 
