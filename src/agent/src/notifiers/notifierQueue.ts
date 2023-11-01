@@ -8,6 +8,9 @@ const kPrivateInstancier = Symbol("instancier");
 type NotifierQueueAlert<T> = T & {
   _id: symbol;
   _nonUniqueMatcher: (notification: T, newNotifications: T) => boolean;
+  notifierConfig: {
+    notifier: string;
+  }
 }
 
 export class NotifierQueue<T = any> extends EventEmitter {
@@ -38,7 +41,11 @@ export class NotifierQueue<T = any> extends EventEmitter {
     for (const newNotification of notifications) {
       const { _id } = newNotification;
       const alreadyInQueue = this.#notificationAlerts
-        .find((notification) => notification._id === _id && notification._nonUniqueMatcher(newNotification, notification));
+        .find(
+          (notification) => notification._id === _id &&
+            notification._nonUniqueMatcher(newNotification, notification) &&
+            notification.notifierConfig.notifier === newNotification.notifierConfig.notifier
+        );
 
       if (alreadyInQueue === undefined) {
         this.#notificationAlerts.push(newNotification);

@@ -1,6 +1,7 @@
 // Import Third-party Dependencies
 import * as httpie from "@myunisoft/httpie";
 import { NotifierFormattedSigynRule, SigynInitializedTemplate } from "@sigyn/config";
+import { morphix } from "@sigyn/morphix";
 
 // CONSTANTS
 const kAttachmentColor = {
@@ -37,9 +38,6 @@ interface ExecuteWebhookData {
 
 async function formatWebhook(options: ExecuteWebhookOptions) {
   const { agentFailure, counter, ruleConfig, label, severity, lokiUrl, rules } = options.data;
-
-  // pupa is ESM only, need a dynamic import for CommonJS.
-  const { default: pupa } = await import("pupa");
 
   const { title: templateTitle = "", content: templateContent = [] } = options.template;
   if (templateTitle === "" && templateContent.length === 0) {
@@ -81,10 +79,10 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
       {
         mrkdwn_in: ["text"],
         color: kAttachmentColor[severity],
-        title: pupa(formattedTitle, templateData, titleTemplateOptions),
+        title: morphix(formattedTitle, templateData, titleTemplateOptions),
         fields: [
           {
-            value: templateContent.map((text) => {
+            value: (await Promise.all(templateContent.map(async(text) => {
               if (text === "") {
                 return "";
               }
@@ -97,12 +95,12 @@ async function formatWebhook(options: ExecuteWebhookOptions) {
                 formattedText = formattedText.replace(url, `<${link}|${label}>`);
               }
 
-              return pupa(
+              return await morphix(
                 formattedText,
                 templateData,
                 templateOptions
               );
-            }).join("\n").replaceAll(/>(?!\s|$)/g, "›"),
+            }))).join("\n").replaceAll(/>(?!\s|$)/g, "›"),
             short: false
           }
         ]

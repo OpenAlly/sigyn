@@ -2,7 +2,25 @@
   "files": [],
   "references": [
     {
+      "path": "./src/config"
+    },
+    {
+      "path": "./src/logql"
+    },
+    {
       "path": "./src/agent"
+    },
+    {
+      "path": "./src/morphix"
+    },
+    {
+      "path": "./src/discord"
+    },
+    {
+      "path": "./src/slack"
+    },
+    {
+      "path": "./src/teams"
     }
   ]
 }

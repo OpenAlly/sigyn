@@ -1,7 +1,7 @@
 {
-  "name": "@sigyn/slack",
-  "version": "1.6.1",
-  "description": "Send Sigyn alerts to Slack via webhook",
+  "name": "@sigyn/morphix",
+  "version": "1.0.0",
+  "description": "Micro templating with function pipes support",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -18,26 +18,26 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "prepublishOnly": "npm run build",
-    "test": "glob -c \"tsx --test\" \"./test/**/*.spec.ts\"",
+    "test": "npm run build && glob -c \"tsx --test --loader=esmock\" \"./test/**/*.spec.mts\"",
     "coverage": "c8 -r html npm test",
     "lint": "cross-env eslint src/**/*.ts"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MyUnisoft/sigyn.git",
-    "directory": "src/slack"
+    "directory": "src/morphix"
   },
   "bugs": {
     "url": "https://github.com/MyUnisoft/sigyn/issues"
   },
-  "homepage": "https://github.com/MyUnisoft/sigyn/blob/main/src/slack/README.md",
+  "homepage": "https://github.com/MyUnisoft/sigyn/blob/main/src/morphix/README.md",
   "files": [
     "dist"
   ],
   "keywords": [],
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
-  "dependencies": {
-    "@myunisoft/httpie": "^2.0.3"
+  "devDependencies": {
+    "esmock": "^2.5.8"
   }
 }
