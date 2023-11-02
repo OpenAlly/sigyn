@@ -1,7 +1,5 @@
 // Import Third-party Dependencies
-import * as httpie from "@myunisoft/httpie";
-import { NotifierFormattedSigynRule, SigynInitializedTemplate } from "@sigyn/config";
-import { morphix } from "@sigyn/morphix";
+import { ExecuteWebhookOptions, WebhookNotifier } from "@sigyn/notifiers";
 
 // CONSTANTS
 const kWebhookUsername = "Sigyn Agent";
@@ -13,90 +11,41 @@ const kEmbedColor = {
   warning: 16776960,
   info: 16777215
 };
-const kSeverityEmoji = {
-  critical: "💥",
-  error: "❗️",
-  warning: "⚠️",
-  info: "📢"
-};
 
-interface ExecuteWebhookOptions {
-  webhookUrl: string;
-  data: ExecuteWebhookData;
-  template: SigynInitializedTemplate;
-}
-
-interface ExecuteWebhookData {
-  ruleConfig?: NotifierFormattedSigynRule;
-  counter?: number;
-  severity: "critical" | "error" | "warning" | "info";
-  label?: Record<string, string>;
-  lokiUrl?: string;
-  agentFailure?: {
-    errors: string;
-    rules: string;
-  }
-  rules?: string;
-}
-
-async function formatWebhook(options: ExecuteWebhookOptions) {
-  const { agentFailure, counter, ruleConfig, label, severity, lokiUrl, rules } = options.data;
-
-  const { title: templateTitle = "", content: templateContent = [] } = options.template;
-  if (templateTitle === "" && templateContent.length === 0) {
-    throw new Error("Invalid rule template: one of the title or content is required.");
+class DiscordNotifier extends WebhookNotifier {
+  contentTemplateOptions() {
+    return {
+      transform: ({ key, value }) => (key === "lokiUrl" ? value : `**${value === undefined ? "unknown" : value}**`),
+      ignoreMissing: true
+    };
   }
 
-  // displaying backtick in code snippet needs code snippet to be surround by double backtick.
-  // if the logql ends with a backtick, we need to add a space after it otherwise the string
-  // ends with triple backtick and the code snippet is done.
-  function formatLogQL(logql: string) {
+  async formatWebhook(): Promise<any> {
+    if (this.data.ruleConfig?.logql) {
+      this.data.ruleConfig.logql = this.#formatLogQL(this.data.ruleConfig.logql);
+    }
+
+    const title = await this.formatTitle();
+    const content = await this.formatContent();
+
+    return {
+      embeds: [{
+        title,
+        description: content.join("\n"),
+        color: kEmbedColor[this.data.severity]
+      }],
+      username: kWebhookUsername,
+      avatar_url: kAvatarUrl
+    };
+  }
+
+  #formatLogQL(logql: string): string {
     return logql.includes("`") ? `\`\`${logql.endsWith("`") ? `${logql} ` : logql}\`\`` : `\`${logql}\``;
   }
-
-  const templateData = {
-    ...ruleConfig ?? {},
-    ruleName: ruleConfig?.name,
-    agentFailure,
-    counter,
-    logql: ruleConfig?.logql ? formatLogQL(ruleConfig.logql) : null,
-    label,
-    lokiUrl,
-    rules
-  };
-
-  const contentTemplateOptions = {
-    transform: ({ key, value }) => (key === "lokiUrl" ? value : `**${value === undefined ? "unknown" : value}**`),
-    ignoreMissing: true
-  };
-  const titleTemplateOptions = {
-    transform: ({ value }) => (value === undefined ? "unknown" : value),
-    ignoreMissing: true
-  };
-
-  const content: string[] = [];
-  for (const template of templateContent) {
-    content.push(await morphix(template, templateData, contentTemplateOptions));
-  }
-
-  return {
-    embeds: [{
-      title: await morphix(`${kSeverityEmoji[severity]} ${templateTitle}`, templateData, titleTemplateOptions),
-      description: content.join("\n"),
-      color: kEmbedColor[severity]
-    }],
-    username: kWebhookUsername,
-    avatar_url: kAvatarUrl
-  };
 }
 
-export async function execute(options: ExecuteWebhookOptions) {
-  const body = await formatWebhook(options);
+export function execute(options: ExecuteWebhookOptions) {
+  const notifier = new DiscordNotifier(options);
 
-  return httpie.post<string>(options.webhookUrl, {
-    body,
-    headers: {
-      "content-type": "application/json"
-    }
-  });
+  return notifier.execute();
 }

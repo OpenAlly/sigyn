@@ -1,15 +1,15 @@
-name: Sigyn Agent
+name: Notifiers
 
 on:
   push:
     branches: [main]
     paths:
-      - src/agent/src/**
-      - src/agent/test/**
+      - src/notifiers/src/**
+      - src/notifiers/test/**
   pull_request:
     paths:
-      - src/agent/src/**
-      - src/agent/test/**
+      - src/notifiers/src/**
+      - src/notifiers/test/**
 
 permissions:
   contents: read
@@ -19,8 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # TODO: v18 temporarily disabled due to https://github.com/MyUnisoft/sigyn/actions/runs/6716893006/job/18253814002
-        node-version: [20.x]
+        node-version: [18.x, 20.x]
       fail-fast: false
     steps:
       - name: Harden Runner
@@ -37,4 +36,4 @@ jobs:
       - name: Build packages
         run: npm run build
       - name: Run tests
-        run: npm run test --workspace=src/agent
+        run: npm run test --workspace=src/notifiers

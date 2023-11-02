@@ -189,14 +189,24 @@ export async function fetchRulesLabels(config: Pick<SigynConfig, "loki" | "rules
 export function applyDefaultValues(
   config: PartialSigynConfig | SigynConfig
 ): SigynInitializedConfig {
+  const templates = {};
+  for (const [key, template] of Object.entries(config.templates ?? {})) {
+    templates[key] = {
+      title: template.title ?? "",
+      content: template.content ?? []
+    };
+  }
+
   return {
     ...config,
-    templates: config.templates as Record<string, SigynInitializedTemplate>,
+    templates,
     missingLabelStrategy: config.missingLabelStrategy ?? kDefaultMissingLabelStrategy,
     defaultSeverity: config.defaultSeverity ?? kDefaultAlertSeverity,
     rules: config.rules.map((rule) => {
       rule.polling ??= kDefaultRulePolling;
       rule.alert.severity = getSeverity(rule.alert.severity ?? config.defaultSeverity ?? kDefaultAlertSeverity);
+      rule.alert.template.title ??= "";
+      rule.alert.template.content ??= [];
       if (rule.alert.throttle) {
         rule.alert.throttle.count ??= kDefaultAlertThrottleCount;
         rule.alert.throttle.activationThreshold ??= 0;
@@ -210,9 +220,14 @@ export function applyDefaultValues(
     }),
     selfMonitoring: config.selfMonitoring ? {
       ...config.selfMonitoring,
-      template: typeof config.selfMonitoring.template === "string" ?
-        config.templates![config.selfMonitoring.template] as SigynInitializedTemplate :
-        config.selfMonitoring.template,
+      template: {
+        title: typeof config.selfMonitoring.template === "string" ?
+          templates![config.selfMonitoring.template].title ?? "" :
+          config.selfMonitoring.template.title ?? "",
+        content: typeof config.selfMonitoring.template === "string" ?
+          templates![config.selfMonitoring.template].content ?? [] :
+          config.selfMonitoring.template.content ?? []
+      },
       throttle: config.selfMonitoring.throttle ? {
         ...config.selfMonitoring.throttle,
         activationThreshold: config.selfMonitoring.throttle.activationThreshold ?? 0,
@@ -220,8 +235,10 @@ export function applyDefaultValues(
       } : undefined
     } : undefined,
     compositeRules: config.compositeRules ? config.compositeRules.map((rule) => {
-      // Note: rules, template & interval is already initialized with `initializeCompositeRules()`.
+      // Note: rules are already initialized with `initializeCompositeRules()`.
       rule.notifiers ??= Object.keys(config.notifiers!);
+      rule.template.title ??= "";
+      rule.template.content ??= [];
       if (rule.throttle) {
         rule.throttle.count ??= kDefaultAlertThrottleCount;
         rule.throttle.activationThreshold ??= 0;

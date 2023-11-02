@@ -17,7 +17,7 @@
       "../../node_modules/@types",
       "../config/dist"
     ],
-    "types": ["node"]
+    "types": ["node"],
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

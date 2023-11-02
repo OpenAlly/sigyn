@@ -26,23 +26,6 @@ describe("execute()", () => {
     setGlobalDispatcher(kDispatcher);
   });
 
-  it("should throws if there is no title AND no content", async() => {
-    await assert.rejects(async() => {
-      await slack.execute({
-        webhookUrl: kDummyWebhoobURL,
-        data: {
-          counter: 10,
-          severity: "error",
-          label: { foo: "bar" }
-        },
-        template: {} as any
-      });
-    }, {
-      name: "Error",
-      message: "Invalid rule template: one of the title or content is required."
-    });
-  });
-
   it("should execute webhook", async() => {
     pool.intercept({
       method: "POST",
@@ -56,7 +39,7 @@ describe("execute()", () => {
         severity: "error",
         label: { foo: "bar" }
       },
-      template: { title: "foo" }
+      template: { title: "foo", content: [] }
     });
 
     assert.deepEqual(JSON.parse(data), { foo: "bar" });
@@ -75,7 +58,7 @@ describe("execute()", () => {
         severity: "error",
         label: { foo: "bar" }
       },
-      template: { title: "foo" }
+      template: { title: "foo", content: [] }
     }), {
       name: "Error",
       message: "Bad Request"

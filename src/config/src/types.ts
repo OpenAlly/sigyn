@@ -164,8 +164,8 @@ export interface SigynAlertTemplate {
 }
 
 export interface SigynInitializedTemplate {
-  title?: string;
-  content?: string[];
+  title: string;
+  content: string[];
 }
 
 export interface SigynSelfMonitoring {

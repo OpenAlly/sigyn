@@ -44,6 +44,7 @@ Click on one of the links to access the documentation of the package:
 ### Notifiers
 | name | package and link |
 | --- | --- |
+| notifiers | [@sigyn/notifiers](./src/notifiers) |
 | discord | [@sigyn/discord](./src/discord/) |
 | slack | [@sigyn/slack](./src/slack) |
 | teams | [@sigyn/teams](./src/teams) |
