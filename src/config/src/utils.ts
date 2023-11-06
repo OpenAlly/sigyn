@@ -326,6 +326,11 @@ export function extendsTemplates(template: SigynAlertTemplate, config: SigynConf
     if (template.content?.before) {
       templateContent.unshift(...template.content.before);
     }
+    if (template.content?.at) {
+      for (const { index, value } of Object.values(template.content.at)) {
+        templateContent.splice(Number(index), 0, value);
+      }
+    }
   }
 
   return {

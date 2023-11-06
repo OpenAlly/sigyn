@@ -53,6 +53,102 @@ describe("Extended templates", () => {
     });
   });
 
+  it("should extends content with 'before'", async() => {
+    const config = await initConfig(path.join(__dirname, "fixtures/extended-templates-content-before/sigyn.config.json"));
+
+    assert.deepEqual(config.templates!, {
+      main: {
+        title: "🚨 {ruleName} - Triggered {counter} times!",
+        content: [
+          "- LogQL: {logql}",
+          "- Threshold: {count}",
+          "- Interval: {interval}"
+        ]
+      },
+      test: {
+        title: "🚨 {ruleName} - Triggered {counter} times!",
+        content: [
+          "foo",
+          "- LogQL: {logql}",
+          "- Threshold: {count}",
+          "- Interval: {interval}"
+        ]
+      }
+    });
+  });
+
+  it("should extends content with 'after'", async() => {
+    const config = await initConfig(path.join(__dirname, "fixtures/extended-templates-content-after/sigyn.config.json"));
+
+    assert.deepEqual(config.templates!, {
+      main: {
+        title: "🚨 {ruleName} - Triggered {counter} times!",
+        content: [
+          "- LogQL: {logql}",
+          "- Threshold: {count}",
+          "- Interval: {interval}"
+        ]
+      },
+      test: {
+        title: "🚨 {ruleName} - Triggered {counter} times!",
+        content: [
+          "- LogQL: {logql}",
+          "- Threshold: {count}",
+          "- Interval: {interval}",
+          "foo"
+        ]
+      }
+    });
+  });
+
+  it("should extends content with 'at'", async() => {
+    const config = await initConfig(path.join(__dirname, "fixtures/extended-templates-content-at/sigyn.config.json"));
+
+    assert.deepEqual(config.templates!, {
+      main: {
+        title: "🚨 {ruleName} - Triggered {counter} times!",
+        content: [
+          "- LogQL: {logql}",
+          "- Threshold: {count}",
+          "- Interval: {interval}"
+        ]
+      },
+      test: {
+        title: "🚨 {ruleName} - Triggered {counter} times!",
+        content: [
+          "- LogQL: {logql}",
+          "- Threshold: {count}",
+          "foo",
+          "- Interval: {interval}"
+        ]
+      }
+    });
+  });
+
+  it("should extends content with negative 'at'", async() => {
+    const config = await initConfig(path.join(__dirname, "fixtures/extended-templates-content-at/sigyn.config.json"));
+
+    assert.deepEqual(config.templates!, {
+      main: {
+        title: "🚨 {ruleName} - Triggered {counter} times!",
+        content: [
+          "- LogQL: {logql}",
+          "- Threshold: {count}",
+          "- Interval: {interval}"
+        ]
+      },
+      test: {
+        title: "🚨 {ruleName} - Triggered {counter} times!",
+        content: [
+          "- LogQL: {logql}",
+          "- Threshold: {count}",
+          "foo",
+          "- Interval: {interval}"
+        ]
+      }
+    });
+  });
+
   it("should extends the nested templates", async() => {
     const config = await initConfig(path.join(__dirname, "fixtures/extended-templates-nested/sigyn.config.json"));
 

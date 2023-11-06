@@ -50,6 +50,26 @@
                 },
                 "nullable": true,
                 "minItems": 1
+              },
+              "at": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "index": {
+                      "type": "integer"
+                    },
+                    "value": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "index",
+                    "value"
+                  ],
+                  "additionalProperties": false
+                },
+                "minItems": 1
               }
             },
             "additionalProperties": false,
@@ -62,6 +82,11 @@
               {
                 "required": [
                   "after"
+                ]
+              },
+              {
+                "required": [
+                  "at"
                 ]
               }
             ]
