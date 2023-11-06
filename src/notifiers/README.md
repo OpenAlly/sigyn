@@ -60,7 +60,7 @@ class MyAwesomeWebhookNotifier extends WebhookNotifier {
 }
 
 export function execute(options: ExecuteWebhookOptions) {
-  const notifier = new DiscordNotifier(options);
+  const notifier = new MyAwesomeWebhookNotifier(options);
 
   return notifier.execute();
 }
