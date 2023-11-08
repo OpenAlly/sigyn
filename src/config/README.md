@@ -228,10 +228,12 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   | `content`  | `string[]` or `object` | ❌       | The content of the notification template. It can be an object when extending another template |
   | `content.before`  | `string[]` | ❌       | The content of the notification template to add **after** the extended template's content |
   | `content.after`  | `string[]` | ❌       | The content of the notification template to add **before** the extended template's content |
+  | `content.at.index`  | `number` | ❌       | The index indicating where the new content should be added. Negative index works i.e. `-1` mean "before the last line" |
+  | `content.at.value`  | `string` | ❌       | The specific content line to be included at the provided index. |
   | `extends`  | `string` | ❌       | The content of the notification template. |
 
   > [!NOTE]
-  > At least one of `title` or `content` must be provided.
+  > One of `title`, `content` or `at` must be provided.
 
   > [!NOTE]
   > When extending template with `extends`:
@@ -304,6 +306,8 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   | `template.content`  | `string[]` or `object` | ❌       | The content of the notification template. It can be an object when extending another template |
   | `template.content.before`  | `string[]` | ❌       | The content of the notification template to add **after** the extended template's content |
   | `template.content.after`  | `string[]` | ❌       | The content of the notification template to add **before** the extended template's content |
+  | `template.content.at.index`  | `number` | ❌       | The index indicating where the new content should be added. Negative index works i.e. `-1` mean "before the last line" |
+  | `template.content.at.value`  | `string` | ❌       | The specific content line to be included at the provided index. |
   | `template.extends`  | `string` | ❌       | The content of the notification template. |
   | `throttle`    | `object`   | ❌       | The maximum amount of alert in a given interval. |
   | `throttle.interval` | `string`   | ✔️       | The throttle duration (e.g. `1m`, `1h`) after sending an alert. |

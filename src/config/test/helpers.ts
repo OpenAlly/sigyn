@@ -11,6 +11,15 @@ export const VALID_CONFIG: PartialSigynConfig = {
       bar: "baz"
     }
   },
+  templates: {
+    main: {
+      title: "title",
+      content: [
+        "foo",
+        "bar"
+      ]
+    }
+  },
   rules: [
     {
       name: "test1",

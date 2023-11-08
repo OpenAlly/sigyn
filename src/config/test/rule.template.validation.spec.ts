@@ -184,6 +184,49 @@ describe("Rule template validations", () => {
     });
   });
 
+  it("given an extended template, content can be string[]", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        rules: [
+          {
+            ...VALID_CONFIG.rules[0],
+            alert: {
+              ...VALID_CONFIG.rules[0].alert,
+              template: {
+                extends: "main",
+                content: ["foo"]
+              }
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("given an extended template, content object must have either 'before', 'after' or 'at'", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        rules: [
+          {
+            ...VALID_CONFIG.rules[0],
+            alert: {
+              ...VALID_CONFIG.rules[0].alert,
+              template: {
+                extends: "main",
+                content: {}
+              }
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /rules/0/alert/template/content: must be array, /rules/0/alert/template/content: must have required property 'before', /rules/0/alert/template/content: must have required property 'after', /rules/0/alert/template/content: must have required property 'at', /rules/0/alert/template/content: must match a schema in anyOf, /rules/0/alert/template/content: must match exactly one schema in oneOf, /rules/0/alert/template: must match \"then\" schema, /rules/0/alert/template: must be string, /rules/0/alert/template: must match exactly one schema in oneOf"
+    });
+  });
+
   it("given root rule template, it should validate", () => {
     assert.doesNotThrow(() => {
       validateConfig({

@@ -155,6 +155,10 @@ export interface PartialSigynAlert {
 export interface SigynAlertTemplateExtendedContent {
   before?: string[];
   after?: string[];
+  at?: {
+    index: number;
+    value: string;
+  }[];
 }
 
 export interface SigynAlertTemplate {
