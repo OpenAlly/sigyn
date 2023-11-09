@@ -45,7 +45,7 @@ describe("Utils", () => {
         ]
       };
 
-      const labels = await utils.fetchRulesLabels(config);
+      const labels = await utils.rules.fetchLabels(config);
 
       assert.equal(labels.size, 2);
       assert.deepEqual(labels.get("env"), ["prod", "dev"]);
@@ -85,6 +85,23 @@ describe("Utils", () => {
             }
           }
 
+        }
+      ],
+      selfMonitoring: {
+        template: {} as any,
+        notifiers: ["discord"],
+        throttle: {
+          interval: "1h"
+        }
+      },
+      compositeRules: [
+        {
+          name: "foo",
+          notifCount: 5,
+          template: {},
+          throttle: {
+            interval: "1h"
+          }
         }
       ]
     };
@@ -134,8 +151,36 @@ describe("Utils", () => {
             }
           }
         ],
-        selfMonitoring: undefined,
-        compositeRules: undefined
+        selfMonitoring: {
+          template: {
+            title: "",
+            content: []
+          },
+          notifiers: ["discord"],
+          throttle: {
+            interval: "1h",
+            count: 0,
+            activationThreshold: 0
+          }
+        },
+        compositeRules: [
+          {
+            name: "foo",
+            notifCount: 5,
+            notifiers: ["discord", "slack"],
+            template: {
+              title: "",
+              content: []
+            },
+            throttle: {
+              interval: "1h",
+              count: 0,
+              activationThreshold: 0
+            },
+            muteDuration: "30m",
+            muteRules: false
+          }
+        ]
       });
     });
 
@@ -229,7 +274,7 @@ describe("Utils", () => {
     };
 
     it("should apply variables", async() => {
-      const rules = utils.applyRulesLogQLVariables(config as SigynConfig);
+      const rules = utils.rules.applyLogQLVariables(config as SigynConfig);
 
       assert.equal(rules[0].logql, "{app=\"foo\"} |= `bar foo|bar`");
     });
@@ -238,7 +283,7 @@ describe("Utils", () => {
       const conf = { ...config } as any;
       conf.rules[0].logql.vars = undefined;
 
-      const rules = utils.applyRulesLogQLVariables(conf as SigynConfig);
+      const rules = utils.rules.applyLogQLVariables(conf as SigynConfig);
 
       assert.equal(rules[0].logql, "{app=\"foo\"} |= `{vars.foo} {vars.baz}`");
     });

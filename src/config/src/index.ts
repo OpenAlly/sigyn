@@ -40,16 +40,16 @@ export async function initConfig(configPath: string | URL): Promise<SigynInitial
     config.templates![key] = utils.extendsTemplates(template, config);
   }
 
-  const rules = await utils.initializeRules(config);
+  const rules = await utils.rules.initialize(config);
   validateConfig(config);
 
-  config.rules = utils.applyRulesLogQLVariables({ ...config, rules });
+  config.rules = utils.rules.applyLogQLVariables({ ...config, rules });
 
-  const compositeRules = utils.initializeCompositeRules(config);
+  const compositeRules = utils.compositeRules.initialize(config);
 
   initializedConfig = utils.applyDefaultValues({
     ...config,
-    compositeRules: utils.handleCompositeRulesTemplates(config, compositeRules)
+    compositeRules: utils.compositeRules.handleTemplates(config, compositeRules)
   });
 
   return initializedConfig;
