@@ -18,7 +18,7 @@ describe("Composite rules initialization", () => {
     ];
 
     it("Composite rule should match foo, bar & baz when include & exclude are not supplied", () => {
-      const compositeRules = utils.initializeCompositeRules({
+      const compositeRules = utils.compositeRules.initialize({
         rules,
         compositeRules: [
           {
@@ -33,7 +33,7 @@ describe("Composite rules initialization", () => {
     });
 
     it("Composite rule should match foo, bar when include is not supplied and exclude is ['baz']", () => {
-      const compositeRules = utils.initializeCompositeRules({
+      const compositeRules = utils.compositeRules.initialize({
         rules,
         compositeRules: [
           {
@@ -49,7 +49,7 @@ describe("Composite rules initialization", () => {
     });
 
     it("Composite rule should match bar, baz when include is not supplied and exclude is ['f*']", () => {
-      const compositeRules = utils.initializeCompositeRules({
+      const compositeRules = utils.compositeRules.initialize({
         rules,
         compositeRules: [
           {
@@ -65,7 +65,7 @@ describe("Composite rules initialization", () => {
     });
 
     it("Composite rule should match bar, baz when include is ['b*'] and exclude is not supplied", () => {
-      const compositeRules = utils.initializeCompositeRules({
+      const compositeRules = utils.compositeRules.initialize({
         rules,
         compositeRules: [
           {
@@ -81,7 +81,7 @@ describe("Composite rules initialization", () => {
     });
 
     it("Composite rule should match bar, baz when include is ['b*', 'foo'] and exclude is ['foo']", () => {
-      const compositeRules = utils.initializeCompositeRules({
+      const compositeRules = utils.compositeRules.initialize({
         rules,
         compositeRules: [
           {
@@ -99,7 +99,7 @@ describe("Composite rules initialization", () => {
 
     it("Composite rule should match at least 2 rules", () => {
       assert.throws(() => {
-        utils.initializeCompositeRules({
+        utils.compositeRules.initialize({
           rules,
           compositeRules: [
             {
@@ -118,7 +118,7 @@ describe("Composite rules initialization", () => {
 
     it("Cannot have multiple composite rules matching the same set of rules", () => {
       assert.throws(() => {
-        utils.initializeCompositeRules({
+        utils.compositeRules.initialize({
           rules,
           compositeRules: [
             {
@@ -141,7 +141,7 @@ describe("Composite rules initialization", () => {
 
     it("Can have multiple composite rules matching different set of rules", () => {
       assert.doesNotThrow(() => {
-        utils.initializeCompositeRules({
+        utils.compositeRules.initialize({
           rules,
           compositeRules: [
             {
@@ -162,7 +162,7 @@ describe("Composite rules initialization", () => {
 
     it("ruleCountThreshold cannot be higher than total matching rules", () => {
       assert.throws(() => {
-        utils.initializeCompositeRules({
+        utils.compositeRules.initialize({
           rules,
           compositeRules: [
             {

@@ -170,7 +170,7 @@ describe("utils.initializeRules()", () => {
       },
       rules
     };
-    assert.deepEqual(await utils.initializeRules(config as SigynConfig), expectedRules);
+    assert.deepEqual(await utils.rules.initialize(config as SigynConfig), expectedRules);
   });
 
   it("should extends template content (array)", async() => {
@@ -224,7 +224,7 @@ describe("utils.initializeRules()", () => {
       },
       rules
     };
-    assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    assert.deepEqual(await utils.rules.initialize(config as unknown as SigynConfig), expectedRules);
   });
   it("should extends template content (array)", async() => {
     const rules: Partial<SigynRule>[] = [
@@ -277,7 +277,7 @@ describe("utils.initializeRules()", () => {
       },
       rules
     };
-    assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    assert.deepEqual(await utils.rules.initialize(config as unknown as SigynConfig), expectedRules);
   });
 
   it("should extends template content (after)", async() => {
@@ -333,7 +333,7 @@ describe("utils.initializeRules()", () => {
       },
       rules
     };
-    assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    assert.deepEqual(await utils.rules.initialize(config as unknown as SigynConfig), expectedRules);
   });
 
   it("should extends template content (before)", async() => {
@@ -389,7 +389,7 @@ describe("utils.initializeRules()", () => {
       },
       rules
     };
-    assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    assert.deepEqual(await utils.rules.initialize(config as unknown as SigynConfig), expectedRules);
   });
 
   it("should extends template content (before and after)", async() => {
@@ -447,7 +447,7 @@ describe("utils.initializeRules()", () => {
       },
       rules
     };
-    assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    assert.deepEqual(await utils.rules.initialize(config as unknown as SigynConfig), expectedRules);
   });
 
   it("should replace extended template title", async() => {
@@ -496,6 +496,6 @@ describe("utils.initializeRules()", () => {
       },
       rules
     };
-    assert.deepEqual(await utils.initializeRules(config as unknown as SigynConfig), expectedRules);
+    assert.deepEqual(await utils.rules.initialize(config as unknown as SigynConfig), expectedRules);
   });
 });

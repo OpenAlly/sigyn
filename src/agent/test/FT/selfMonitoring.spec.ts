@@ -39,6 +39,7 @@ describe("Self-monitoring", () => {
   before(async() => {
     process.env.GRAFANA_API_TOKEN = "toto";
     setGlobalDispatcher(kMockAgent);
+    kMockAgent.disableNetConnect();
 
     const pool = kMockAgent.get("https://discord.com");
     pool.intercept({

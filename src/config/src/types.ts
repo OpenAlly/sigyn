@@ -222,7 +222,7 @@ export interface SigynInitializedCompositeRule {
   notifCount: number;
   ruleCountThreshold?: number;
   interval: string;
-  template: string | SigynInitializedTemplate;
+  template: SigynInitializedTemplate;
   notifiers: string[];
   throttle?: {
     count: number;
