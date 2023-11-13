@@ -63,7 +63,7 @@ export function handleTemplates(
     return [];
   }
 
-  const clonedRules = structuredClone(compositeRules);
+  const clonedRules = JSON.parse(JSON.stringify((compositeRules)));
 
   for (const rule of clonedRules) {
     if (typeof rule.template === "object" && rule.template.extends) {
