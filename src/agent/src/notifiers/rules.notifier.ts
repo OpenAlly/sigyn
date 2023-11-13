@@ -125,6 +125,7 @@ export class RuleNotifier extends Notifier<RuleNotifierAlert> {
       ruleConfig,
       ruleName: rule.name,
       count: rule.counter,
+      counter: rule.threshold,
       threshold: ruleConfig.alert.on.count,
       interval: ruleConfig.alert.on.interval,
       label: { ...new StreamSelector(ruleConfig.logql).kv(), ...rule.labels },
