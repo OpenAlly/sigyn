@@ -28,9 +28,9 @@ export class WebhookNotifier {
   };
 
   constructor(options: ExecuteWebhookOptions) {
-    this.webhookUrl = structuredClone(options.webhookUrl);
-    this.data = structuredClone(options.data);
-    this.template = structuredClone(options.template);
+    this.webhookUrl = JSON.parse(JSON.stringify((options.webhookUrl)));
+    this.data = JSON.parse(JSON.stringify((options.data)));
+    this.template = JSON.parse(JSON.stringify((options.template)));
 
     this.#headers = {
       "content-type": "application/json"
