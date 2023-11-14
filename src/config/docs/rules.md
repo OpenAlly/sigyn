@@ -40,6 +40,57 @@ Rules takes an array of object in the `rules` root config field.
 {
   "rules": [
     {
+      "name": "Foo",
+      "logql": "{app=\"foo\", env=\"preprod\"} |= `Error`",
+      "polling": [
+        "*/10 * 0-15 * * *",
+        "*/30 * 16-23 * * *"
+      ],
+      "alert": {
+        "on": {
+          "count": "10",
+          "interval": "5m"
+        },
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}",
+            "- Threshold: {count}",
+            "- Interval: {interval}",
+            "- [See logs on Grafana]({lokiUrl})"
+          ]
+        }
+      }
+    },
+    {
+      "name": "My rule on env: {label.env}",
+      "logql": "{app=\"foo\", env={label.env}} |= `your awesome logql`",
+      "polling": "30s",
+      "labelFilters": {
+        "env": ["prod", "preprod"]
+      },
+      "alert": {
+        "on": {
+          "count": "< 10",
+          "interval": "5m"
+        },
+        "template": "onlyTitle"
+      }
+    },
+    {
+      "name": "A rule based on label matching",
+      "logql": "{app=\"foo\"} |~ `state: (ok|ko)` | regexp `state: (?P<state>ok|ko)`",
+      "alert": {
+        "on": {
+          "label": "state",
+          "value": "ko",
+          "percentThreshold": 80,
+          "interval": "5d"
+        },
+        "template": {
+          "title": "Too much KO"
+        }
+      }
     }
   ],
   ...
