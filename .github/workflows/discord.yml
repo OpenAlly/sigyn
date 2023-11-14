@@ -3,13 +3,10 @@ name: Sigyn Discord
 on:
   push:
     branches: [main]
-    paths:
-      - src/discord/src/**
-      - src/discord/test/**
   pull_request:
     paths:
-      - src/discord/src/**
-      - src/discord/test/**
+      - "src/discord/**"
+      - "!src/discord/README.md"
 
 permissions:
   contents: read

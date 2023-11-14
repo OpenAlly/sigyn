@@ -3,13 +3,10 @@ name: Morphix
 on:
   push:
     branches: [main]
-    paths:
-      - src/morphix/src/**
-      - src/morphix/test/**
   pull_request:
     paths:
-      - src/morphix/src/**
-      - src/morphix/test/**
+      - "src/morphix/**"
+      - "!src/morphix/README.md"
 
 permissions:
   contents: read

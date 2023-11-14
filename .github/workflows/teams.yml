@@ -3,13 +3,10 @@ name: Sigyn Teams
 on:
   push:
     branches: [main]
-    paths:
-      - src/teams/src/**
-      - src/teams/test/**
   pull_request:
     paths:
-      - src/teams/src/**
-      - src/teams/test/**
+      - "src/teams/**"
+      - "!src/teams/README.md"
 
 permissions:
   contents: read

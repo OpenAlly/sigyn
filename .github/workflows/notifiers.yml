@@ -3,13 +3,10 @@ name: Notifiers
 on:
   push:
     branches: [main]
-    paths:
-      - src/notifiers/src/**
-      - src/notifiers/test/**
   pull_request:
     paths:
-      - src/notifiers/src/**
-      - src/notifiers/test/**
+      - "src/notifiers/**"
+      - "!src/notifiers/README.md"
 
 permissions:
   contents: read

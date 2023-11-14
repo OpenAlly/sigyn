@@ -3,13 +3,11 @@ name: Sigyn Agent
 on:
   push:
     branches: [main]
-    paths:
-      - src/agent/src/**
-      - src/agent/test/**
+    
   pull_request:
     paths:
-      - src/agent/src/**
-      - src/agent/test/**
+      - "src/agent/**"
+      - "!src/agent/README.md"
 
 permissions:
   contents: read
