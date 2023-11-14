@@ -6,7 +6,7 @@ on:
   pull_request:
     paths:
       - "src/morphix/**"
-      - "!src/morphix/README.md"
+      - "!src/morphix/**/*.md"
 
 permissions:
   contents: read

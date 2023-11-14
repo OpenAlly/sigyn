@@ -6,7 +6,7 @@ on:
   pull_request:
     paths:
       - "src/slack/**"
-      - "!src/slack/README.md"
+      - "!src/slack/**/*.md"
 
 permissions:
   contents: read

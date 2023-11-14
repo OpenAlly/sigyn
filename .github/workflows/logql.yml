@@ -6,7 +6,7 @@ on:
   pull_request:
     paths:
       - "src/logql/**"
-      - "!src/logql/README.md"
+      - "!src/logql/**/*.md"
 
 permissions:
   contents: read

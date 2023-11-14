@@ -6,7 +6,7 @@ on:
   pull_request:
     paths:
       - "src/notifiers/**"
-      - "!src/notifiers/README.md"
+      - "!src/notifiers/**/*.md"
 
 permissions:
   contents: read
