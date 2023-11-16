@@ -3,13 +3,11 @@ name: Sigyn Config
 on:
   push:
     branches: [main]
-    paths:
-      - src/config/src/**
-      - src/config/test/**
   pull_request:
     paths:
-      - src/config/src/**
-      - src/config/test/**
+      - "package-lock.json"
+      - "src/config/**"
+      - "!src/config/**/*.md"
 
 permissions:
   contents: read

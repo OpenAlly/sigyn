@@ -3,13 +3,11 @@ name: Morphix
 on:
   push:
     branches: [main]
-    paths:
-      - src/morphix/src/**
-      - src/morphix/test/**
   pull_request:
     paths:
-      - src/morphix/src/**
-      - src/morphix/test/**
+      - "package-lock.json"
+      - "src/morphix/**"
+      - "!src/morphix/**/*.md"
 
 permissions:
   contents: read

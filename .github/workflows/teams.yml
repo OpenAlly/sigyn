@@ -3,13 +3,11 @@ name: Sigyn Teams
 on:
   push:
     branches: [main]
-    paths:
-      - src/teams/src/**
-      - src/teams/test/**
   pull_request:
     paths:
-      - src/teams/src/**
-      - src/teams/test/**
+      - "package-lock.json"
+      - "src/teams/**"
+      - "!src/teams/**/*.md"
 
 permissions:
   contents: read

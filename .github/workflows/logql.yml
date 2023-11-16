@@ -3,13 +3,11 @@ name: Sigyn LogQL
 on:
   push:
     branches: [main]
-    paths:
-      - src/logql/src/**
-      - src/logql/test/**
   pull_request:
     paths:
-      - src/logql/src/**
-      - src/logql/test/**
+      - "package-lock.json"
+      - "src/logql/**"
+      - "!src/logql/**/*.md"
 
 permissions:
   contents: read

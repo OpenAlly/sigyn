@@ -3,13 +3,11 @@ name: Sigyn Slack
 on:
   push:
     branches: [main]
-    paths:
-      - src/slack/src/**
-      - src/slack/test/**
   pull_request:
     paths:
-      - src/slack/src/**
-      - src/slack/test/**
+      - "package-lock.json"
+      - "src/slack/**"
+      - "!src/slack/**/*.md"
 
 permissions:
   contents: read

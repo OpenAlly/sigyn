@@ -3,13 +3,11 @@ name: Notifiers
 on:
   push:
     branches: [main]
-    paths:
-      - src/notifiers/src/**
-      - src/notifiers/test/**
   pull_request:
     paths:
-      - src/notifiers/src/**
-      - src/notifiers/test/**
+      - "package-lock.json"
+      - "src/notifiers/**"
+      - "!src/notifiers/**/*.md"
 
 permissions:
   contents: read
