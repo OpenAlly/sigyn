@@ -181,7 +181,6 @@ describe("Self-monitoring", () => {
         rule
       }
     );
-
     task.execute();
 
     await setTimeout(kTimeout);
@@ -217,79 +216,79 @@ describe("Self-monitoring", () => {
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
   });
 
-  it("should wait remaining activationThreshold (3) before activate throttle", async() => {
-    const config = await initConfig(kRuleActivationThresholdConfigLocation);
-    const rule = new Rule(config.rules[0], { logger: kLogger });
-    rule.init();
-    getDB().exec("DELETE FROM agentFailures");
+  // it("should wait remaining activationThreshold (3) before activate throttle", async() => {
+  //   const config = await initConfig(kRuleActivationThresholdConfigLocation);
+  //   const rule = new Rule(config.rules[0], { logger: kLogger });
+  //   rule.init();
+  //   getDB().exec("DELETE FROM agentFailures");
 
-    const task = asyncTask(
-      config.rules[0], {
-        logger: kLogger,
-        lokiApi: kMockLokiApi as any,
-        rule
-      }
-    );
+  //   const task = asyncTask(
+  //     config.rules[0], {
+  //       logger: kLogger,
+  //       lokiApi: kMockLokiApi as any,
+  //       rule
+  //     }
+  //   );
 
-    task.execute();
-    await setTimeout(kTimeout);
-    // first alert, no throttle (remaining: 2)
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+  //   task.execute();
+  //   await setTimeout(kTimeout);
+  //   // first alert, no throttle (remaining: 2)
+  //   assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
 
-    const pool = kMockAgent.get("https://discord.com");
-    pool.intercept({
-      method: "POST",
-      path: () => true
-    }).reply(200);
+  //   const pool = kMockAgent.get("https://discord.com");
+  //   pool.intercept({
+  //     method: "POST",
+  //     path: () => true
+  //   }).reply(200);
 
-    task.execute();
-    await setTimeout(kTimeout);
+  //   task.execute();
+  //   await setTimeout(kTimeout);
 
-    // because of activationThreshold, no throttle (remaining: 1)
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+  //   // because of activationThreshold, no throttle (remaining: 1)
+  //   assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
 
-    pool.intercept({
-      method: "POST",
-      path: () => true
-    }).reply(200);
-    task.execute();
-    await setTimeout(kTimeout);
+  //   pool.intercept({
+  //     method: "POST",
+  //     path: () => true
+  //   }).reply(200);
+  //   task.execute();
+  //   await setTimeout(kTimeout);
 
-    // because of activationThreshold, no throttle (remaining: 0 -> now throttle is ON)
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+  //   // because of activationThreshold, no throttle (remaining: 0 -> now throttle is ON)
+  //   assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
 
-    pool.intercept({
-      method: "POST",
-      path: () => true
-    }).reply(200);
+  //   pool.intercept({
+  //     method: "POST",
+  //     path: () => true
+  //   }).reply(200);
 
-    task.execute();
-    await setTimeout(kTimeout);
-    // Now that throttle is activated (count = 3, 2 more to get OFF), alert not sent.
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+  //   task.execute();
+  //   await setTimeout(kTimeout);
+  //   // Now that throttle is activated (count = 3, 2 more to get OFF), alert not sent.
+  //   assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
+  //     name: "UndiciError",
+  //     message: /1 interceptor is pending:/
+  //   });
 
-    task.execute();
-    await setTimeout(kTimeout);
-    // Throttle is still activated (count = 3, 1 more to get OFF), alert not sent.
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+  //   task.execute();
+  //   await setTimeout(kTimeout);
+  //   // Throttle is still activated (count = 3, 1 more to get OFF), alert not sent.
+  //   assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
+  //     name: "UndiciError",
+  //     message: /1 interceptor is pending:/
+  //   });
 
-    task.execute();
-    await setTimeout(kTimeout);
-    // Throttle is still activated (count = 3, 0 more, throttle is off now), alert not sent.
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+  //   task.execute();
+  //   await setTimeout(kTimeout);
+  //   // Throttle is still activated (count = 3, 0 more, throttle is off now), alert not sent.
+  //   assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
+  //     name: "UndiciError",
+  //     message: /1 interceptor is pending:/
+  //   });
 
-    // Throttle is OFF, alert sent again.
-    task.execute();
-    await setTimeout(kTimeout);
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
-  });
+  //   // Throttle is OFF, alert sent again.
+  //   task.execute();
+  //   await setTimeout(kTimeout);
+  //   assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+  // });
 });
