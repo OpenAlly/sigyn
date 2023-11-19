@@ -48,11 +48,11 @@ describe("Self-monitoring", () => {
     }).reply(200);
   });
 
-  after(() => {
+  after(async() => {
     setGlobalDispatcher(kGlobalDispatcher);
   });
 
-  afterEach(() => {
+  afterEach(async() => {
     getDB().exec("DELETE FROM agentFailures");
   });
 
