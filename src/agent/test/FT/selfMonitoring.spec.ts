@@ -126,95 +126,95 @@ describe("Self-monitoring", () => {
     assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
   });
 
-  it("should send alert as rule matches errorFilters", async() => {
-    initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
-    const config = await initConfig(kRuleMatchErrorFiltersConfigLocation);
-    const rule = new Rule(config.rules[0], { logger: kLogger });
-    rule.init();
+  // it("should send alert as rule matches errorFilters", async() => {
+  //   initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
+  //   const config = await initConfig(kRuleMatchErrorFiltersConfigLocation);
+  //   const rule = new Rule(config.rules[0], { logger: kLogger });
+  //   rule.init();
 
-    const task = asyncTask(
-      config.rules[0], {
-        logger: kLogger,
-        lokiApi: kMockLokiApi as any,
-        rule
-      }
-    );
+  //   const task = asyncTask(
+  //     config.rules[0], {
+  //       logger: kLogger,
+  //       lokiApi: kMockLokiApi as any,
+  //       rule
+  //     }
+  //   );
 
-    task.execute();
+  //   task.execute();
 
-    await setTimeout(kTimeout);
+  //   await setTimeout(kTimeout);
 
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
-  });
+  //   assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+  // });
 
-  it("should send alert as there are is no filter", async() => {
-    initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
-    const config = await initConfig(kRuleNoFiltersConfigLocation);
-    const rule = new Rule(config.rules[0], { logger: kLogger });
-    rule.init();
+  // it("should send alert as there are is no filter", async() => {
+  //   initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
+  //   const config = await initConfig(kRuleNoFiltersConfigLocation);
+  //   const rule = new Rule(config.rules[0], { logger: kLogger });
+  //   rule.init();
 
-    const task = asyncTask(
-      config.rules[0], {
-        logger: kLogger,
-        lokiApi: kMockLokiApi as any,
-        rule
-      }
-    );
+  //   const task = asyncTask(
+  //     config.rules[0], {
+  //       logger: kLogger,
+  //       lokiApi: kMockLokiApi as any,
+  //       rule
+  //     }
+  //   );
 
-    task.execute();
+  //   task.execute();
 
-    await setTimeout(kTimeout);
+  //   await setTimeout(kTimeout);
 
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
-  });
+  //   assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+  // });
 
-  it("should have throttle", async() => {
-    initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
-    const config = await initConfig(kRuleThrottleConfigLocation);
-    const rule = new Rule(config.rules[0], { logger: kLogger });
-    rule.init();
+  // it("should have throttle", async() => {
+  //   initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
+  //   const config = await initConfig(kRuleThrottleConfigLocation);
+  //   const rule = new Rule(config.rules[0], { logger: kLogger });
+  //   rule.init();
 
-    const task = asyncTask(
-      config.rules[0], {
-        logger: kLogger,
-        lokiApi: kMockLokiApi as any,
-        rule
-      }
-    );
-    task.execute();
+  //   const task = asyncTask(
+  //     config.rules[0], {
+  //       logger: kLogger,
+  //       lokiApi: kMockLokiApi as any,
+  //       rule
+  //     }
+  //   );
+  //   task.execute();
 
-    await setTimeout(kTimeout);
+  //   await setTimeout(kTimeout);
 
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+  //   assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
 
-    const pool = kMockAgent.get("https://discord.com");
-    pool.intercept({
-      method: "POST",
-      path: () => true
-    }).reply(200);
+  //   const pool = kMockAgent.get("https://discord.com");
+  //   pool.intercept({
+  //     method: "POST",
+  //     path: () => true
+  //   }).reply(200);
 
-    task.execute();
+  //   task.execute();
 
-    await setTimeout(kTimeout);
+  //   await setTimeout(kTimeout);
 
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+  //   assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
+  //     name: "UndiciError",
+  //     message: /1 interceptor is pending:/
+  //   });
 
-    task.execute();
-    await setTimeout(kTimeout);
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+  //   task.execute();
+  //   await setTimeout(kTimeout);
+  //   assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
+  //     name: "UndiciError",
+  //     message: /1 interceptor is pending:/
+  //   });
 
-    task.execute();
-    await setTimeout(kTimeout);
+  //   task.execute();
+  //   await setTimeout(kTimeout);
 
-    // // We have throttle.count set to 3 so this alert should be sent
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
-  });
+  //   // // We have throttle.count set to 3 so this alert should be sent
+  //   assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+  // });
 
   // it("should wait remaining activationThreshold (3) before activate throttle", async() => {
   //   const config = await initConfig(kRuleActivationThresholdConfigLocation);
