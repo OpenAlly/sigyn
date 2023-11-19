@@ -4,7 +4,7 @@
   },
   "notifiers": {
     "discord": {
-      "notifier": "discord",
+      "notifier": "../../test/FT/mocks/sigyn-test-notifier.js",
       "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
     }
   },
