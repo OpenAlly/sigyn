@@ -3,7 +3,7 @@ name: Sigyn Agent
 on:
   push:
     branches: [main]
-    
+
   pull_request:
     paths:
       - "package-lock.json"
@@ -21,10 +21,6 @@ jobs:
         node-version: [18.x, 20.x]
       fail-fast: false
     steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@1b05615854632b887b69ae1be8cbefe72d3ae423 # v2.6.0
-        with:
-          egress-policy: audit
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
