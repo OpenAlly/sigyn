@@ -33,6 +33,48 @@ describe("StreamSelector", () => {
       assert.strictEqual(streamSelector.get("app")!.value, "foo");
       assert.strictEqual(streamSelector.get("env")!.value, "dev");
     });
+
+    it("should handle an object with string value", () => {
+      const streamSelector = new StreamSelector({ foo: "bar" });
+
+      assert.strictEqual(streamSelector.get("foo")!.value, "bar");
+      assert.strictEqual(streamSelector.get("foo")!.operator, "=");
+    });
+
+    it("should handle an object with regexp value", () => {
+      const streamSelector = new StreamSelector({ foo: /^bar/ });
+
+      assert.strictEqual(streamSelector.get("foo")!.value, "^bar");
+      assert.strictEqual(streamSelector.get("foo")!.operator, "=~");
+    });
+
+    it("should handle an object with StreamSelector.Equal string value", () => {
+      const streamSelector = new StreamSelector({ foo: StreamSelector.Equal("bar") });
+
+      assert.strictEqual(streamSelector.get("foo")!.value, "bar");
+      assert.strictEqual(streamSelector.get("foo")!.operator, "=");
+    });
+
+    it("should handle an object with StreamSelector.Equal regexp value", () => {
+      const streamSelector = new StreamSelector({ foo: StreamSelector.Equal(/^bar/) });
+
+      assert.strictEqual(streamSelector.get("foo")!.value, "^bar");
+      assert.strictEqual(streamSelector.get("foo")!.operator, "=~");
+    });
+
+    it("should handle an object with StreamSelector.Not string value", () => {
+      const streamSelector = new StreamSelector({ foo: StreamSelector.Not("bar") });
+
+      assert.strictEqual(streamSelector.get("foo")!.value, "bar");
+      assert.strictEqual(streamSelector.get("foo")!.operator, "!=");
+    });
+
+    it("should handle an object with StreamSelector.Not regexp value", () => {
+      const streamSelector = new StreamSelector({ foo: StreamSelector.Not(/^bar/) });
+
+      assert.strictEqual(streamSelector.get("foo")!.value, "^bar");
+      assert.strictEqual(streamSelector.get("foo")!.operator, "!~");
+    });
   });
 
   describe("label matching operators", () => {
@@ -234,6 +276,42 @@ describe("StreamSelector", () => {
       const streamSelector = new StreamSelector("{foo=\"foo\",bar!=\"bar\",foz=~\"fo[oz]\",baz!~\"ba[rz]\"}");
 
       assert.strictEqual(streamSelector.toString(), "{foo=\"foo\",bar!=\"bar\",foz=~\"fo[oz]\",baz!~\"ba[rz]\"}");
+    });
+
+    it("should stringify a given object with string value", () => {
+      const streamSelector = new StreamSelector({ foo: "bar" });
+
+      assert.strictEqual(streamSelector.toString(), "{foo=\"bar\"}");
+    });
+
+    it("should stringify a given object with regexp value", () => {
+      const streamSelector = new StreamSelector({ foo: /^bar/ });
+
+      assert.strictEqual(streamSelector.toString(), "{foo=~\"^bar\"}");
+    });
+
+    it("should stringify a given object with StreamSelector.Equal string value", () => {
+      const streamSelector = new StreamSelector({ foo: StreamSelector.Equal("bar") });
+
+      assert.strictEqual(streamSelector.toString(), "{foo=\"bar\"}");
+    });
+
+    it("should stringify a given object with StreamSelector.Equal regexp value", () => {
+      const streamSelector = new StreamSelector({ foo: StreamSelector.Equal(/^bar/) });
+
+      assert.strictEqual(streamSelector.toString(), "{foo=~\"^bar\"}");
+    });
+
+    it("should stringify a given object with StreamSelector.Not string value", () => {
+      const streamSelector = new StreamSelector({ foo: StreamSelector.Not("bar") });
+
+      assert.strictEqual(streamSelector.toString(), "{foo!=\"bar\"}");
+    });
+
+    it("should stringify a given object with StreamSelector.Not regexp value", () => {
+      const streamSelector = new StreamSelector({ foo: StreamSelector.Not(/^bar/) });
+
+      assert.strictEqual(streamSelector.toString(), "{foo!~\"^bar\"}");
     });
   });
 

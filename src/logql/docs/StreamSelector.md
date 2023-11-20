@@ -37,8 +37,30 @@ Initializes a new instance of the `StreamSelector` class with an optional LogQL 
 Available `init` types are:
 - `string` - Create an instance of `StreamSelector` given a **LogQL** query to parse.
 - `string[]` - Create an instance of `StreamSelector` given multiple **LogQL** queries to parse.
+- `Record<string, string | RegExp | StreamSelectorOp>` - Create an instance of `StreamSelector` given a key-value object. By default, the operator is an **exactlyEqual** (`=`) if value is `string` or a **Matches Regexp** (`=~`) if value is `RegExp`. `StreamSelectorOp` is returned by `StreamSelector.Equal()` & `StreamSelector.Not()`.
 - `Iterable<[string, string]>` - Create an instance of `StreamSelector` given a `key`-`value` iterable. The default operator will be an **exactlyEqual** (`=`).
 - `StreamSelector` - Create an instance of `StreamSelector` based on another `StreamSelector` class.
+
+### `static Equal(value: string | RegExp)`
+
+Utility static method that allow to init **exactlyEqual** (`=`) or **Matches Regexp** (`=~`) values via Object, depending weither value is `string` or `RegExp`.
+
+```ts
+const streamSelector = new StreamSelector({ foo: StreamSelector.Equal("bar") })
+```
+
+This is equal to:
+```ts
+const streamSelector = new StreamSelector({ foo: "bar" })
+```
+
+### `static Not(value: string | RegExp)`
+
+Utility static method that allow to init **notEqual** (`!=`) or **Does not Match** (`!~`) values via Object.
+
+```ts
+const streamSelector = new StreamSelector({ foo: StreamSelector.Not("bar") })
+```
 
 ### set(labelKey: string, labelValue: LabelValue | string, op?: LabelMatchingOperator)`
 
