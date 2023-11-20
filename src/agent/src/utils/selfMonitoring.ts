@@ -41,15 +41,21 @@ function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throt
 export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Logger) {
   const config = getConfig();
   if (!config.selfMonitoring) {
+    logger.info("[SELF MONITORING](skip: disabled)");
+
     return;
   }
   const { errorFilters, ruleFilters, minimumErrorCount = 0 } = config.selfMonitoring;
 
   if (errorFilters && !errorFilters?.includes(errorMessage)) {
+    logger.info(`[SELF MONITORING](skip: error message "${errorMessage}" is not in errorFilters)`);
+
     return;
   }
 
   if (ruleFilters && !ruleFilters?.includes(rule.config.name)) {
+    logger.info(`[SELF MONITORING](skip: rule "${rule.config.name}" is not in ruleFilters)`);
+
     return;
   }
 
@@ -67,8 +73,12 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
     const agentFailures = getDB().prepare("SELECT * FROM agentFailures").all() as DbAgentFailure[];
     if (agentFailures.length > minimumErrorCount) {
       if (hasAgentFailureThrottle(config.selfMonitoring.throttle)) {
+        logger.info(`[SELF MONITORING](skip: throttle is activated)`);
+
         return;
       }
+
+      logger.info(`[SELF MONITORING](new alert: ${agentFailures.length} agent failures detected)`);
 
       createAgentFailureAlert(agentFailures, config.selfMonitoring, logger);
 
