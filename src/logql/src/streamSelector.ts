@@ -48,20 +48,28 @@ export class StreamSelector extends Map<string, StreamSelectorValue> {
     }
 
     if (Symbol.iterator in init) {
-      for (const query of init) {
-        if (typeof query === "string") {
-          this.#parse(query);
-
-          continue;
-        }
-
-        const [key, value] = query;
-        super.set(key, { value, operator: "=" });
-      }
+      this.#parseIterable(init);
 
       return;
     }
 
+    this.#parseObject(init);
+  }
+
+  #parseIterable(init: string[] | Iterable<[string, string]>) {
+    for (const query of init) {
+      if (typeof query === "string") {
+        this.#parse(query);
+
+        continue;
+      }
+
+      const [key, value] = query;
+      super.set(key, { value, operator: "=" });
+    }
+  }
+
+  #parseObject(init: Record<string, string | RegExp | StreamSelectorOp>) {
     for (const [key, value] of Object.entries(init)) {
       if (typeof value === "string") {
         super.set(key, { value, operator: "=" });
