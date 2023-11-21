@@ -31,29 +31,21 @@ export class StreamSelector extends Map<string, StreamSelectorValue> {
   ) {
     super();
 
-    if (init instanceof StreamSelector) {
-      this.#clone(init);
-
-      return;
-    }
-
     if (!init) {
       return;
     }
-
-    if (typeof init === "string") {
+    else if (init instanceof StreamSelector) {
+      this.#clone(init);
+    }
+    else if (typeof init === "string") {
       this.#parse(init);
-
-      return;
     }
-
-    if (Symbol.iterator in init) {
+    else if (Symbol.iterator in init) {
       this.#parseIterable(init);
-
-      return;
     }
-
-    this.#parseObject(init);
+    else {
+      this.#parseObject(init);
+    }
   }
 
   #parseIterable(init: string[] | Iterable<[string, string]>) {
