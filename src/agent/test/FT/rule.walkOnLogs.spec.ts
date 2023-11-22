@@ -434,15 +434,16 @@ describe("Rule.walkOnLogs()", () => {
       const labels = getDB().prepare("SELECT * FROM ruleLabels").all() as DbRuleLabel[];
 
       assert.equal(labels.length, 3);
+      const ruleId = rule.getRuleFromDatabase().id;
       assert.deepEqual(labels.map((label) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { timestamp, ...labelWithouTimestamp } = label;
 
         return labelWithouTimestamp;
       }), [
-        { id: 1, ruleId: 1, key: "foo", value: "bar" },
-        { id: 2, ruleId: 1, key: "foo", value: "baz" },
-        { id: 3, ruleId: 1, key: "foz", value: "boz" }
+        { id: 1, ruleId, key: "foo", value: "bar" },
+        { id: 2, ruleId, key: "foo", value: "baz" },
+        { id: 3, ruleId, key: "foz", value: "boz" }
       ]);
     });
 
@@ -460,7 +461,7 @@ describe("Rule.walkOnLogs()", () => {
 
       assert.equal(labels.length, 1);
       assert.equal(labels[0].id, 1);
-      assert.equal(labels[0].ruleId, 1);
+      assert.equal(labels[0].ruleId, rule.getRuleFromDatabase().id);
       assert.equal(labels[0].key, "foo");
       assert.equal(labels[0].value, "bar");
     });
