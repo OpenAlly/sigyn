@@ -12,7 +12,7 @@ import { AgentFailureAlert } from "../notifiers/agentFailure.notifier";
 export function getAgentFailureRules(alert: AgentFailureAlert): string {
   const ruleIds = new Set(alert.failures.map(({ ruleId }) => ruleId));
   const failures = getDB()
-    .prepare("SELECT name FROM rules WHERE id IN (?)")
+    .prepare(`SELECT name FROM rules WHERE id IN (${[...ruleIds].map(() => "?").join(",")})`)
     .all([...ruleIds]) as { name: string }[];
 
   return failures.map(({ name }) => name).join(", ");
@@ -31,8 +31,16 @@ function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throt
     .get(intervalDate) as { count: number });
   const agentFailuresAlertCount = agentFailuresAlert?.count ?? 0;
 
-  if (agentFailuresAlertCount <= activationThreshold) {
+  if (activationThreshold > 0 && agentFailuresAlertCount <= activationThreshold) {
     return false;
+  }
+
+  if (count > 0 && agentFailuresAlertCount - activationThreshold > count) {
+    return false;
+  }
+
+  if (activationThreshold > 0 && agentFailuresAlertCount > activationThreshold) {
+    return true;
   }
 
   return agentFailuresAlertCount === 1 ? false : agentFailuresAlertCount - activationThreshold <= count;
