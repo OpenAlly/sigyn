@@ -249,7 +249,7 @@ export class Rule {
       }
 
       const alerts = getDB().prepare(
-        "SELECT alertId, key, value FROM alertLabels WHERE key IN (?)"
+        `SELECT alertId, key, value FROM alertLabels WHERE key IN (${labelScope.map(() => "?").join(",")})`
       ).all(labelScope) as { alertId: number; key: string; value: string }[];
 
       const alertIds = alerts.flatMap((alert) => {
@@ -264,7 +264,7 @@ export class Rule {
         return 0;
       }
 
-      return (getDB().prepare("SELECT COUNT(id) as count FROM alerts WHERE id IN (?) AND createdAt >= ?").get(
+      return (getDB().prepare(`SELECT COUNT(id) as count FROM alerts WHERE id IN (${alertIds.map(() => "?").join(",")}) AND createdAt >= ?`).get(
         alertIds,
         interval
       ) as { count: number }).count;

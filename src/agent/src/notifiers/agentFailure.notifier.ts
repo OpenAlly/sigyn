@@ -37,20 +37,20 @@ export class AgentFailureNotifier extends Notifier<AgentFailureAlert> {
   }
 
   async sendNotification(alert: AgentFailureAlert) {
-    const { notifierConfig } = alert;
-    const notifierOptions = {
-      ...notifierConfig,
-      data: await this.#agentFailureAlertData(alert),
-      template: this.config.selfMonitoring!.template
-    };
-
     try {
+      const { notifierConfig } = alert;
+      const notifierOptions = {
+        ...notifierConfig,
+        data: await this.#agentFailureAlertData(alert),
+        template: this.config.selfMonitoring!.template
+      };
+
       await this.execute(notifierOptions);
 
       this.logger.info(`[SELF-MONITORING](notify: success|notifier: ${notifierConfig.notifier})`);
     }
     catch (error) {
-      this.logger.error(`[SELF-MONITORING](notify: error|notifier: ${notifierConfig.notifier}|message: ${error.message})`);
+      this.logger.error(`[SELF-MONITORING](notify: error|notifier: ${alert.notifierConfig.notifier}|message: ${error.message})`);
     }
   }
 
