@@ -1,5 +1,5 @@
 // Import Node.js Dependencies
-import { isDeepStrictEqual } from "node:util";
+import assert from "node:assert";
 
 // Import Third-party Dependencies
 import { getConfig } from "@sigyn/config";
@@ -62,6 +62,17 @@ export class RuleNotifier extends Notifier<RuleNotifierAlert> {
   }
 
   nonUniqueMatcher(notification: RuleNotifierAlert, newNotifications: RuleNotifierAlert) {
+    function isDeepStrictEqual(a: unknown, b: unknown): boolean {
+      try {
+        assert.deepEqual(a, b);
+
+        return true;
+      }
+      catch {
+        return false;
+      }
+    }
+
     return notification.rule.name === newNotifications.rule.name &&
       isDeepStrictEqual(notification.rule.labels, newNotifications.rule.labels);
   }

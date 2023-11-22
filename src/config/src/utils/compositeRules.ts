@@ -1,5 +1,5 @@
 // Import Node.js Dependencies
-import { isDeepStrictEqual } from "node:util";
+import assert from "node:assert";
 
 // Import Third-party Dependencies
 import { minimatch } from "minimatch";
@@ -10,6 +10,17 @@ import { extendsTemplates } from "./templates";
 
 // CONSTANTS
 const kDefaultCompositeRuleInterval = "1d";
+
+function isDeepStrictEqual(a: unknown, b: unknown): boolean {
+  try {
+    assert.deepEqual(a, b);
+
+    return true;
+  }
+  catch {
+    return false;
+  }
+}
 
 export function initialize(config: SigynConfig): SigynInitializedCompositeRule[] {
   if (!config.compositeRules) {

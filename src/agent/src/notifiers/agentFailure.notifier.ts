@@ -1,5 +1,5 @@
 // Import Node.js Dependencies
-import { isDeepStrictEqual } from "node:util";
+import assert from "node:assert";
 
 // Import Internal Dependencies
 import { Logger } from "..";
@@ -33,7 +33,14 @@ export class AgentFailureNotifier extends Notifier<AgentFailureAlert> {
   }
 
   nonUniqueMatcher(notification: AgentFailureAlert, newNotifications: AgentFailureAlert) {
-    return isDeepStrictEqual(notification.failures, newNotifications.failures);
+    try {
+      assert.deepEqual(notification.failures, newNotifications.failures);
+
+      return true;
+    }
+    catch {
+      return false;
+    }
   }
 
   async sendNotification(alert: AgentFailureAlert) {
