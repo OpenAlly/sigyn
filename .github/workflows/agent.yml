@@ -18,7 +18,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        # v21 only for --test-concurrency cause of an obscur bug with test_runner with ci
+        node-version: [21.x]
       fail-fast: false
     steps:
       - name: Harden Runner

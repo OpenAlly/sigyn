@@ -19,7 +19,7 @@
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "dev": "npm run build -- --watch",
     "prepublishOnly": "npm run build",
-    "test": "glob -c \"tsx -r dotenv/config --test\" \"./test/**/*.spec.ts\"",
+    "test": "glob -c \"tsx -r dotenv/config --test-concurrency 1 --test\" \"./test/**/*.spec.ts\"",
     "coverage": "c8 --all --src ./src -r html npm test",
     "lint": "cross-env eslint src/**/*.ts"
   },
@@ -41,17 +41,17 @@
   "license": "MIT",
   "dependencies": {
     "@myunisoft/loki": "^2.1.0",
-    "better-sqlite3": "^9.0.0",
+    "better-sqlite3": "^9.1.1",
     "cron-parser": "^4.9.0",
-    "croner": "^7.0.4",
+    "croner": "^7.0.5",
     "dayjs": "^1.11.10",
     "dotenv": "^16.3.1",
     "ms": "^2.1.3",
-    "pino": "^8.16.1",
+    "pino": "^8.16.2",
     "toad-scheduler": "^3.0.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.6",
+    "@types/better-sqlite3": "^7.6.8",
     "is-ci": "^3.0.1",
     "mockdate": "^3.0.5",
     "pino-pretty": "^10.2.3"
