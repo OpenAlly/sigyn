@@ -17,7 +17,8 @@
     "src/notifiers",
     "src/discord",
     "src/slack",
-    "src/teams"
+    "src/teams",
+    "src/pattern"
   ],
   "devDependencies": {
     "@nodesecure/eslint-config": "^1.8.0",
