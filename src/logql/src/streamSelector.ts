@@ -1,5 +1,7 @@
 // CONSTANTS
 const kLabelMatchingOperators = ["=", "!=", "=~", "!~"];
+const kEqual = Symbol("equal");
+const kNotEqual = Symbol("notEqual");
 
 export type LabelMatchingOperator = "=" | "!=" | "=~" | "!~";
 
@@ -9,27 +11,44 @@ export interface StreamSelectorValue {
 }
 
 export type LabelValue = Partial<StreamSelectorValue> & Pick<StreamSelectorValue, "value">;
+export type StreamSelectorOp = { [kEqual]?: string | RegExp } | { [kNotEqual]?: string | RegExp };
 
 export class StreamSelector extends Map<string, StreamSelectorValue> {
-  constructor(init?: string | string[] | Iterable<[string, string]> | StreamSelector) {
+  static Equal(value: string | RegExp) {
+    return {
+      [kEqual]: value
+    };
+  }
+
+  static Not(value: string | RegExp) {
+    return {
+      [kNotEqual]: value
+    };
+  }
+
+  constructor(
+    init?: string | string[] | Record<string, string | RegExp | StreamSelectorOp> | Iterable<[string, string]> | StreamSelector
+  ) {
     super();
-
-    if (init instanceof StreamSelector) {
-      this.#clone(init);
-
-      return;
-    }
 
     if (!init) {
       return;
     }
-
-    if (typeof init === "string") {
-      this.#parse(init);
-
-      return;
+    else if (init instanceof StreamSelector) {
+      this.#clone(init);
     }
+    else if (typeof init === "string") {
+      this.#parse(init);
+    }
+    else if (Symbol.iterator in init) {
+      this.#parseIterable(init);
+    }
+    else {
+      this.#parseObject(init);
+    }
+  }
 
+  #parseIterable(init: string[] | Iterable<[string, string]>) {
     for (const query of init) {
       if (typeof query === "string") {
         this.#parse(query);
@@ -39,6 +58,39 @@ export class StreamSelector extends Map<string, StreamSelectorValue> {
 
       const [key, value] = query;
       super.set(key, { value, operator: "=" });
+    }
+  }
+
+  #parseObject(init: Record<string, string | RegExp | StreamSelectorOp>) {
+    for (const [key, value] of Object.entries(init)) {
+      if (typeof value === "string") {
+        super.set(key, { value, operator: "=" });
+
+        continue;
+      }
+      else if (value instanceof RegExp) {
+        super.set(key, { value: value.source, operator: "=~" });
+
+        continue;
+      }
+
+      if (value[kEqual]) {
+        super.set(key, {
+          value: value[kEqual] instanceof RegExp ? value[kEqual].source : value[kEqual],
+          operator: value[kEqual] instanceof RegExp ? "=~" : "="
+        });
+
+        continue;
+      }
+
+      if (value[kNotEqual]) {
+        super.set(key, {
+          value: value[kNotEqual] instanceof RegExp ? value[kNotEqual].source : value[kNotEqual],
+          operator: value[kNotEqual] instanceof RegExp ? "!~" : "!="
+        });
+
+        continue;
+      }
     }
   }
 
