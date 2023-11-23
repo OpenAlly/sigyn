@@ -2,7 +2,7 @@
 import assert from "node:assert";
 import path from "node:path";
 import { after, afterEach, before, describe, it } from "node:test";
-import { setTimeout } from "node:timers/promises";
+import { setTimeout, setImmediate } from "node:timers/promises";
 
 // Import Third-party Dependencies
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
@@ -52,8 +52,10 @@ describe("Self-monitoring", () => {
     setGlobalDispatcher(kGlobalDispatcher);
   });
 
-  afterEach(() => {
+  afterEach(async() => {
     getDB().exec("DELETE FROM agentFailures");
+
+    await setImmediate(() => void 0);
   });
 
   it("should not send alert when error does not match errorFilters", async() => {
