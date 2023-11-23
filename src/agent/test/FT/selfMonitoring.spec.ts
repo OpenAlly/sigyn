@@ -1,11 +1,10 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
 import path from "node:path";
-import { after, afterEach, before, describe, it } from "node:test";
+import { afterEach, before, beforeEach, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
 // Import Third-party Dependencies
-import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 import { initConfig } from "@sigyn/config";
 import isCI from "is-ci";
 
@@ -14,6 +13,7 @@ import { asyncTask } from "../../src/tasks/asyncTask";
 import { MockLogger } from "./helpers";
 import { Rule } from "../../src/rules";
 import { getDB, initDB } from "../../src/database";
+import { resetCalls, getCalls } from "./mocks/sigyn-test-notifier";
 
 // CONSTANTS
 const kFixturePath = path.join(__dirname, "/fixtures");
@@ -30,26 +30,16 @@ const kMockLokiApi = {
     throw new Error("Failed");
   }
 };
-const kMockAgent = new MockAgent();
-const kGlobalDispatcher = getGlobalDispatcher();
 // time to wait for the task to be fully executed (alert sent)
 const kTimeout = isCI ? 350 : 200;
 
 describe("Self-monitoring", () => {
-  before(async() => {
-    process.env.GRAFANA_API_TOKEN = "toto";
-    setGlobalDispatcher(kMockAgent);
-    kMockAgent.disableNetConnect();
-
-    const pool = kMockAgent.get("https://discord.com");
-    pool.intercept({
-      method: "POST",
-      path: () => true
-    }).reply(200);
+  beforeEach(() => {
+    resetCalls();
   });
 
-  after(() => {
-    setGlobalDispatcher(kGlobalDispatcher);
+  before(async() => {
+    process.env.GRAFANA_API_TOKEN = "toto";
   });
 
   afterEach(() => {
@@ -75,10 +65,7 @@ describe("Self-monitoring", () => {
 
     await setTimeout(kTimeout);
 
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+    assert.equal(getCalls(), 0);
   });
 
   it("should not send alert when error does not match ruleFilters", async() => {
@@ -99,10 +86,7 @@ describe("Self-monitoring", () => {
 
     await setTimeout(kTimeout);
 
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+    assert.equal(getCalls(), 0);
   });
 
   it("should send alert as rule matches ruleFilters", async() => {
@@ -123,7 +107,7 @@ describe("Self-monitoring", () => {
 
     await setTimeout(kTimeout);
 
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+    assert.equal(getCalls(), 1);
   });
 
   it("should send alert as rule matches errorFilters", async() => {
@@ -144,7 +128,7 @@ describe("Self-monitoring", () => {
 
     await setTimeout(kTimeout);
 
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+    assert.equal(getCalls(), 1);
   });
 
   it("should send alert as there are is no filter", async() => {
@@ -165,7 +149,7 @@ describe("Self-monitoring", () => {
 
     await setTimeout(kTimeout);
 
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+    assert.equal(getCalls(), 1);
   });
 
   it("should have throttle", async() => {
@@ -183,38 +167,23 @@ describe("Self-monitoring", () => {
     );
 
     task.execute();
-
     await setTimeout(kTimeout);
-
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
-
-    const pool = kMockAgent.get("https://discord.com");
-    pool.intercept({
-      method: "POST",
-      path: () => true
-    }).reply(200);
-
-    task.execute();
-
-    await setTimeout(kTimeout);
-
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+    assert.equal(getCalls(), 1);
 
     task.execute();
     await setTimeout(kTimeout);
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+    // Still 1 call as throttle is activated
+    assert.equal(getCalls(), 1);
 
     task.execute();
     await setTimeout(kTimeout);
+    // Still 1 call as throttle is activated
+    assert.equal(getCalls(), 1);
 
-    // // We have throttle.count set to 3 so this alert should be sent
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+    task.execute();
+    await setTimeout(kTimeout);
+    // Throttle is OFF, alert sent again.
+    assert.equal(getCalls(), 2);
   });
 
   it("should wait remaining activationThreshold (3) before activate throttle", async() => {
@@ -234,62 +203,37 @@ describe("Self-monitoring", () => {
     task.execute();
     await setTimeout(kTimeout);
     // first alert, no throttle (remaining: 2)
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+    assert.equal(getCalls(), 1);
 
-    const pool = kMockAgent.get("https://discord.com");
-    pool.intercept({
-      method: "POST",
-      path: () => true
-    }).reply(200);
 
     task.execute();
     await setTimeout(kTimeout);
-
     // because of activationThreshold, no throttle (remaining: 1)
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+    assert.equal(getCalls(), 2);
 
-    pool.intercept({
-      method: "POST",
-      path: () => true
-    }).reply(200);
     task.execute();
     await setTimeout(kTimeout);
-
     // because of activationThreshold, no throttle (remaining: 0 -> now throttle is ON)
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
-
-    pool.intercept({
-      method: "POST",
-      path: () => true
-    }).reply(200);
+    assert.equal(getCalls(), 3);
 
     task.execute();
     await setTimeout(kTimeout);
     // Now that throttle is activated (count = 3, 2 more to get OFF), alert not sent.
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+    assert.equal(getCalls(), 3);
 
     task.execute();
     await setTimeout(kTimeout);
     // Throttle is still activated (count = 3, 1 more to get OFF), alert not sent.
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+    assert.equal(getCalls(), 3);
 
     task.execute();
     await setTimeout(kTimeout);
     // Throttle is still activated (count = 3, 0 more, throttle is off now), alert not sent.
-    assert.throws(() => kMockAgent.assertNoPendingInterceptors(), {
-      name: "UndiciError",
-      message: /1 interceptor is pending:/
-    });
+    assert.equal(getCalls(), 3);
 
     // Throttle is OFF, alert sent again.
     task.execute();
     await setTimeout(kTimeout);
-    assert.doesNotThrow(() => kMockAgent.assertNoPendingInterceptors());
+    assert.equal(getCalls(), 4);
   });
 });
