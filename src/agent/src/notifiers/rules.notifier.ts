@@ -91,6 +91,7 @@ export class RuleNotifier extends Notifier<RuleNotifierAlert> {
         .run("failed", alert.notif.alertId);
 
       this.logger.error(`[${rule.name}](notify: error|notifier: ${notifierConfig.notifier}|message: ${error.message})`);
+      this.logger.debug(error);
     }
   }
 

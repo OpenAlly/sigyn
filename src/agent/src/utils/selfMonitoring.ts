@@ -100,5 +100,6 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
   }
   catch (error) {
     logger.error(`[SELF MONITORING](error: ${error.message})`);
+    logger.debug(error);
   }
 }

@@ -36,10 +36,11 @@ export function asyncTask(ruleConfig: SigynInitializedRule, options: AsyncTaskOp
         rule.clearLabels();
       }
     }
-    catch (e) {
-      logger.error(`[${ruleConfig.name}](error: ${e.message})`);
+    catch (error) {
+      logger.error(`[${ruleConfig.name}](error: ${error.message})`);
+      logger.debug(error);
 
-      handleAgentFailure(e.message, rule, logger);
+      handleAgentFailure(error.message, rule, logger);
     }
   });
 
