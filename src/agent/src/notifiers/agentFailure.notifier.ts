@@ -51,6 +51,7 @@ export class AgentFailureNotifier extends Notifier<AgentFailureAlert> {
     }
     catch (error) {
       this.logger.error(`[SELF-MONITORING](notify: error|notifier: ${alert.notifierConfig.notifier}|message: ${error.message})`);
+      this.logger.debug(error);
     }
   }
 

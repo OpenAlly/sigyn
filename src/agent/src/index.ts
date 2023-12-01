@@ -17,24 +17,36 @@ import * as utils from "./utils/index";
 
 // CONSTANTS
 const kScheduler = new ToadScheduler();
-const kLogger = pino({
-  level: "info",
-  transport: {
-    target: "pino-pretty"
-  }
-});
 
 export interface Logger {
   info: (message: string) => void;
   error: (message: string) => void;
+  debug: (message: string) => void;
+}
+
+export interface StartOptions {
+  logger?: Logger;
+  level?: "info" | "debug" | "error";
+}
+
+function defaultLogger(level: StartOptions["level"]) {
+  return pino({
+    level,
+    transport: {
+      target: "pino-pretty"
+    }
+  });
 }
 
 export async function start(
   location = process.cwd(),
-  logger: Logger = kLogger
+  options: StartOptions = {}
 ) {
-  kLogger.info(`Starting sigyn agent at '${location}'`);
-  initDB(kLogger);
+  const { logger, level = "info" } = options;
+  const agentLogger = logger ?? defaultLogger(level);
+
+  agentLogger.info(`Starting sigyn agent at '${location}'`);
+  initDB(agentLogger);
 
   const { rules, loki } = await initConfig(
     path.join(location, "/sigyn.config.json")
@@ -49,10 +61,10 @@ export async function start(
       continue;
     }
 
-    const rule = new Rule(ruleConfig, { logger });
+    const rule = new Rule(ruleConfig, { logger: agentLogger });
     rule.init();
 
-    const task = asyncTask(ruleConfig, { rule, logger, lokiApi });
+    const task = asyncTask(ruleConfig, { rule, logger: agentLogger, lokiApi });
     const rulePollings = utils.rules.getPollings(ruleConfig.polling);
 
     for (const [isCron, polling] of rulePollings) {

@@ -47,6 +47,7 @@ export class CompositeRuleNotifier extends Notifier<CompositeRuleAlert> {
     }
     catch (error) {
       this.logger.error(`[${compositeRuleName}](notify: error|notifier: ${notifierConfig.notifier}|message: ${error.message})`);
+      this.logger.debug(error);
     }
   }
 
