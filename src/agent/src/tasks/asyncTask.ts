@@ -24,11 +24,12 @@ export function asyncTask(ruleConfig: SigynInitializedRule, options: AsyncTaskOp
       return;
     }
 
+    logger.info(`[${ruleConfig.name}](state: polling|start: ${start}|int: ${Date.now() - start}|query: ${ruleConfig.logql})`);
+
     try {
       const { logs } = await lokiApi.queryRangeStream<string>(ruleConfig.logql, {
         start
       });
-      logger.info(`[${ruleConfig.name}](state: polling|start: ${start}|end: ${Date.now()}|query: ${ruleConfig.logql})`);
 
       const createAlert = await rule.walkOnLogs(logs);
       if (createAlert) {

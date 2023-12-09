@@ -1,8 +1,10 @@
 let calls = 0;
+let args = null;
 
 // This is the notifier execute function that will be called by the agent
-export function execute() {
+export function execute(...fnArgs) {
   calls++;
+  args = fnArgs;
 }
 
 export function resetCalls() {
@@ -11,4 +13,8 @@ export function resetCalls() {
 
 export function getCalls() {
   return calls;
+}
+
+export function getArgs() {
+  return args;
 }
