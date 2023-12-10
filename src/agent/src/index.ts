@@ -4,7 +4,8 @@ import timers from "node:timers/promises";
 
 // Import Third-party Dependencies
 import { initConfig } from "@sigyn/config";
-import { GrafanaLoki } from "@myunisoft/loki";
+import { GrafanaApi } from "@myunisoft/loki";
+import { Agent, setGlobalDispatcher } from "@myunisoft/httpie";
 import { ToadScheduler, CronJob, SimpleIntervalJob } from "toad-scheduler";
 import { pino } from "pino";
 import ms from "ms";
@@ -27,6 +28,7 @@ export interface Logger {
 export interface StartOptions {
   logger?: Logger;
   level?: "info" | "debug" | "error";
+  timeout?: number;
 }
 
 function defaultLogger(level: StartOptions["level"]) {
@@ -42,17 +44,19 @@ export async function start(
   location = process.cwd(),
   options: StartOptions = {}
 ) {
-  const { logger, level = "info" } = options;
+  const { logger, level = "info", timeout = 30_000 } = options;
   const agentLogger = logger ?? defaultLogger(level);
 
   agentLogger.info(`Starting sigyn agent at '${location}'`);
+
+  setGlobalDispatcher(new Agent({ connect: { timeout } }));
   initDB(agentLogger);
 
   const { rules, loki } = await initConfig(
     path.join(location, "/sigyn.config.json")
   );
 
-  const lokiApi = new GrafanaLoki({
+  const lokiApi = new GrafanaApi({
     remoteApiURL: loki.apiUrl
   });
 

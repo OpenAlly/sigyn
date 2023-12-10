@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import ms from "ms";
 import cronParser from "cron-parser";
 import { Database } from "better-sqlite3";
+import { Result, Ok, Err } from "@openally/result";
 
 // Import Internal Dependencies
 import { DbRule, DbRuleLabel, getDB, getOldestLabelTimestamp } from "./database";
@@ -21,6 +22,7 @@ export class Rule {
   config: SigynInitializedRule;
   #logger: Logger;
   #lastFetchedStream: Record<string, string> | null = null;
+  #now: number;
 
   constructor(rule: SigynInitializedRule, options: RuleOptions) {
     const { logger } = options;
@@ -90,23 +92,79 @@ export class Rule {
     }
   }
 
-  async walkOnLogs(logs: LokiStreamResult[]): Promise<boolean> {
+  walkOnLogs(logs: LokiStreamResult<string>[]): Result<true, string> {
     this.#lastFetchedStream = null;
+    this.#now = dayjs().valueOf();
 
     const db = getDB();
-    const now = dayjs().valueOf();
     const rule = this.getRuleFromDatabase();
-    if (rule.muteUntil > now) {
-      return false;
+
+    if (rule.muteUntil > this.#now) {
+      return Err("Rule is muted by higher level composite rule");
     }
 
+    this.#insertLogsInDB(logs);
+
+    if (this.config.alert.on.label) {
+      const checkLabelThreshold = this.#checkLabelThreshold(rule);
+
+      return checkLabelThreshold ? Ok(true) : Err("Label threshold does not match");
+    }
+
+    const timeThreshold = utils.cron
+      .durationOrCronToDate(this.config.alert.on.interval!, "subtract")
+      .valueOf();
+
+    if (rule.lastIntervalReset === null || rule.lastIntervalReset - timeThreshold < 0) {
+      db.prepare("UPDATE rules SET lastIntervalReset = ?, firstReset = ? WHERE id = ?").run(this.#now, rule.lastIntervalReset === null ? 1 : 0, rule.id);
+      rule.firstReset = rule.lastIntervalReset === null ? 1 : 0;
+      rule.lastIntervalReset = this.#now;
+    }
+
+    const previousCounter = rule.counter;
+    rule.counter = (
+      db.prepare("SELECT COUNT(id) as counter FROM ruleLogs WHERE ruleId = ? AND processed = 0 AND timestamp >= ?")
+        .get(rule.id, timeThreshold) as { counter: null | number }
+    ).counter ?? 0;
+
+    db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(rule.counter, rule.id);
+
+    const alertThreshold = this.config.alert.on.count!;
+    this.#logger.info(`[${rule.name}](state: handle|polling: ${this.#getCurrentPolling()[1]}|previous: ${previousCounter}|new: ${rule.counter - previousCounter}|next: ${rule.counter}|alertThreshold: ${alertThreshold}|timeThreshold: ${timeThreshold})`);
+
+    const [operator, value] = utils.rules.countThresholdOperator(alertThreshold);
+
+    // we checking for a max value, so we want to wait the whole interval before sending an alert
+    if (operator.startsWith("<") && (rule.lastIntervalReset !== this.#now || rule.firstReset === 1)) {
+      return Err("Waiting the whole interval before comparing logs");
+    }
+    else if (!utils.rules.countMatchOperator(operator, rule.counter, value)) {
+      return Err(`Logs does not match operator value (o:${operator}|c:${rule.counter}|v:${value})`);
+    }
+
+    const cancelAlert = this.#checkThrottle(rule, db);
+    if (cancelAlert) {
+      return Err(`Rule throttle activated`);
+    }
+
+    this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
+
+    db.transaction(() => {
+      db.prepare("UPDATE rules SET counter = 0, threshold = ?, lastIntervalReset = ? WHERE id = ?").run(rule.counter, this.#now, rule.id);
+      db.prepare("UPDATE ruleLogs SET processed = 1 WHERE ruleId = ?").run(rule.id);
+    })();
+
+    return Ok(true);
+  }
+
+  #insertLogsInDB(logs: LokiStreamResult<string>[]): void {
+    const rule = this.getRuleFromDatabase();
     const ruleLabels = this.getDistinctLabelsFromDatabase(rule.id);
-    const lastCounter = rule.counter;
     const existingLabels = new Set();
     for (const label of ruleLabels) {
       existingLabels.add(`${label.key}:${label.value}`);
     }
-
+    const db = getDB();
     const ruleLabelsInsertStmt = db.prepare("INSERT INTO ruleLabels (ruleId, key, value, timestamp) VALUES (?, ?, ?, ?)");
     const ruleLogInsertStmt = db.prepare("INSERT INTO ruleLogs (ruleId, log, timestamp) VALUES (?, ?, ?)");
 
@@ -126,74 +184,20 @@ export class Rule {
             let insertedCount = 0;
 
             while (insertedCount++ < values.length) {
-              ruleLabelsInsertStmt.run(rule.id, key, value, now);
+              ruleLabelsInsertStmt.run(rule.id, key, value, this.#now);
             }
           }
           else if (!existingLabels.has(`${key}:${value}`)) {
-            ruleLabelsInsertStmt.run(rule.id, key, value, now);
+            ruleLabelsInsertStmt.run(rule.id, key, value, this.#now);
             existingLabels.add(`${key}:${value}`);
           }
         }
 
         for (const log of values) {
-          ruleLogInsertStmt.run(rule.id, log, now);
+          ruleLogInsertStmt.run(rule.id, log, this.#now);
         }
       }
     })();
-
-    if (this.config.alert.on.label) {
-      return this.#checkLabelThreshold(rule);
-    }
-
-    const timeThreshold = utils.cron
-      .durationOrCronToDate(this.config.alert.on.interval!, "subtract")
-      .valueOf();
-
-    if (rule.lastIntervalReset === null || rule.lastIntervalReset - timeThreshold < 0) {
-      db.prepare("UPDATE rules SET lastIntervalReset = ?, firstReset = ? WHERE id = ?").run(now, rule.lastIntervalReset === null ? 1 : 0, rule.id);
-      rule.firstReset = rule.lastIntervalReset === null ? 1 : 0;
-      rule.lastIntervalReset = now;
-    }
-
-    rule.counter = (
-      db.prepare("SELECT COUNT(id) as counter FROM ruleLogs WHERE ruleId = ? AND processed = 0 AND timestamp >= ?")
-        .get(rule.id, timeThreshold) as { counter: null | number }
-    ).counter ?? 0;
-
-    db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(rule.counter, rule.id);
-
-    const alertThreshold = this.config.alert.on.count!;
-    this.#logger.info(`[${rule.name}](state: handle|logs: ${logs.reduce((acc, curr) => acc + curr.values.length, 0)}|polling: ${this.#getCurrentPolling()[1]}|previous: ${lastCounter}|new: ${rule.counter - lastCounter}|next: ${rule.counter}|alertThreshold: ${alertThreshold}|timeThreshold: ${timeThreshold})`);
-
-    const [operator, value] = utils.rules.countThresholdOperator(alertThreshold);
-
-    if (operator.startsWith("<")) {
-      // we checking for a max value, so we want to wait the whole interval before sending an alert
-      if (rule.lastIntervalReset !== now || rule.firstReset === 1) {
-        return false;
-      }
-
-      if (!utils.rules.countMatchOperator(operator, rule.counter, value)) {
-        return false;
-      }
-    }
-    else if (!utils.rules.countMatchOperator(operator, rule.counter, value)) {
-      return false;
-    }
-
-    const cancelAlert = this.#checkThrottle(rule, db);
-    if (cancelAlert) {
-      return false;
-    }
-
-    this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
-
-    db.transaction(() => {
-      db.prepare("UPDATE rules SET counter = 0, threshold = ?, lastIntervalReset = ? WHERE id = ?").run(rule.counter, now, rule.id);
-      db.prepare("UPDATE ruleLogs SET processed = 1 WHERE ruleId = ?").run(rule.id);
-    })();
-
-    return true;
   }
 
   #checkLabelThreshold(rule: DbRule): boolean {
