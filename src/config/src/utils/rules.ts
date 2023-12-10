@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import { GrafanaLoki } from "@myunisoft/loki";
+import { GrafanaApi } from "@myunisoft/loki";
 
 // Import Internal Dependencies
 import { SigynConfig, SigynInitializedRule, SigynRule } from "../types";
@@ -69,7 +69,7 @@ function* getLabelFilters(rule: SigynRule) {
 }
 
 export async function fetchLabels(config: Pick<SigynConfig, "loki" | "rules">) {
-  const lokiApi = new GrafanaLoki({
+  const lokiApi = new GrafanaApi({
     remoteApiURL: config.loki.apiUrl
   });
 
@@ -86,7 +86,7 @@ export async function fetchLabels(config: Pick<SigynConfig, "loki" | "rules">) {
       }
 
       try {
-        const labelValues = await lokiApi.labelValues(label);
+        const labelValues = await lokiApi.Loki.labelValues(label);
 
         labels.set(label, labelValues);
       }

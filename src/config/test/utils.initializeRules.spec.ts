@@ -22,7 +22,7 @@ describe("utils.initializeRules()", () => {
     const pool = kMockAgent.get(kDummyUrl);
     pool.intercept({
       path: (path) => path.includes("env")
-    }).reply(200, { data: ["prod", "dev"] }, { headers: { "Content-Type": "application/json" } }).persist();
+    }).reply(200, { status: "success", data: ["prod", "dev"] }, { headers: { "Content-Type": "application/json" } }).persist();
   });
 
   after(() => {

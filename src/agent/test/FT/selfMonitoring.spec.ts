@@ -26,8 +26,10 @@ const kRuleThrottleConfigLocation = path.join(kFixturePath, "/self-monitoring-th
 const kRuleActivationThresholdConfigLocation = path.join(kFixturePath, "/self-monitoring-activation-threshold/sigyn.config.json");
 const kLogger = new MockLogger();
 const kMockLokiApi = {
-  queryRangeStream() {
-    throw new Error("Failed");
+  Loki: {
+    queryRangeStream() {
+      throw new Error("Failed");
+    }
   }
 };
 // time to wait for the task to be fully executed (alert sent)

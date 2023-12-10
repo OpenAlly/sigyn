@@ -1,7 +1,11 @@
+// Import Node.js Dependencies
+import { performance } from "node:perf_hooks";
+
 // Import Third-party Dependencies
 import { SigynInitializedRule } from "@sigyn/config";
-import { GrafanaLoki } from "@myunisoft/loki";
+import { GrafanaApi } from "@myunisoft/loki";
 import { AsyncTask } from "toad-scheduler";
+import ms from "ms";
 
 // Import Internal Dependencies
 import { Rule } from "../rules";
@@ -12,7 +16,7 @@ import { handleAgentFailure } from "../utils/selfMonitoring";
 export interface AsyncTaskOptions {
   logger: Logger;
   rule: Rule;
-  lokiApi: GrafanaLoki;
+  lokiApi: GrafanaApi;
 }
 
 export function asyncTask(ruleConfig: SigynInitializedRule, options: AsyncTaskOptions) {
@@ -26,19 +30,25 @@ export function asyncTask(ruleConfig: SigynInitializedRule, options: AsyncTaskOp
 
     logger.info(`[${ruleConfig.name}](state: polling|start: ${start}|int: ${Date.now() - start}|query: ${ruleConfig.logql})`);
 
+    const t0 = performance.now();
     try {
-      const { logs } = await lokiApi.queryRangeStream<string>(ruleConfig.logql, {
+      const { logs } = await lokiApi.Loki.queryRangeStream<string>(ruleConfig.logql, {
         start
       });
+      const logsCount = logs.reduce((acc, curr) => acc + curr.values.length, 0);
+      logger.info(`[${ruleConfig.name}](logs: ${logsCount}|execTime: ${ms(performance.now() - t0)})`);
 
-      const createAlert = await rule.walkOnLogs(logs);
-      if (createAlert) {
+      const createAlertResult = rule.walkOnLogs(logs);
+      if (createAlertResult.ok) {
         createRuleAlert(rule.getAlertFormattedRule(), ruleConfig, logger);
         rule.clearLabels();
       }
+      else {
+        logger.debug(`[${ruleConfig.name}](debug: ${createAlertResult.val})`);
+      }
     }
     catch (error) {
-      logger.error(`[${ruleConfig.name}](error: ${error.message})`);
+      logger.error(`[${ruleConfig.name}](error: ${error.message}|execTime: ${ms(performance.now() - t0)})`);
       logger.debug(error);
 
       handleAgentFailure(error.message, rule, logger);

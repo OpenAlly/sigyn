@@ -21,13 +21,13 @@
     "src/pattern"
   ],
   "devDependencies": {
-    "@nodesecure/eslint-config": "^1.8.0",
-    "@types/node": "^20.9.4",
+    "@nodesecure/eslint-config": "^1.9.0",
+    "@types/node": "^20.10.4",
     "c8": "^8.0.1",
     "cross-env": "^7.0.3",
     "glob": "^10.3.10",
     "tsup": "^8.0.1",
-    "tsx": "^4.4.0",
-    "typescript": "^5.3.2"
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.3"
   }
 }

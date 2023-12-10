@@ -9,6 +9,7 @@ import { after, before, describe, it } from "node:test";
 import dayjs from "dayjs";
 import { SigynInitializedConfig, SigynRule, initConfig } from "@sigyn/config";
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
+import { Result } from "@openally/result";
 
 // Import Internal Dependencies
 import { DbRule, DbRuleLabel, getDB, initDB } from "../../src/database";
@@ -31,10 +32,10 @@ function getRule(rule: SigynRule): DbRule {
   return getDB().prepare("SELECT * FROM rules WHERE name = ?").get(rule.name) as DbRule;
 }
 
-async function pollingIn200ms(rule: Rule, logs: string[], stream: Record<string, string> = {}): Promise<boolean> {
+async function pollingIn200ms(rule: Rule, logs: string[], stream: Record<string, string> = {}): Promise<Result<true, string>> {
   const t0 = performance.now();
 
-  const createAlert = await rule.walkOnLogs([{ values: logs, stream }]);
+  const createAlert = rule.walkOnLogs([{ values: logs, stream }]);
 
   const timeToHandleLogsInMs = Math.floor(performance.now() - t0);
 
@@ -109,13 +110,13 @@ describe("Rule.walkOnLogs()", () => {
         while (pollingCount++ < 4) {
           const createAlert = await pollingIn200ms(rule, ["one new log"]);
 
-          assert.equal(createAlert, false);
+          assert.equal(createAlert.ok, false);
           assert.equal(getRule(ruleConfig).counter, pollingCount);
         }
 
         const createAlert = await pollingIn200ms(rule, ["one new log"]);
 
-        assert.equal(createAlert, true);
+        assert.equal(createAlert.ok, true);
         // once alert triggers, counter should be reset to 0
         assert.equal(getRule(ruleConfig).counter, 0);
       });
@@ -132,7 +133,7 @@ describe("Rule.walkOnLogs()", () => {
         while (pollingCount++ < 4) {
           const createAlert = await pollingIn200ms(rule, ["one new log outside interval limit"]);
 
-          assert.equal(createAlert, false);
+          assert.equal(createAlert.ok, false);
           assert.equal(getRule(ruleConfig).counter, pollingCount);
         }
 
@@ -143,13 +144,13 @@ describe("Rule.walkOnLogs()", () => {
         const createAlertAfter1200Ms = await pollingIn200ms(rule, ["one new log"]);
 
         // counter is still 4 because it has removed one counter added 1.200s later while interval is 1s
-        assert.equal(createAlertAfter1200Ms, false);
+        assert.equal(createAlertAfter1200Ms.ok, false);
         assert.equal(getRule(ruleConfig).counter, 4);
 
         const createAlertAfter1400Ms = await pollingIn200ms(rule, ["one new log"]);
 
         // counter is still 4 because it has removed one counter added 1.200s later while interval is 1s
-        assert.equal(createAlertAfter1400Ms, false);
+        assert.equal(createAlertAfter1400Ms.ok, false);
         assert.equal(getRule(ruleConfig).counter, 4);
       });
     });
@@ -165,7 +166,7 @@ describe("Rule.walkOnLogs()", () => {
 
         const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
-        assert.equal(createAlert, true);
+        assert.equal(createAlert.ok, true);
         // once alert triggers, counter should be reset to 0
         assert.equal(getRule(ruleConfig).counter, 0);
       });
@@ -181,7 +182,7 @@ describe("Rule.walkOnLogs()", () => {
           .run(Date.now() + 50000, ruleConfig.name);
 
         const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
-        assert.equal(createAlert, false);
+        assert.equal(createAlert.ok, false);
 
         // reset mute for next tests
         getDB()
@@ -200,7 +201,7 @@ describe("Rule.walkOnLogs()", () => {
 
           const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
-          assert.equal(createAlert, true);
+          assert.equal(createAlert.ok, true);
           // once alert triggers, counter should be reset to 0
           assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -217,7 +218,7 @@ describe("Rule.walkOnLogs()", () => {
 
             const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
-            assert.equal(createAlert, false);
+            assert.equal(createAlert.ok, false);
             assert.equal(getRule(ruleConfig).throttleCount, i + 1);
           }
         });
@@ -230,7 +231,7 @@ describe("Rule.walkOnLogs()", () => {
 
           const createAlert = await pollingIn200ms(rule, Array.from(Array(15)).map(() => "one new log"));
 
-          assert.equal(createAlert, true);
+          assert.equal(createAlert.ok, true);
           // once alert triggers, counter should be reset to 0
           assert.equal(getRule(ruleConfig).counter, 0);
         });
@@ -266,7 +267,7 @@ describe("Rule.walkOnLogs()", () => {
 
           const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
-          assert.equal(createAlert, true);
+          assert.equal(createAlert.ok, true);
           // once alert triggers, counter should be reset to 0
           assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -282,7 +283,7 @@ describe("Rule.walkOnLogs()", () => {
 
             const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
-            assert.equal(createAlert, true);
+            assert.equal(createAlert.ok, true);
             // once alert triggers, counter should be reset to 0
             assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -300,7 +301,7 @@ describe("Rule.walkOnLogs()", () => {
 
             const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
-            assert.equal(createAlert, false);
+            assert.equal(createAlert.ok, false);
             assert.equal(getRule(ruleConfig).throttleCount, i + 1);
           }
         });
@@ -312,7 +313,7 @@ describe("Rule.walkOnLogs()", () => {
 
           const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
-          assert.equal(createAlert, true);
+          assert.equal(createAlert.ok, true);
           // once alert triggers, counter should be reset to 0
           assert.equal(getRule(ruleConfig).counter, 0);
         });
@@ -329,7 +330,7 @@ describe("Rule.walkOnLogs()", () => {
 
         const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
-        assert.equal(createAlert, true);
+        assert.equal(createAlert.ok, true);
         // once alert triggers, counter should be reset to 0
         assert.equal(getRule(ruleConfig).counter, 0);
 
@@ -346,7 +347,7 @@ describe("Rule.walkOnLogs()", () => {
 
           const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
 
-          assert.equal(createAlert, true);
+          assert.equal(createAlert.ok, true);
           // once alert triggers, counter should be reset to 0
           assert.equal(getRule(ruleConfig).counter, 0);
         }
@@ -375,7 +376,7 @@ describe("Rule.walkOnLogs()", () => {
         for (let i = 0; i < 4; i++) {
           const createAlert = await pollingIn200ms(rule, ["one log"]);
 
-          assert.equal(createAlert, false);
+          assert.equal(createAlert.ok, false);
           // once alert triggers, counter should be reset to 0
           assert.equal(getRule(ruleConfig).counter, i + 1);
         }
@@ -384,7 +385,7 @@ describe("Rule.walkOnLogs()", () => {
         assert.equal(getRule(ruleConfig).counter, 4);
         const createAlert = await pollingIn200ms(rule, ["one log should trigger alert"]);
 
-        assert.equal(createAlert, true);
+        assert.equal(createAlert.ok, true);
         // once alert triggers, counter should be reset to 0
         assert.equal(getRule(ruleConfig).counter, 0);
       });
@@ -410,7 +411,7 @@ describe("Rule.walkOnLogs()", () => {
         for (let i = 0; i < 4; i++) {
           const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"));
 
-          assert.equal(createAlert, false);
+          assert.equal(createAlert.ok, false);
           // once alert triggers, counter should be reset to 0
           assert.equal(getRule(ruleConfig).counter, (i + 1) * 10);
         }
@@ -419,7 +420,7 @@ describe("Rule.walkOnLogs()", () => {
         assert.equal(getRule(ruleConfig).counter, 40);
         const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"));
 
-        assert.equal(createAlert, false);
+        assert.equal(createAlert.ok, false);
         assert.equal(getRule(ruleConfig).counter, 50);
       });
     });
@@ -479,7 +480,7 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { state: "ko" });
 
-      assert.equal(createAlert, true);
+      assert.equal(createAlert.ok, true);
     });
 
     it("should not send alert when count not reached", async() => {
@@ -488,7 +489,7 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"), { state: "ko" });
 
-      assert.equal(createAlert, false);
+      assert.equal(createAlert.ok, false);
 
       const createAlertWhenThrehsholdReached = await pollingIn200ms(
         rule,
@@ -496,7 +497,7 @@ describe("Rule.walkOnLogs()", () => {
         { state: "ko" }
       );
 
-      assert.equal(createAlertWhenThrehsholdReached, true);
+      assert.equal(createAlertWhenThrehsholdReached.ok, true);
     });
 
     it("should send alert when interval and threshold reached", async() => {
@@ -515,13 +516,13 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { state: "ko" });
 
-      assert.equal(createAlert, false);
+      assert.equal(createAlert.ok, false);
 
-      assert.equal(await pollingIn200ms(rule, []), false);
+      assert.equal((await pollingIn200ms(rule, [])).ok, false);
 
       // We need 3 intervals because there is some MS difference between the first polling and the first label timestamp
       const createAlertAfterIntervalReached = await pollingIn200ms(rule, []);
-      assert.equal(createAlertAfterIntervalReached, true);
+      assert.equal(createAlertAfterIntervalReached.ok, true);
     });
   });
 
@@ -540,7 +541,7 @@ describe("Rule.walkOnLogs()", () => {
         { values: ["one new log"], stream: { app: "foo" } }
       ]);
 
-      assert.equal(createAlert, true);
+      assert.equal(createAlert.ok, true);
       assert.equal(getRule(config.rules[0]).counter, 0);
 
       // Since throttle is based on alerts table, we need to create it ourself
@@ -555,7 +556,7 @@ describe("Rule.walkOnLogs()", () => {
         { values: ["one new log"], stream: { app: "foo" } }
       ]);
 
-      assert.equal(createAlert, false);
+      assert.equal(createAlert.ok, false);
       assert.equal(getRule(config.rules[0]).counter, 1);
     });
 
@@ -567,7 +568,7 @@ describe("Rule.walkOnLogs()", () => {
         { values: ["one new log"], stream: { app: "bar" } }
       ]);
 
-      assert.equal(createAlert, true);
+      assert.equal(createAlert.ok, true);
       assert.equal(getRule(config.rules[0]).counter, 0);
 
       // Since throttle is based on alerts table, we need to create it ourself
@@ -582,7 +583,7 @@ describe("Rule.walkOnLogs()", () => {
         { values: ["one new log"], stream: { app: "bar" } }
       ]);
 
-      assert.equal(createAlert, false);
+      assert.equal(createAlert.ok, false);
       assert.equal(getRule(config.rules[0]).counter, 1);
     });
 
@@ -597,7 +598,7 @@ describe("Rule.walkOnLogs()", () => {
           { values: ["one new log"], stream: { app: "foo" } }
         ]);
 
-        assert.equal(createAlert, true);
+        assert.equal(createAlert.ok, true);
         // Since throttle is based on alerts table, we need to create it ourself
         createAlertInDB(getRule(config.rules[0]), { app: "foo" });
       }
@@ -608,7 +609,7 @@ describe("Rule.walkOnLogs()", () => {
           { values: ["one new log"], stream: { app: "bar" } }
         ]);
 
-        assert.equal(createAlert, true);
+        assert.equal(createAlert.ok, true);
         // Since throttle is based on alerts table, we need to create it ourself
         createAlertInDB(getRule(config.rules[0]), { app: "bar" });
       }
@@ -628,7 +629,7 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { responseTime: "1500" });
 
-      assert.equal(createAlert, true);
+      assert.equal(createAlert.ok, true);
     });
 
     it("should not send alert when count not reached", async() => {
@@ -637,7 +638,7 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"), { responseTime: "1500" });
 
-      assert.equal(createAlert, false);
+      assert.equal(createAlert.ok, false);
 
       const createAlertWhenThrehsholdReached = await pollingIn200ms(
         rule,
@@ -645,7 +646,7 @@ describe("Rule.walkOnLogs()", () => {
         { responseTime: "1500" }
       );
 
-      assert.equal(createAlertWhenThrehsholdReached, true);
+      assert.equal(createAlertWhenThrehsholdReached.ok, true);
     });
 
     it("should send alert when interval and threshold reached", async() => {
@@ -664,13 +665,13 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { responseTime: "1500" });
 
-      assert.equal(createAlert, false);
+      assert.equal(createAlert.ok, false);
 
-      assert.equal(await pollingIn200ms(rule, []), false);
+      assert.equal((await pollingIn200ms(rule, [])).ok, false);
 
       // We need 3 intervals because there is some MS difference between the first polling and the first label timestamp
       const createAlertAfterIntervalReached = await pollingIn200ms(rule, []);
-      assert.equal(createAlertAfterIntervalReached, true);
+      assert.equal(createAlertAfterIntervalReached.ok, true);
     });
   });
 
@@ -687,7 +688,7 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { statusCode: "500" });
 
-      assert.equal(createAlert, true);
+      assert.equal(createAlert.ok, true);
     });
 
     it("should not send alert when count not reached", async() => {
@@ -696,7 +697,7 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"), { statusCode: "500" });
 
-      assert.equal(createAlert, false);
+      assert.equal(createAlert.ok, false);
 
       const createAlertWhenThrehsholdReached = await pollingIn200ms(
         rule,
@@ -704,7 +705,7 @@ describe("Rule.walkOnLogs()", () => {
         { statusCode: "500" }
       );
 
-      assert.equal(createAlertWhenThrehsholdReached, true);
+      assert.equal(createAlertWhenThrehsholdReached.ok, true);
     });
 
     it("should send alert when interval and threshold reached", async() => {
@@ -723,13 +724,13 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { statusCode: "500" });
 
-      assert.equal(createAlert, false);
+      assert.equal(createAlert.ok, false);
 
-      assert.equal(await pollingIn200ms(rule, []), false);
+      assert.equal((await pollingIn200ms(rule, [])).ok, false);
 
       // We need 3 intervals because there is some MS difference between the first polling and the first label timestamp
       const createAlertAfterIntervalReached = await pollingIn200ms(rule, []);
-      assert.equal(createAlertAfterIntervalReached, true);
+      assert.equal(createAlertAfterIntervalReached.ok, true);
     });
   });
 
@@ -746,7 +747,7 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, Array.from(Array(10)).map(() => "one new log"), { responseTime: "50" });
 
-      assert.equal(createAlert, false);
+      assert.equal(createAlert.ok, false);
     });
 
     it("should send alert when count is reached", async() => {
@@ -755,7 +756,7 @@ describe("Rule.walkOnLogs()", () => {
 
       const createAlert = await pollingIn200ms(rule, ["one new log"], { responseTime: "550" });
 
-      assert.equal(createAlert, true);
+      assert.equal(createAlert.ok, true);
     });
   });
 });
