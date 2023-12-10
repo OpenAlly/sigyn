@@ -24,6 +24,38 @@
           "title": "Alert"
         }
       }
+    },
+    {
+      "name": "State KO >= 80% no filters 2",
+      "logql": "{app=\"sigyn\"} |~ `state: (ok|ko)` | regexp `state: (?P<state>ok|ko)`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "label": "state",
+          "value": "ko",
+          "percentThreshold": 80,
+          "minimumLabelCount": 10
+        },
+        "template": {
+          "title": "Alert"
+        }
+      }
+    },
+    {
+      "name": "State KO >= 80% no filters 3",
+      "logql": "{app=\"sigyn\"} |~ `state: (ok|ko)` | regexp `state: (?P<state>ok|ko)`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "label": "state",
+          "value": "ko",
+          "percentThreshold": 80,
+          "minimumLabelCount": 10
+        },
+        "template": {
+          "title": "Alert"
+        }
+      }
     }
   ],
   "selfMonitoring": {

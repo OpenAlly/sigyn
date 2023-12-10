@@ -13,7 +13,7 @@ import { asyncTask } from "../../src/tasks/asyncTask";
 import { MockLogger } from "./helpers";
 import { Rule } from "../../src/rules";
 import { getDB, initDB } from "../../src/database";
-import { resetCalls, getCalls } from "./mocks/sigyn-test-notifier";
+import { resetCalls, getCalls, getArgs } from "./mocks/sigyn-test-notifier";
 
 // CONSTANTS
 const kFixturePath = path.join(__dirname, "/fixtures");
@@ -92,22 +92,28 @@ describe("Self-monitoring", () => {
   it("should send alert as rule matches ruleFilters", async() => {
     initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
     const config = await initConfig(kRuleMatchRuleFiltersConfigLocation);
-    const rule = new Rule(config.rules[0], { logger: kLogger });
-    rule.init();
 
-    const task = asyncTask(
-      config.rules[0], {
-        logger: kLogger,
-        lokiApi: kMockLokiApi as any,
-        rule
-      }
-    );
+    for (const ruleConfig of config.rules) {
+      const rule = new Rule(ruleConfig, { logger: kLogger });
+      rule.init();
+      const task = asyncTask(
+        config.rules[0], {
+          logger: kLogger,
+          lokiApi: kMockLokiApi as any,
+          rule
+        }
+      );
 
-    task.execute();
+      task.execute();
+    }
+
 
     await setTimeout(kTimeout);
 
-    assert.equal(getCalls(), 1);
+    assert.equal(getCalls(), 3);
+
+    const errors = getArgs()[0].data.agentFailure.errors;
+    assert.equal(errors, "Failed", "should not have duplicated errors");
   });
 
   it("should send alert as rule matches errorFilters", async() => {

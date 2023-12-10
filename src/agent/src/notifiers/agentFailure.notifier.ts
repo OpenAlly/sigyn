@@ -57,10 +57,11 @@ export class AgentFailureNotifier extends Notifier<AgentFailureAlert> {
 
   async #agentFailureAlertData(alert: AgentFailureAlert) {
     const { failures } = alert;
+    const errors = new Set(failures.map(({ message }) => message));
 
     return {
       agentFailure: {
-        errors: failures.reduce((pre, { message }) => (pre ? `${pre}, ${message}` : message), ""),
+        errors: [...errors].join(", "),
         rules: getAgentFailureRules(alert)
       },
       severity: kAgentFailureSeverity
