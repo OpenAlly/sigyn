@@ -66,7 +66,8 @@ const kExpectedTablesColumns = {
     { name: "ruleId", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
     { name: "message", dflt_value: null, type: "TEXT", pk: 0, notnull: 0 },
     { name: "timestamp", dflt_value: null, type: "INTEGER", pk: 0, notnull: 0 },
-    { name: "count", dflt_value: 1, type: "INTEGER", pk: 0, notnull: 0 }
+    { name: "count", dflt_value: 1, type: "INTEGER", pk: 0, notnull: 0 },
+    { name: "processed", dflt_value: 0, type: "INTEGER", pk: 0, notnull: 0 }
   ],
   compositeRuleAlerts: [
     { name: "id", dflt_value: null, type: "INTEGER", pk: 1, notnull: 0 },

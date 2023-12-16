@@ -24,6 +24,7 @@ const kRuleMatchErrorFiltersConfigLocation = path.join(kFixturePath, "/no-self-m
 const kRuleNoFiltersConfigLocation = path.join(kFixturePath, "/no-self-monitoring-filters/sigyn.config.json");
 const kRuleThrottleConfigLocation = path.join(kFixturePath, "/self-monitoring-throttle/sigyn.config.json");
 const kRuleActivationThresholdConfigLocation = path.join(kFixturePath, "/self-monitoring-activation-threshold/sigyn.config.json");
+const kRuleIntervalThrottleConfigLocation = path.join(kFixturePath, "/self-monitoring-interval/sigyn.config.json");
 const kLogger = new MockLogger();
 const kMockLokiApi = {
   Loki: {
@@ -243,5 +244,41 @@ describe("Self-monitoring", () => {
     task.execute();
     await setTimeout(kTimeout);
     assert.equal(getCalls(), 4);
+  });
+
+  it("should disable throttle after interval", async() => {
+    const config = await initConfig(kRuleIntervalThrottleConfigLocation);
+    const rule = new Rule(config.rules[0], { logger: kLogger });
+    rule.init();
+
+    const task = asyncTask(
+      config.rules[0], {
+        logger: kLogger,
+        lokiApi: kMockLokiApi as any,
+        rule
+      }
+    );
+
+    task.execute();
+    await setTimeout(kTimeout);
+    // first alert, no throttle
+    assert.equal(getCalls(), 1);
+
+    task.execute();
+    await setTimeout(kTimeout);
+    // throttle activated, still 1 call
+    assert.equal(getCalls(), 1);
+
+    task.execute();
+    await setTimeout(kTimeout);
+    // throttle activated, still 1 call
+    assert.equal(getCalls(), 1);
+
+    // wait 5s (the interval value)
+    await setTimeout(5000);
+    task.execute();
+    await setTimeout(kTimeout);
+    // throttle deactivated, now 2 calls
+    assert.equal(getCalls(), 2);
   });
 });
