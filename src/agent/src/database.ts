@@ -73,6 +73,8 @@ export interface DbAgentFailure {
   ruleId: number;
   message: string;
   timestamp: number;
+  count: number;
+  processed: number;
 }
 
 export interface DbAgentFailureAlert {

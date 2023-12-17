@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS agentFailures
     message   TEXT,
     timestamp INTEGER,
     count     INTEGER DEFAULT 1,
+    processed INTEGER DEFAULT 0,
     FOREIGN KEY(ruleId)
       REFERENCES rules(id)
         ON UPDATE CASCADE

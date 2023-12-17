@@ -1,5 +1,6 @@
 // Import Third-party Dependencies
 import { SigynInitializedSelfMonitoring, getConfig } from "@sigyn/config";
+import { Result, Ok, Err } from "@openally/result";
 
 // Import Internal Dependencies
 import { DbAgentFailure, getDB } from "../database";
@@ -18,9 +19,9 @@ export function getAgentFailureRules(alert: AgentFailureAlert): string {
   return failures.map(({ name }) => name).join(", ");
 }
 
-function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throttle"]) {
+function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throttle"]): Result<string, string> {
   if (!throttle) {
-    return false;
+    return Err("no throttle for the given rule");
   }
 
   const { interval, count, activationThreshold } = throttle;
@@ -29,21 +30,46 @@ function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throt
   const agentFailuresAlert = (getDB()
     .prepare("SELECT count FROM agentFailures WHERE timestamp >= ? ORDER BY count DESC")
     .get(intervalDate) as { count: number });
-  const agentFailuresAlertCount = agentFailuresAlert?.count ?? 0;
+  const lastAgentFailureAlert = (getDB()
+    .prepare("SELECT * FROM agentFailures ORDER BY count DESC LIMIT 1")
+    .get() as DbAgentFailure);
+  getDB().exec("UPDATE agentFailures SET processed = 1");
 
-  if (activationThreshold > 0 && agentFailuresAlertCount <= activationThreshold) {
-    return false;
+  const agentFailuresAlertCount = agentFailuresAlert?.count ?? 0;
+  const countThresholdExceeded = count > 0 && agentFailuresAlertCount - activationThreshold > count;
+  const activationThresholdExceeded = activationThreshold > 0 && agentFailuresAlertCount <= activationThreshold;
+  const intervalExceeded = lastAgentFailureAlert.processed && lastAgentFailureAlert.timestamp > intervalDate;
+
+  function logMessage(throttle: boolean, details: string) {
+    // eslint-disable-next-line max-len
+    return `(throttle: ${throttle ? "on" : "off"}|details: ${details}|processed: ${lastAgentFailureAlert.processed}|lastAlertTime: ${lastAgentFailureAlert.timestamp}|activationThreshold: ${activationThreshold}|agentFailuresCount: ${agentFailuresAlertCount}|count: ${count})`;
   }
 
-  if (count > 0 && agentFailuresAlertCount - activationThreshold > count) {
-    return false;
+  if (!activationThresholdExceeded && intervalExceeded && !countThresholdExceeded) {
+    return Ok(logMessage(true, "within interval"));
+  }
+  else if (lastAgentFailureAlert.processed && activationThreshold === 0) {
+    return Err(logMessage(false, "interval exceeded"));
+  }
+
+
+  if (activationThresholdExceeded) {
+    return Err(logMessage(false, "activation threshold exceeded"));
+  }
+
+  if (countThresholdExceeded) {
+    return Err(logMessage(false, "count threshold exceeded"));
   }
 
   if (activationThreshold > 0 && agentFailuresAlertCount > activationThreshold) {
-    return true;
+    return Ok(logMessage(true, "failures count > activationThreshold"));
   }
 
-  return agentFailuresAlertCount === 1 ? false : agentFailuresAlertCount - activationThreshold <= count;
+  const hasThrottle = agentFailuresAlertCount === 1 ? false : agentFailuresAlertCount - activationThreshold <= count;
+
+  return hasThrottle ?
+    Ok(logMessage(true, "failures count < activationThreshold + count")) :
+    Err(logMessage(false, "failures count > activationThreshold + count"));
 }
 
 export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Logger) {
@@ -80,9 +106,10 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
 
     const agentFailures = getDB().prepare("SELECT * FROM agentFailures").all() as DbAgentFailure[];
     if (agentFailures.length > minimumErrorCount) {
-      if (hasAgentFailureThrottle(config.selfMonitoring.throttle)) {
-        logger.info(`[SELF MONITORING](skip: throttle is activated)`);
+      const throttle = hasAgentFailureThrottle(config.selfMonitoring.throttle);
+      logger.info(`[SELF MONITORING]${throttle.val}`);
 
+      if (throttle.ok) {
         return;
       }
 
