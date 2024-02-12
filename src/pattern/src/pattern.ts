@@ -10,11 +10,11 @@ export interface PatternShape<T extends LokiPatternType = string> {
 }
 
 export class NoopPattern implements PatternShape {
-  compile(): (log: string) => [log: string] {
+  compile(): (log: string) => [] | [log: string] {
     return (log) => [log];
   }
 
-  executeOnLogs(logs: Array<string>): Array<string> {
+  executeOnLogs(logs: Array<string>): LokiLiteralPattern<string>[] {
     return logs;
   }
 }

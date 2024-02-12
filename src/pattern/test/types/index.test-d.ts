@@ -10,11 +10,18 @@ expectType<{
   verb: string;
   code: string;
 }[]>(new Pattern("<verb> <_> <code>").executeOnLogs([]));
-expectType<string[]>(new Pattern("invalid pattern should return string").executeOnLogs([]));
 expectType<{
   verb: string;
   code: string;
 }[]>(new Pattern(["<verb>", " <_> ", "<code>"] as const).executeOnLogs([]));
 
-expectAssignable<PatternShape>(new NoopPattern());
-expectAssignable<PatternShape>(new Pattern("foobar"));
+expectType<(log: string) => [] | [log: string]>(new NoopPattern().compile());
+expectType<(log: string) => [] | [log: string]>(new Pattern("invalid pattern should return string").compile());
+expectType<(log: string) => [] | [log: { foobar: string }]>(new Pattern("<_> <foobar>").compile());
+
+expectType<string[]>(new Pattern("invalid pattern should return string").executeOnLogs([]));
+expectType<string[]>(new NoopPattern().executeOnLogs([]));
+
+expectAssignable<PatternShape<string>>(new NoopPattern());
+expectAssignable<PatternShape<string>>(new Pattern("foobar"));
+expectAssignable<PatternShape<"<_> <foobar>">>(new Pattern("<_> <foobar>"));
