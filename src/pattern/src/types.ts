@@ -3,6 +3,8 @@
 
 type Simplify<T> = {[KeyType in keyof T]: T[KeyType]} & {};
 
+type ConvertEmptyRecord<T, R = string> = T extends Record<string, never> ? R : T;
+
 type TupleToObject<T extends Array<string>> = {
   [key in ExtractPattern<T[number]>]: string
 };
@@ -28,8 +30,10 @@ type ExtractPattern<Pattern extends string> = Pattern extends `${infer _}<${infe
   Name extends "_" ? never : Trim<Name> : never;
 
 export type LokiPatternType = string | Array<string> | ReadonlyArray<string>;
-export type LokiLiteralPattern<T extends LokiPatternType> = Simplify<
-  TupleToObject<
-    Split<ArrayToString<T>, ">">
+export type LokiLiteralPattern<T extends LokiPatternType> = ConvertEmptyRecord<
+  Simplify<
+    TupleToObject<
+      Split<ArrayToString<T>, ">">
+    >
   >
 >;

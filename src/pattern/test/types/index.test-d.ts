@@ -10,6 +10,7 @@ expectType<{
   verb: string;
   code: string;
 }[]>(new Pattern("<verb> <_> <code>").executeOnLogs([]));
+expectType<string[]>(new Pattern("invalid pattern should return string").executeOnLogs([]));
 expectType<{
   verb: string;
   code: string;
