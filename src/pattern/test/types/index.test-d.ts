@@ -2,7 +2,11 @@
 import { expectType, expectAssignable } from "tsd";
 
 // Import Internal Dependencies
-import { Pattern, NoopPattern, PatternShape } from "../../src/pattern";
+import {
+  Pattern,
+  PatternShape,
+  NoopPattern
+} from "../../src/pattern";
 
 expectType<Pattern<string>>(new Pattern("foobar"));
 
@@ -22,6 +26,8 @@ expectType<(log: string) => [] | [log: { foobar: string }]>(new Pattern("<_> <fo
 expectType<string[]>(new Pattern("invalid pattern should return string").executeOnLogs([]));
 expectType<string[]>(new NoopPattern().executeOnLogs([]));
 
+expectAssignable<PatternShape<string>>(new NoopPattern() || new Pattern("<foobar>"));
 expectAssignable<PatternShape<string>>(new NoopPattern());
 expectAssignable<PatternShape<string>>(new Pattern("foobar"));
+expectAssignable<PatternShape<string>>(new Pattern(["foobar", "yo"]));
 expectAssignable<PatternShape<"<_> <foobar>">>(new Pattern("<_> <foobar>"));
