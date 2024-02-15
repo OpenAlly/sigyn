@@ -30,10 +30,6 @@ type ExtractPattern<Pattern extends string> = Pattern extends `${infer _}<${infe
   Name extends "_" ? never : Trim<Name> : never;
 
 export type LokiPatternType = string | Array<string> | ReadonlyArray<string>;
-export type LokiLiteralPattern<T extends LokiPatternType> = ConvertEmptyRecord<
-  Simplify<
-    TupleToObject<
-      Split<ArrayToString<T>, ">">
-    >
-  >
->;
+export type LokiLiteralPattern<T extends LokiPatternType> = ConvertEmptyRecord<Simplify<
+  TupleToObject<Split<ArrayToString<T>, ">">>
+>>;

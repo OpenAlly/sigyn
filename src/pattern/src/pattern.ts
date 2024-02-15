@@ -9,13 +9,13 @@ export interface PatternShape<T extends LokiPatternType = string> {
   executeOnLogs(logs: Array<string>): LokiLiteralPattern<T>[];
 }
 
-export class NoopPattern implements PatternShape {
-  compile(): (log: string) => [] | [log: string] {
-    return (log) => [log];
+export class NoopPattern<T extends LokiPatternType = string> implements PatternShape<T> {
+  compile(): (log: string) => [] | [log: LokiLiteralPattern<T>] {
+    return (log) => [log as LokiLiteralPattern<T>];
   }
 
-  executeOnLogs(logs: Array<string>): LokiLiteralPattern<string>[] {
-    return logs;
+  executeOnLogs(logs: Array<string>): LokiLiteralPattern<T>[] {
+    return logs as LokiLiteralPattern<T>[];
   }
 }
 
@@ -46,7 +46,7 @@ export class Pattern<T extends LokiPatternType> implements PatternShape<T> {
     return (log) => {
       const match = new RegExp(exprStr).exec(log);
 
-      return match === null ? [] : [match.groups as LokiLiteralPattern<T>];
+      return match === null ? [] : [match.groups as unknown as LokiLiteralPattern<T>];
     };
   }
 
