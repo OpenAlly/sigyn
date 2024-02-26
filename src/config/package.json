@@ -44,7 +44,7 @@
     "minimatch": "^9.0.3"
   },
   "devDependencies": {
-    "@myunisoft/httpie": "^3.0.3",
+    "@myunisoft/httpie": "^4.0.0",
     "dotenv": "^16.4.3"
   }
 }
