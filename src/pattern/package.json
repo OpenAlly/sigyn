@@ -1,6 +1,6 @@
 {
   "name": "@sigyn/pattern",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Loki pattern in JavaScript",
   "main": "./dist/pattern.js",
   "module": "./dist/pattern.mjs",
