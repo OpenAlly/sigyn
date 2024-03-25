@@ -52,6 +52,44 @@ describe("Config validation", () => {
     });
   });
 
+  it("given a config without grafana", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        grafana: undefined as any
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: : must have required property 'grafana'"
+    });
+  });
+
+  it("given a config without grafana apiUrl, it should throws", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        grafana: {} as any
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /grafana: must have required property 'apiUrl'"
+    });
+  });
+
+  it("grafana apiUrl must be string", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        grafana: {
+          apiUrl: 42 as any
+        }
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /grafana/apiUrl: must be string"
+    });
+  });
+
   it("given a root template with only title, it should validate", () => {
     assert.doesNotThrow(() => {
       validateConfig({

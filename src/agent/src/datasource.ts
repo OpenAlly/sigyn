@@ -2,19 +2,19 @@
 import { GrafanaApi, Datasource as GrafanaDatasource } from "@myunisoft/loki";
 
 export class Datasource {
-  #lokiApi: GrafanaApi;
+  #grafanaApi: GrafanaApi;
 
   private static datasource: Datasource;
   private static cache: GrafanaDatasource;
 
   private constructor(host: string) {
-    this.#lokiApi = new GrafanaApi({
+    this.#grafanaApi = new GrafanaApi({
       remoteApiURL: host
     });
   }
 
   fetchDatasources() {
-    return this.#lokiApi.Datasources.all();
+    return this.#grafanaApi.Datasources.all();
   }
 
   static async Loki(host: string) {

@@ -1,5 +1,6 @@
 export interface SigynConfig {
   loki: LokiConfig;
+  grafana: GrafanaConfig;
   notifiers: Record<string, {
     notifier: string;
     [key: string]: unknown;
@@ -15,6 +16,7 @@ export interface SigynConfig {
 
 export interface SigynInitializedConfig {
   loki: LokiConfig;
+  grafana: GrafanaConfig;
   notifiers: Record<string, {
     notifier: string;
     [key: string]: unknown;
@@ -30,6 +32,7 @@ export interface SigynInitializedConfig {
 
 export interface PartialSigynConfig {
   loki: LokiConfig;
+  grafana: GrafanaConfig;
   notifiers: Record<string, {
     notifier: string;
     [key: string]: unknown;
@@ -46,6 +49,10 @@ export interface PartialSigynConfig {
 export type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
 
 export interface LokiConfig {
+  apiUrl: string;
+}
+
+export interface GrafanaConfig {
   apiUrl: string;
 }
 
