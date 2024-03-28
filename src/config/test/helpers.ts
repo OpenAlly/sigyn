@@ -5,6 +5,9 @@ export const VALID_CONFIG: PartialSigynConfig = {
   loki: {
     apiUrl: "http://localhost:3100"
   },
+  grafana: {
+    apiUrl: "http://localhost:3000"
+  },
   notifiers: {
     discord: {
       notifier: "discord",

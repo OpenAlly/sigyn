@@ -25,7 +25,7 @@
 
 ## ⚙️ Configuration
 
-The **Sigyn** configuration object consists of theses properties: `loki`, `templates`, `rules`, `compositeRules`, `notifiers` and `selfMonitoring`.
+The **Sigyn** configuration object consists of theses properties: `loki`, `grafana`, `templates`, `rules`, `compositeRules`, `notifiers` and `selfMonitoring`.
 
 ### Example configuration
 
@@ -33,6 +33,9 @@ The **Sigyn** configuration object consists of theses properties: `loki`, `templ
 {
   "loki": {
     "apiUrl": "http://localhost:3100"
+  },
+  "grafana": {
+    "apiUrl": "http://localhost:3000"
   },
   "templates": {
     "onlyTitle": {
@@ -114,6 +117,8 @@ The **Sigyn** configuration object consists of theses properties: `loki`, `templ
 ### Required
 The `loki` property defines an object that allows configuring Loki API access.
 
+The `grafana` property defines an object that allows configuring Grafana API access.
+
 The `rules` property defines an array of rule objects, each representing a specific monitoring rule.
 
 The `notifiers` property is an object that allows configuring various notification methods.
@@ -145,6 +150,13 @@ The `selfMonitoring` property defines how/when Sigyn should emit alert for self 
   | Property   | Type       | Required | Description |
   |------------|------------|----------|-------------|
   | `apiUrl`   | `string`   | ✔️       | The Loki API url |
+---
+- `grafana` (Object, Required):
+  - This object specifies the Grafana API configuration.
+
+  | Property   | Type       | Required | Description |
+  |------------|------------|----------|-------------|
+  | `apiUrl`   | `string`   | ✔️       | The Grafana API url |
 ---
 - `templates` See [templates](./docs/templates.md)
 ---

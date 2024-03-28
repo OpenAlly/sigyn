@@ -2,6 +2,9 @@
   "loki": {
     "apiUrl": "http://localhost:3100"
   },
+  "grafana": {
+    "apiUrl": "http://localhost:3000"
+  },
   "notifiers": {
     "slack": {
       "notifier": "slack",

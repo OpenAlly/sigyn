@@ -17,6 +17,22 @@
       ],
       "additionalProperties": false
     },
+    "grafana": {
+      "title": "Specify the Grafana API Configuration",
+      "description": "The Grafana API configuration is used to retrieve datasources to generate loki url in notifications.",
+      "type": "object",
+      "properties": {
+        "apiUrl": {
+          "title": "The Grafana API url",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "apiUrl"
+      ],
+      "additionalProperties": false
+    },
     "templates": {
       "type": "object",
       "patternProperties": {
@@ -273,6 +289,7 @@
   },
   "required": [
     "loki",
+    "grafana",
     "rules",
     "notifiers"
   ],

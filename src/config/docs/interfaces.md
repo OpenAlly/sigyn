@@ -3,6 +3,7 @@
 ```ts
 interface SigynConfig {
   loki: LokiConfig;
+  grafana: GrafanaConfig;
   notifiers: Record<string, {
     notifier: string;
     [key: string]: unknown;
@@ -18,6 +19,7 @@ interface SigynConfig {
 
 interface SigynInitializedConfig {
   loki: LokiConfig;
+  grafana: GrafanaConfig;
   notifiers: Record<string, {
     notifier: string;
     [key: string]: unknown;
@@ -33,6 +35,7 @@ interface SigynInitializedConfig {
 
 interface PartialSigynConfig {
   loki: LokiConfig;
+  grafana: GrafanaConfig;
   notifiers: Record<string, {
     notifier: string;
     [key: string]: unknown;
@@ -49,6 +52,10 @@ interface PartialSigynConfig {
 type ExtendedSigynConfig = Pick<SigynConfig, "templates" | "rules">;
 
 interface LokiConfig {
+  apiUrl: string;
+}
+
+interface GrafanaConfig {
   apiUrl: string;
 }
 
