@@ -1,6 +1,6 @@
 {
   "name": "@sigyn/agent",
-  "version": "3.4.1",
+  "version": "4.0.0",
   "description": "Loki alerting agent",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
