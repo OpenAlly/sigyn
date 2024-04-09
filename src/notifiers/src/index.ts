@@ -23,5 +23,8 @@ export interface ExecuteWebhookData {
     rules: string;
   }
   rules?: string;
+  labelCount: number;
+  labelMatchCount: number;
+  labelMatchPercent?: number;
 }
 

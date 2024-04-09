@@ -143,5 +143,5 @@ export function cleanRulesInDb(
 export function getOldestLabelTimestamp(ruleId: number, label: string) {
   return (getDB()
     .prepare("SELECT timestamp FROM ruleLabels WHERE key = ? AND ruleId = ? ORDER BY timestamp ASC LIMIT 1")
-    .get(label, ruleId) as Pick<DbRuleLabel, "timestamp">).timestamp;
+    .get(label, ruleId) as Pick<DbRuleLabel, "timestamp">)?.timestamp;
 }

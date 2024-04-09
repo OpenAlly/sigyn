@@ -23,6 +23,9 @@ export class Rule {
   #logger: Logger;
   #lastFetchedStream: Record<string, string> | null = null;
   #now: number;
+  #labelCount: number = 0;
+  #labelMatchCount: number = 0;
+  #labelMatchPercent: number | undefined;
 
   constructor(rule: SigynInitializedRule, options: RuleOptions) {
     const { logger } = options;
@@ -70,7 +73,10 @@ export class Rule {
     return {
       ...rule,
       labels: formattedLabels,
-      oldestLabelTimestamp: this.config.alert.on.label ? getOldestLabelTimestamp(rule.id, this.config.alert.on.label) : null
+      oldestLabelTimestamp: this.config.alert.on.label ? getOldestLabelTimestamp(rule.id, this.config.alert.on.label) : null,
+      labelCount: this.#labelCount,
+      labelMatchCount: this.#labelMatchCount,
+      labelMatchPercent: this.#labelMatchPercent
     };
   }
 
@@ -236,7 +242,12 @@ export class Rule {
 
     this.#logger.info(`[${rule.name}](state: reached|actual: ${labels.length}|count: ${count ?? "x"}|thresholdCount: ${labelMatchCount}|percentThreshold: ${percentThreshold}|actualPercent: ${labelMatchCount / labels.length * 100})`);
 
+    this.#labelCount = labels.length;
+    this.#labelMatchCount = labelMatchCount;
+
     if (percentThreshold) {
+      this.#labelMatchPercent = labelMatchCount / labels.length * 100;
+
       return labelMatchCount / labels.length * 100 >= percentThreshold!;
     }
 

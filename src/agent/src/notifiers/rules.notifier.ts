@@ -15,7 +15,13 @@ import * as utils from "../utils";
 const kIdentifier = Symbol("ruleNotifier");
 
 export interface RuleNotifierAlert extends Alert {
-  rule: DbRule & { labels: Record<string, string>; oldestLabelTimestamp: number | null };
+  rule: DbRule & {
+    labels: Record<string, string>;
+    oldestLabelTimestamp: number | null;
+    labelCount: number;
+    labelMatchCount: number;
+    labelMatchPercent: number | undefined;
+  };
   notif: Pick<DbAlertNotif, "alertId" | "notifierId">;
   error?: Error;
 }
@@ -131,7 +137,10 @@ export class RuleNotifier extends Notifier<RuleNotifierAlert> {
       interval: ruleConfig.alert.on.interval,
       label: { ...new StreamSelector(ruleConfig.logql).kv(), ...rule.labels },
       severity: ruleConfig.alert.severity,
-      lokiUrl: await utils.getLokiUrl(rule, ruleConfig)
+      lokiUrl: await utils.getLokiUrl(rule, ruleConfig),
+      labelCount: rule.labelCount,
+      labelMatchCount: rule.labelMatchCount,
+      labelMatchPercent: rule.labelMatchPercent
     };
   }
 }
