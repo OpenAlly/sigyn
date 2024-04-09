@@ -30,12 +30,15 @@ function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throt
   const agentFailuresAlert = (getDB()
     .prepare("SELECT count FROM agentFailures WHERE timestamp >= ? ORDER BY count DESC")
     .get(intervalDate) as { count: number });
+  const unprocessedAgentFailuresAlertFromThrottle = (getDB()
+    .prepare("SELECT count FROM agentFailures WHERE timestamp <= ? AND processed = 0 ORDER BY count DESC")
+    .get(intervalDate) as { count: number });
   const lastAgentFailureAlert = (getDB()
     .prepare("SELECT * FROM agentFailures ORDER BY count DESC LIMIT 1")
     .get() as DbAgentFailure);
-  getDB().exec("UPDATE agentFailures SET processed = 1");
 
   const agentFailuresAlertCount = agentFailuresAlert?.count ?? 0;
+  const unprocessedAgentFailuresAlertCount = unprocessedAgentFailuresAlertFromThrottle?.count ?? 0;
   const countThresholdExceeded = count > 0 && agentFailuresAlertCount - activationThreshold > count;
   const activationThresholdExceeded = activationThreshold > 0 && agentFailuresAlertCount <= activationThreshold;
   const intervalExceeded = lastAgentFailureAlert.processed && lastAgentFailureAlert.timestamp > intervalDate;
@@ -52,9 +55,12 @@ function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throt
     return Err(logMessage(false, "interval exceeded"));
   }
 
+  if (unprocessedAgentFailuresAlertCount > 0) {
+    return Err(logMessage(false, "failures older than throttle interval"));
+  }
 
   if (activationThresholdExceeded) {
-    return Err(logMessage(false, "activation threshold exceeded"));
+    return Err(logMessage(false, `activation threshold not reached (${agentFailuresAlertCount} <= ${activationThreshold})`));
   }
 
   if (countThresholdExceeded) {
@@ -73,6 +79,7 @@ function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throt
 }
 
 export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Logger) {
+  const db = getDB();
   const config = getConfig();
   if (!config.selfMonitoring) {
     logger.info("[SELF MONITORING](skip: disabled)");
@@ -95,8 +102,8 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
 
   try {
     const dbRule = rule.getRuleFromDatabase();
-    getDB().exec("UPDATE agentFailures SET count = count + 1");
-    getDB()
+    db.exec("UPDATE agentFailures SET count = count + 1");
+    db
       .prepare("INSERT INTO agentFailures (ruleId, message, timestamp) VALUES (?, ?, ?)")
       .run(
         dbRule.id,
@@ -104,7 +111,7 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
         Date.now()
       );
 
-    const agentFailures = getDB().prepare("SELECT * FROM agentFailures").all() as DbAgentFailure[];
+    const agentFailures = db.prepare("SELECT * FROM agentFailures").all() as DbAgentFailure[];
     if (agentFailures.length > minimumErrorCount) {
       const throttle = hasAgentFailureThrottle(config.selfMonitoring.throttle);
       logger.info(`[SELF MONITORING]${throttle.val}`);
@@ -114,6 +121,7 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
       }
 
       logger.info(`[SELF MONITORING](new alert: ${agentFailures.length} agent failures detected)`);
+      db.exec("UPDATE agentFailures SET processed = 1");
 
       createAgentFailureAlert(agentFailures, config.selfMonitoring, logger);
 
@@ -122,7 +130,7 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
       const intervalDate = interval ?
         cronUtils.durationOrCronToDate(interval, "subtract").valueOf() :
         Date.now();
-      getDB().prepare("DELETE FROM agentFailures WHERE timestamp < ?").run(intervalDate);
+      db.prepare("DELETE FROM agentFailures WHERE timestamp < ?").run(intervalDate);
     }
   }
   catch (error) {

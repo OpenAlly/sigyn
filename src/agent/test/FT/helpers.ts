@@ -62,3 +62,7 @@ export class MockLogger {
     return void 0;
   }
 }
+
+export function resetAgentFailures() {
+  getDB().prepare("DELETE FROM agentFailures").run();
+}
