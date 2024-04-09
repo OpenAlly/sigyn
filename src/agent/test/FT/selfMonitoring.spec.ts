@@ -5,12 +5,13 @@ import { afterEach, before, beforeEach, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
 // Import Third-party Dependencies
-import { initConfig } from "@sigyn/config";
+import { SigynInitializedConfig, initConfig } from "@sigyn/config";
+import { AsyncTask } from "toad-scheduler";
 import isCI from "is-ci";
 
 // Import Internal Dependencies
 import { asyncTask } from "../../src/tasks/asyncTask";
-import { MockLogger } from "./helpers";
+import { MockLogger, resetAgentFailures } from "./helpers";
 import { Rule } from "../../src/rules";
 import { getDB, initDB } from "../../src/database";
 import { resetCalls, getCalls, getArgs } from "./mocks/sigyn-test-notifier";
@@ -25,6 +26,10 @@ const kRuleNoFiltersConfigLocation = path.join(kFixturePath, "/no-self-monitorin
 const kRuleThrottleConfigLocation = path.join(kFixturePath, "/self-monitoring-throttle/sigyn.config.json");
 const kRuleActivationThresholdConfigLocation = path.join(kFixturePath, "/self-monitoring-activation-threshold/sigyn.config.json");
 const kRuleIntervalThrottleConfigLocation = path.join(kFixturePath, "/self-monitoring-interval/sigyn.config.json");
+const kRuleActivationThresholdThrottleConfigLocation = path.join(
+  kFixturePath,
+  "/self-monitoring-activation-threshold-interval/sigyn.config.json"
+);
 const kLogger = new MockLogger();
 const kMockLokiApi = {
   Loki: {
@@ -43,6 +48,7 @@ describe("Self-monitoring", () => {
 
   before(async() => {
     process.env.GRAFANA_API_TOKEN = "toto";
+    initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
   });
 
   afterEach(() => {
@@ -50,7 +56,6 @@ describe("Self-monitoring", () => {
   });
 
   it("should not send alert when error does not match errorFilters", async() => {
-    initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
     const config = await initConfig(kRuleConfigLocation);
     const rule = new Rule(config.rules[0], { logger: kLogger });
     rule.init();
@@ -278,4 +283,60 @@ describe("Self-monitoring", () => {
     // throttle deactivated, now 2 calls
     assert.equal(getCalls(), 2);
   });
+
+  describe("With both activationThreshold & interval", () => {
+    let config: SigynInitializedConfig;
+    let rule: Rule;
+    let task: AsyncTask;
+
+    before(async() => {
+      resetCalls();
+      resetAgentFailures();
+      config = await initConfig(kRuleActivationThresholdThrottleConfigLocation);
+      rule = new Rule(config.rules[0], { logger: kLogger });
+      rule.init();
+
+      task = asyncTask(
+        config.rules[0], {
+          logger: kLogger,
+          lokiApi: kMockLokiApi as any,
+          rule
+        }
+      );
+    });
+
+    it("should have throttle for 5s once activationThreshold is reached", async() => {
+      task.execute();
+      await setTimeout(kTimeout);
+      assert.equal(getCalls(), 1, "should send a first alert (1 / 4)");
+
+      task.execute();
+      await setTimeout(kTimeout);
+      assert.equal(getCalls(), 2, "should send alert when activationThreshold is not reached (2 / 4)");
+
+      task.execute();
+      await setTimeout(kTimeout);
+      assert.equal(getCalls(), 3, "should send alert when activationThreshold is not reached (3 / 4)");
+
+      task.execute();
+      await setTimeout(kTimeout);
+      assert.equal(getCalls(), 4, "should send alert when activationThreshold is not reached (4 / 4)");
+
+      task.execute();
+      await setTimeout(kTimeout);
+      assert.equal(getCalls(), 4, "should NOT send alert when activationThreshold is reached (5 / 4)");
+
+      function intervalCallback() {
+        task.execute();
+      }
+      const timer = setInterval(intervalCallback, 200);
+      await setTimeout(2000);
+      clearInterval(timer[Symbol.toPrimitive]());
+
+      task.execute();
+      await setTimeout(kTimeout);
+      assert.equal(getCalls(), 5, "should send alert when throttle ends with accumulated failures");
+    });
+  });
 });
+
