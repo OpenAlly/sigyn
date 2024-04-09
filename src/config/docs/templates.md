@@ -29,7 +29,7 @@ Both can be setting up with an object as following:
 
 ## Variables
 
-You can use any of theses variables (both for `title` & `content`), surrounding with `{}` (see example below):
+You can use any of theses variables (both in `title` & `content`), surrounding with `{}` (see example below):
 - `ruleName`
 - `logql`
 - `count` (count of logs retrievied within the interval)
@@ -37,6 +37,9 @@ You can use any of theses variables (both for `title` & `content`), surrounding 
 - `threshold` (`alert.on.count`)
 - `interval`
 - `lokiUrl` 
+- `labelCount` (count label based rules)
+- `labelMatchCount` (label based rules)
+- `labelMatchPercent` (percent label based rules)
 
 > [!NOTE]
 > You can use hyperlink with Markdown i.e. `[See logs]({lokiUrl})`.
