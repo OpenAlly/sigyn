@@ -1,7 +1,12 @@
 // Import Third-party Dependencies
-import { ExecuteWebhookOptions, WebhookNotifier } from "@sigyn/notifiers";
+import { WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
 
-class TeamsNotifier extends WebhookNotifier {
+export interface TeamsWebhookBodyFormat {
+  title: string,
+  text: string
+}
+
+class TeamsNotifier extends WebhookNotifier<TeamsWebhookBodyFormat> {
   contentTemplateOptions() {
     return {
       transform: ({ value, key }) => (key === "logql" || key === "lokiUrl" ? value : `**${value ?? "unknown"}**`),
@@ -9,13 +14,15 @@ class TeamsNotifier extends WebhookNotifier {
     };
   }
 
-  async formatWebhook(): Promise<any> {
+  async formatWebhookBody(): Promise<TeamsWebhookBodyFormat> {
     if (this.data.ruleConfig?.logql) {
       this.data.ruleConfig.logql = this.#formatLogQL(this.data.ruleConfig.logql);
     }
 
-    const title = await this.formatTitle();
-    const content = await this.formatContent();
+    const [title, content] = await Promise.all([
+      this.formatTitle(),
+      this.formatContent()
+    ]);
 
     return {
       title,
@@ -28,8 +35,13 @@ class TeamsNotifier extends WebhookNotifier {
   }
 }
 
-export function execute(options: ExecuteWebhookOptions) {
+export async function execute(
+  options: WebhookNotifierOptions
+) {
   const notifier = new TeamsNotifier(options);
+  const body = await notifier.formatWebhookBody();
 
-  return notifier.execute();
+  return notifier.execute(
+    body
+  );
 }

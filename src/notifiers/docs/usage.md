@@ -7,46 +7,46 @@
 
 ## Webhook
 
-Create a class that extends from `WebhookNotifier` to build a Webhook notifier.
+Create a class that extends from `WebhookNotifier<T>` to build a Webhook notifier.
 
 ```ts
-import { ExecuteWebhookOptions, WebhookNotifier } from "@sigyn/notifiers";
+import { WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
 
-class MyAwesomeWebhookNotifier extends WebhookNotifier {
-  async formatWebhook(): Promise<any> {
-    const title = await this.formatTitle();
-    const content = await this.formatContent();
+interface MyAwesomeFormat {
+  title: string,
+  content: string
+}
+
+class MyAwesomeWebhookNotifier extends WebhookNotifier<MyAwesomeFormat> {
+  async formatWebhookBody(): Promise<MyAwesomeFormat> {
+    const [title, content] = await Promise.all([
+      this.formatTitle(),
+      this.formatContent()
+    ]);
 
     return {
       title,
-      content.join("\n")
+      content: content.join("\n")
     }
   }
 }
 
-export function execute(options: ExecuteWebhookOptions) {
+export function execute(
+  options: WebhookNotifierOptions
+) {
   const notifier = new MyAwesomeWebhookNotifier(options);
+  const body = await notifier.formatWebhookBody();
 
-  return notifier.execute();
+  return notifier.execute(
+    body
+  );
 }
 ```
 
-The only required method to implement is `formatWebhook()`.
-This method return the Webhook body.
-```ts
-async execute() {
-  const body = await this.formatWebhook();
-
-  return httpie.post<string>(this.webhookUrl, {
-    body,
-    headers: this.#headers
-  });
-}
-```
 You can use `formatTitle()` & `formatContent()` to get title & content formatted with template data. Theses functions uses `@sigyn/morphix` and you can customise the options of boths:
 
 ```ts
-class MyAwesomeWebhookNotifier extends WebhookNotifier {
+class MyAwesomeWebhookNotifier extends WebhookNotifier<MyAwesomeFormat> {
   contentTemplateOptions() {
     return {
       transform: ({ value }) => (value === undefined ? "unknown" : value),
@@ -61,13 +61,15 @@ class MyAwesomeWebhookNotifier extends WebhookNotifier {
     }
   }
 
-  async formatWebhook(): Promise<any> {
-    const title = await this.formatTitle();
-    const content = await this.formatContent();
+  async formatWebhookBody(): Promise<MyAwesomeFormat> {
+    const [title, content] = await Promise.all([
+      this.formatTitle(),
+      this.formatContent()
+    ]);
 
     return {
       title,
-      content.join("\n")
+      content: content.join("\n")
     }
   }
 }
@@ -77,6 +79,7 @@ class MyAwesomeWebhookNotifier extends WebhookNotifier {
 > The `contentTemplateOptions` & `titleTemplateOptions` above are the default values.
 
 By default, `showSeverityEmoji` is truthy: this option add an emoji before the title depending the alert **severity**.
+
 ```ts
 const kSeverityEmoji = {
   critical: "💥",
@@ -85,27 +88,33 @@ const kSeverityEmoji = {
   info: "📢"
 };
 ```
+
 You can do `this.showSeverityEmoji = false` to disable this behavior.
+
 ```ts
 async formatWebhook(): Promise<any> {
   this.showSeverityEmoji = false;
 
-  const title = await this.formatTitle();
-  const content = await this.formatContent();
+  const [title, content] = await Promise.all([
+    this.formatTitle(),
+    this.formatContent()
+  ]);
 
   return {
     title,
-    content.join("\n")
+    content: content.join("\n")
   }
 }
 ```
+
 You can also disable it in the constructor
+
 ```ts
 class MyAwesomeWebhookNotifier extends WebhookNotifier {
   // directly set the property to false
   showSeverityEmoji = false;
 
-  constructor(options: ExecuteWebhookOptions) {
+  constructor(options: WebhookNotifierOptions) {
     super(options);
     // or
     this.showSeverityEmoji = false;
@@ -121,21 +130,25 @@ You can see implementation examples with our notifiers:
 ## Interfaces
 
 ```ts
-interface ExecuteWebhookOptions {
-    webhookUrl: string;
-    data: ExecuteWebhookData;
-    template: SigynInitializedTemplate;
+export interface WebhookNotifierOptions {
+  webhookUrl: string;
+  data: WebhookData;
+  template: SigynInitializedTemplate;
 }
-interface ExecuteWebhookData {
-    ruleConfig?: NotifierFormattedSigynRule;
-    counter?: number;
-    severity: "critical" | "error" | "warning" | "info";
-    label?: Record<string, string>;
-    lokiUrl?: string;
-    agentFailure?: {
-        errors: string;
-        rules: string;
-    };
-    rules?: string;
+
+export interface WebhookData {
+  ruleConfig?: NotifierFormattedSigynRule;
+  counter?: number;
+  severity: "critical" | "error" | "warning" | "info";
+  label?: Record<string, string>;
+  lokiUrl?: string;
+  agentFailure?: {
+    errors: string;
+    rules: string;
+  }
+  rules?: string;
+  labelCount: number;
+  labelMatchCount: number;
+  labelMatchPercent?: number;
 }
 ```

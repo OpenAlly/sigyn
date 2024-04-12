@@ -12,8 +12,8 @@ const kMockAgent = new MockAgent();
 const kDispatcher = getGlobalDispatcher();
 const kDummyWebhoobURL = "https://webhook.test";
 
-class DummyWebhookNotifier extends WebhookNotifier {
-  async formatWebhook() {
+class DummyWebhookNotifier extends WebhookNotifier<{ foo: string }> {
+  async formatWebhookBody() {
     return { foo: "bar" };
   }
 }
@@ -41,7 +41,9 @@ describe("Webhook", () => {
     const notifier = new DummyWebhookNotifier({
       webhookUrl: "https://webhook.test/dummy",
       data: {
-        severity: "critical"
+        severity: "critical",
+        labelCount: 0,
+        labelMatchCount: 1
       },
       template: {
         title: "Test",
@@ -49,7 +51,10 @@ describe("Webhook", () => {
       }
     });
 
-    const response = await notifier.execute();
+    const body = await notifier.formatWebhookBody();
+    const response = await notifier.execute(
+      body
+    );
 
     assert.strictEqual(response.statusCode, 200);
   });

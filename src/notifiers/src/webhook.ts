@@ -1,8 +1,8 @@
-// Import Internal Dependencies
-import { ExecuteWebhookData, ExecuteWebhookOptions } from ".";
-
 // Import Third-party Dependencies
-import { SigynInitializedTemplate } from "@sigyn/config";
+import {
+  SigynInitializedTemplate,
+  NotifierFormattedSigynRule
+} from "@sigyn/config";
 import { morphix } from "@sigyn/morphix";
 import * as httpie from "@myunisoft/httpie";
 
@@ -14,9 +14,31 @@ const kSeverityEmoji = {
   info: "📢"
 };
 
-export class WebhookNotifier {
+export interface WebhookNotifierOptions {
   webhookUrl: string;
-  data: ExecuteWebhookData;
+  data: WebhookData;
+  template: SigynInitializedTemplate;
+}
+
+export interface WebhookData {
+  ruleConfig?: NotifierFormattedSigynRule;
+  counter?: number;
+  severity: "critical" | "error" | "warning" | "info";
+  label?: Record<string, string>;
+  lokiUrl?: string;
+  agentFailure?: {
+    errors: string;
+    rules: string;
+  }
+  rules?: string;
+  labelCount: number;
+  labelMatchCount: number;
+  labelMatchPercent?: number;
+}
+
+export class WebhookNotifier<T> {
+  webhookUrl: string;
+  data: WebhookData;
   template: SigynInitializedTemplate;
   showSeverityEmoji = true;
 
@@ -27,7 +49,7 @@ export class WebhookNotifier {
     ignoreMissing: true
   };
 
-  constructor(options: ExecuteWebhookOptions) {
+  constructor(options: WebhookNotifierOptions) {
     this.webhookUrl = JSON.parse(JSON.stringify((options.webhookUrl)));
     this.data = JSON.parse(JSON.stringify((options.data)));
     this.template = JSON.parse(JSON.stringify((options.template)));
@@ -45,7 +67,7 @@ export class WebhookNotifier {
     return this.#defaultTemplateOptions;
   }
 
-  async formatTitle() {
+  formatTitle(): Promise<string> {
     if (this.data.ruleConfig) {
       this.data = {
         ...this.data,
@@ -57,11 +79,14 @@ export class WebhookNotifier {
       this.template.title = `${kSeverityEmoji[this.data.severity]} ${this.template.title}`;
     }
 
-    return await morphix(this.template.title, this.data, this.titleTemplateOptions());
+    return morphix(this.template.title, this.data, this.titleTemplateOptions());
   }
 
-  async formatContent() {
-    // We update the data here at the end of lifecycle in case the user update data / ruleConfig previous in the lifecycle
+  async formatContent(): Promise<string[]> {
+    /**
+     * We update the data here at the end of lifecycle
+     * in case the user update data / ruleConfig previous in the lifecycle
+     */
     if (this.data.ruleConfig) {
       this.data = {
         ...this.data,
@@ -69,22 +94,14 @@ export class WebhookNotifier {
       };
     }
 
-    const contents: string[] = [];
-
-    for (const content of this.template.content) {
-      contents.push(await morphix(content, this.data, this.contentTemplateOptions()));
-    }
-
-    return contents;
+    return Promise.all(
+      this.template.content.map((content) => morphix(content, this.data, this.contentTemplateOptions()))
+    );
   }
 
-  async formatWebhook() {
-    throw new Error("formatWebhook method must be implemented");
-  }
-
-  async execute() {
-    const body = await this.formatWebhook();
-
+  async execute(
+    body: T
+  ): Promise<httpie.RequestResponse<string>> {
     return httpie.post<string>(this.webhookUrl, {
       body,
       headers: this.#headers
