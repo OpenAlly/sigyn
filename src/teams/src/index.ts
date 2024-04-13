@@ -1,4 +1,5 @@
 // Import Third-party Dependencies
+import { MorphixOptions } from "@sigyn/morphix";
 import { WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
 
 export interface TeamsWebhookBodyFormat {
@@ -7,7 +8,7 @@ export interface TeamsWebhookBodyFormat {
 }
 
 class TeamsNotifier extends WebhookNotifier<TeamsWebhookBodyFormat> {
-  contentTemplateOptions() {
+  contentTemplateOptions(): MorphixOptions {
     return {
       transform: ({ value, key }) => (key === "logql" || key === "lokiUrl" ? value : `**${value ?? "unknown"}**`),
       ignoreMissing: true

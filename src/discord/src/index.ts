@@ -1,4 +1,5 @@
 // Import Third-party Dependencies
+import { MorphixOptions } from "@sigyn/morphix";
 import { WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
 
 // CONSTANTS
@@ -13,15 +14,27 @@ const kEmbedColor = {
   info: 16777215
 };
 
-class DiscordNotifier extends WebhookNotifier<any> {
-  contentTemplateOptions() {
+export interface DiscordEmbed {
+  title: string;
+  description: string;
+  color: number;
+}
+
+export interface DiscordWebhookBodyFormat {
+  embeds: DiscordEmbed[];
+  username: string;
+  avatar_url?: string;
+}
+
+class DiscordNotifier extends WebhookNotifier<DiscordWebhookBodyFormat> {
+  contentTemplateOptions(): MorphixOptions {
     return {
       transform: ({ key, value }) => (key === "lokiUrl" ? value : `**${value === undefined ? "unknown" : value}**`),
       ignoreMissing: true
     };
   }
 
-  async formatWebhookBody(): Promise<any> {
+  async formatWebhookBody(): Promise<DiscordWebhookBodyFormat> {
     if (this.data.ruleConfig?.logql) {
       this.data.ruleConfig.logql = this.#formatLogQL(this.data.ruleConfig.logql);
     }

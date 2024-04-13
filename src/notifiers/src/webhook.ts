@@ -3,7 +3,7 @@ import {
   SigynInitializedTemplate,
   NotifierFormattedSigynRule
 } from "@sigyn/config";
-import { morphix } from "@sigyn/morphix";
+import { morphix, MorphixOptions } from "@sigyn/morphix";
 import * as httpie from "@myunisoft/httpie";
 
 // CONSTANTS
@@ -13,11 +13,19 @@ const kSeverityEmoji = {
   warning: "⚠️",
   info: "📢"
 };
+const kDefaultTemplateOptions: MorphixOptions = {
+  transform: ({ value }) => (value === undefined ? "unknown" : value),
+  ignoreMissing: true
+};
 
 export interface WebhookNotifierOptions {
   webhookUrl: string;
   data: WebhookData;
   template: SigynInitializedTemplate;
+  /**
+   * @default true
+   */
+  showSeverityEmoji?: boolean;
 }
 
 export interface WebhookData {
@@ -40,31 +48,25 @@ export class WebhookNotifier<T> {
   webhookUrl: string;
   data: WebhookData;
   template: SigynInitializedTemplate;
-  showSeverityEmoji = true;
+  showSeverityEmoji: boolean;
 
-  #headers: httpie.RequestOptions["headers"];
-  #defaultTemplateOptions = {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    transform: ({ value, key }) => (value === undefined ? "unknown" : value),
-    ignoreMissing: true
-  };
+  constructor(
+    options: WebhookNotifierOptions
+  ) {
+    const { webhookUrl, data, template, showSeverityEmoji = true } = options;
 
-  constructor(options: WebhookNotifierOptions) {
-    this.webhookUrl = options.webhookUrl;
-    this.data = JSON.parse(JSON.stringify((options.data)));
-    this.template = JSON.parse(JSON.stringify((options.template)));
-
-    this.#headers = {
-      "content-type": "application/json"
-    };
+    this.webhookUrl = webhookUrl;
+    this.data = JSON.parse(JSON.stringify((data)));
+    this.template = JSON.parse(JSON.stringify((template)));
+    this.showSeverityEmoji = showSeverityEmoji;
   }
 
-  contentTemplateOptions() {
-    return this.#defaultTemplateOptions;
+  contentTemplateOptions(): MorphixOptions {
+    return kDefaultTemplateOptions;
   }
 
-  titleTemplateOptions() {
-    return this.#defaultTemplateOptions;
+  titleTemplateOptions(): MorphixOptions {
+    return kDefaultTemplateOptions;
   }
 
   formatTitle(): Promise<string> {
@@ -105,7 +107,9 @@ export class WebhookNotifier<T> {
   ): Promise<httpie.RequestResponse<string>> {
     return httpie.post<string>(this.webhookUrl, {
       body,
-      headers: this.#headers
+      headers: {
+        "content-type": "application/json"
+      }
     });
   }
 }

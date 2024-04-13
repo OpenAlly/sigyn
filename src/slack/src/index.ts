@@ -1,4 +1,5 @@
 // Import Third-party Dependencies
+import { MorphixOptions } from "@sigyn/morphix";
 import { WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
 import { MessageAttachment } from "@slack/types";
 
@@ -15,15 +16,9 @@ export interface SlackWebhookBodyFormat {
 }
 
 class SlackNotifier extends WebhookNotifier<SlackWebhookBodyFormat> {
-  contentTemplateOptions() {
+  contentTemplateOptions(): MorphixOptions {
     return {
-      transform: ({ value, key }) => {
-        if (key === "logql" || key === "lokiUrl") {
-          return value;
-        }
-
-        return `*${value ?? "unknown"}*`;
-      },
+      transform: ({ value, key }) => (key === "logql" || key === "lokiUrl" ? value : `*${value ?? "unknown"}*`),
       ignoreMissing: true
     };
   }

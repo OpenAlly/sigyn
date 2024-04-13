@@ -46,37 +46,28 @@ export function execute(
 You can use `formatTitle()` & `formatContent()` to get title & content formatted with template data. Theses functions uses `@sigyn/morphix` and you can customise the options of boths:
 
 ```ts
+import { MorphixOptions } from "@sigyn/morphix";
+
+const kCustomTemplateOptions: MorphixOptions = {
+  transform: ({ value }) => (value === undefined ? "unknown" : value),
+  ignoreMissing: true
+};
+
 class MyAwesomeWebhookNotifier extends WebhookNotifier<MyAwesomeFormat> {
   contentTemplateOptions() {
-    return {
-      transform: ({ value }) => (value === undefined ? "unknown" : value),
-      ignoreMissing: true
-    }
+    return kCustomTemplateOptions;
   }
 
   titleTemplateOptions() {
-    return {
-      transform: ({ value }) => (value === undefined ? "unknown" : value),
-      ignoreMissing: true
-    }
-  }
-
-  async formatWebhookBody(): Promise<MyAwesomeFormat> {
-    const [title, content] = await Promise.all([
-      this.formatTitle(),
-      this.formatContent()
-    ]);
-
-    return {
-      title,
-      content: content.join("\n")
-    }
+    return kCustomTemplateOptions;
   }
 }
 ```
 
 > [!NOTE]
 > The `contentTemplateOptions` & `titleTemplateOptions` above are the default values.
+
+---
 
 By default, `showSeverityEmoji` is truthy: this option add an emoji before the title depending the alert **severity**.
 
@@ -89,35 +80,14 @@ const kSeverityEmoji = {
 };
 ```
 
-You can do `this.showSeverityEmoji = false` to disable this behavior.
+But you can disable it by providing the constructor options `showSeverityEmoji` to false.
 
 ```ts
-async formatWebhook(): Promise<any> {
-  this.showSeverityEmoji = false;
-
-  const [title, content] = await Promise.all([
-    this.formatTitle(),
-    this.formatContent()
-  ]);
-
-  return {
-    title,
-    content: content.join("\n")
-  }
-}
-```
-
-You can also disable it in the constructor
-
-```ts
-class MyAwesomeWebhookNotifier extends WebhookNotifier {
-  // directly set the property to false
-  showSeverityEmoji = false;
-
-  constructor(options: WebhookNotifierOptions) {
-    super(options);
-    // or
-    this.showSeverityEmoji = false;
+class MyAwesomeWebhookNotifier extends WebhookNotifier<MyAwesomeFormat> {
+  constructor(
+    options: WebhookNotifierOptions
+  ) {
+    super({ ...options, showSeverityEmoji: false });
   }
 }
 ```
@@ -132,8 +102,12 @@ You can see implementation examples with our notifiers:
 ```ts
 export interface WebhookNotifierOptions {
   webhookUrl: string;
-  data: WebhookData;
+  data: WebhookData;s
   template: SigynInitializedTemplate;
+  /**
+   * @default true
+   */
+  showSeverityEmoji?: boolean;
 }
 
 export interface WebhookData {
