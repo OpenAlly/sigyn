@@ -50,7 +50,7 @@ export class WebhookNotifier<T> {
   };
 
   constructor(options: WebhookNotifierOptions) {
-    this.webhookUrl = JSON.parse(JSON.stringify((options.webhookUrl)));
+    this.webhookUrl = options.webhookUrl;
     this.data = JSON.parse(JSON.stringify((options.data)));
     this.template = JSON.parse(JSON.stringify((options.template)));
 
@@ -76,7 +76,8 @@ export class WebhookNotifier<T> {
     }
 
     if (this.showSeverityEmoji && this.template.title) {
-      this.template.title = `${kSeverityEmoji[this.data.severity]} ${this.template.title}`;
+      const emoji = kSeverityEmoji[this.data.severity];
+      this.template.title = `${emoji} ${this.template.title}`;
     }
 
     return morphix(this.template.title, this.data, this.titleTemplateOptions());
