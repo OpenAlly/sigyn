@@ -37,3 +37,5 @@ jobs:
         run: npm run build
       - name: Run tests
         run: npm run test --workspace=src/agent
+      - name: Run e2e tests
+        run: npm run test:e2e --workspace=src/agent

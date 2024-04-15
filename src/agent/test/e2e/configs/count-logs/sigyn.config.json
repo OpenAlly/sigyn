@@ -1,0 +1,30 @@
+{
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
+  "grafana": {
+    "apiUrl": "http://localhost:3030/grafana/"
+  },
+  "notifiers": {
+    "custom": {
+      "notifier": "../../test/FT/mocks/sigyn-test-notifier.js"
+    }
+  },
+  "rules": [
+    {
+      "name": "Hello World",
+      "logql": "{app=\"fastify\"} |= `Hello World`",
+      "polling": "300ms",
+      "notifiers": ["custom"],
+      "alert": {
+        "on": {
+          "interval": "1m",
+          "count": 1
+        },
+        "template": {
+          "title": "Alert"
+        }
+      }
+    }
+  ]
+}

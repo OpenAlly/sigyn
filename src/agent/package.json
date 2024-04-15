@@ -20,6 +20,7 @@
     "dev": "npm run build -- --watch",
     "prepublishOnly": "npm run build",
     "test": "glob -c \"tsx -r dotenv/config --test-concurrency 1 --test\" \"./test/**/*.spec.ts\"",
+    "test:e2e": "glob -c \"tsx -r dotenv/config --test-concurrency 1 --test\" \"./test/e2e/*.e2e-spec.ts\"",
     "coverage": "c8 -r html npm test",
     "lint": "cross-env eslint src/**/*.ts"
   },
@@ -56,6 +57,7 @@
     "@types/better-sqlite3": "^7.6.9",
     "is-ci": "^3.0.1",
     "mockdate": "^3.0.5",
-    "pino-pretty": "^11.0.0"
+    "pino-pretty": "^11.0.0",
+    "testcontainers": "^10.8.1"
   }
 }
