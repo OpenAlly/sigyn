@@ -145,11 +145,19 @@ See [Throttle](./throttle.md)
 
 ### `muteRules`
 
-Weither matched rules should stop trigger alert when a higher-level composite rule triggers.
+Whether matched rules should stop trigger alert when a higher-level composite rule triggers.
 
 | Type      | Required | Default |
 |-----------|----------|---------|
 | `boolean` | ❌       | `false` |
+
+### `muteUntriggered`
+
+Whether to mute rules that haven't triggered any alerts.
+
+| Type      | Required | Default |
+|-----------|----------|---------|
+| `boolean` | ❌       | `true` |
 
 ### `muteDuration`
 

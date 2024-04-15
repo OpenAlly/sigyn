@@ -215,7 +215,7 @@ You can use `bounded` strategy to make Sigyn skip the first poll so the first po
 
 ### `disabled`
 
-Weither the rule should be disabled. When a rule is disabled, Sigyn simply ignore it.
+Whether the rule should be disabled. When a rule is disabled, Sigyn simply ignore it.
 
 | Type      | Required | Default     |
 |-----------|----------|-------------|

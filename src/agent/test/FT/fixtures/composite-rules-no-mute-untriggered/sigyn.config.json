@@ -1,0 +1,84 @@
+{
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
+  "grafana": {
+    "apiUrl": "http://localhost:3000"
+  },
+  "notifiers": {
+    "discord": {
+      "notifier": "discord",
+      "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
+    }
+  },
+  "rules": [
+    {
+      "name": "AAA",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "BBB",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "CCC",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}"
+          ]
+        }
+      }
+    }
+  ],
+  "compositeRules": [
+    {
+      "name": "Composite Rule",
+      "template": {
+        "title": "title",
+        "content": ["content"]
+      },
+      "notifCount": 6,
+      "throttle": {
+        "interval": "5m",
+        "count": 3
+      },
+      "ruleCountThreshold": 2,
+      "muteRules": true,
+      "muteUntriggered": false
+    }
+  ]
+}

@@ -174,13 +174,18 @@ export interface SigynAlertTemplate {
   extends?: string;
 }
 
+export interface SigynPartialTemplate {
+  title?: string;
+  content?: string[];
+}
+
 export interface SigynInitializedTemplate {
   title: string;
   content: string[];
 }
 
 export interface SigynSelfMonitoring {
-  template: string | SigynInitializedTemplate;
+  template: string | SigynPartialTemplate;
   notifiers: string[];
   errorFilters?: string[];
   ruleFilters?: string[];
@@ -220,6 +225,7 @@ export interface SigynCompositeRule {
     activationThreshold?: number;
   };
   muteRules?: boolean;
+  muteUntriggered?: boolean;
   muteDuration?: string;
 }
 
@@ -237,5 +243,6 @@ export interface SigynInitializedCompositeRule {
     activationThreshold: number;
   };
   muteRules: boolean;
+  muteUntriggered: boolean;
   muteDuration: string;
 }

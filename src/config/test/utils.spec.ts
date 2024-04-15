@@ -58,6 +58,9 @@ describe("Utils", () => {
       loki: {
         apiUrl: kDummyUrl
       },
+      grafana: {
+        apiUrl: kDummyUrl
+      },
       notifiers: {
         discord: {
           notifier: "discord",
@@ -109,6 +112,9 @@ describe("Utils", () => {
     it("should apply default values", () => {
       assert.deepEqual(utils.applyDefaultValues(config), {
         loki: {
+          apiUrl: kDummyUrl
+        },
+        grafana: {
           apiUrl: kDummyUrl
         },
         templates: {},
@@ -178,6 +184,7 @@ describe("Utils", () => {
               activationThreshold: 0
             },
             muteDuration: "30m",
+            muteUntriggered: true,
             muteRules: false
           }
         ]
@@ -233,6 +240,9 @@ describe("Utils", () => {
   describe("applyRulesLogQLVariables()", () => {
     const config: PartialSigynConfig = {
       loki: {
+        apiUrl: kDummyUrl
+      },
+      grafana: {
         apiUrl: kDummyUrl
       },
       notifiers: {

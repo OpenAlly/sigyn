@@ -43,7 +43,7 @@ Available `init` types are:
 
 ### `static Equal(value: string | RegExp)`
 
-Utility static method that allow to init **exactlyEqual** (`=`) or **Matches Regexp** (`=~`) values via Object, depending weither value is `string` or `RegExp`.
+Utility static method that allow to init **exactlyEqual** (`=`) or **Matches Regexp** (`=~`) values via Object, depending whether value is `string` or `RegExp`.
 
 ```ts
 const streamSelector = new StreamSelector({ foo: StreamSelector.Equal("bar") })
