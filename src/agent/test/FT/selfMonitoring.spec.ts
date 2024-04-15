@@ -14,7 +14,7 @@ import { asyncTask } from "../../src/tasks/asyncTask";
 import { MockLogger, resetAgentFailures } from "./helpers";
 import { Rule } from "../../src/rules";
 import { getDB, initDB } from "../../src/database";
-import { resetCalls, getCalls, getArgs } from "./mocks/sigyn-test-notifier";
+import { TestingNotifier } from "./mocks/sigyn-test-notifier";
 
 // CONSTANTS
 const kFixturePath = path.join(__dirname, "/fixtures");
@@ -40,10 +40,11 @@ const kMockLokiApi = {
 };
 // time to wait for the task to be fully executed (alert sent)
 const kTimeout = isCI ? 350 : 200;
+const kTestingNotifier = TestingNotifier.getInstance();
 
-describe("Self-monitoring", () => {
+describe("Self-monitoring", { concurrency: 1 }, () => {
   beforeEach(() => {
-    resetCalls();
+    kTestingNotifier.clear();
   });
 
   before(async() => {
@@ -73,7 +74,7 @@ describe("Self-monitoring", () => {
 
     await setTimeout(kTimeout);
 
-    assert.equal(getCalls(), 0);
+    assert.equal(kTestingNotifier.notifCount, 0);
   });
 
   it("should not send alert when error does not match ruleFilters", async() => {
@@ -94,7 +95,7 @@ describe("Self-monitoring", () => {
 
     await setTimeout(kTimeout);
 
-    assert.equal(getCalls(), 0);
+    assert.equal(kTestingNotifier.notifCount, 0);
   });
 
   it("should send alert as rule matches ruleFilters", async() => {
@@ -118,9 +119,9 @@ describe("Self-monitoring", () => {
 
     await setTimeout(kTimeout);
 
-    assert.equal(getCalls(), 3);
+    assert.equal(kTestingNotifier.notifCount, 3);
 
-    const errors = getArgs()[0].data.agentFailure.errors;
+    const { errors } = kTestingNotifier.lastNotifArguments.data.agentFailure;
     assert.equal(errors, "Failed", "should not have duplicated errors");
   });
 
@@ -141,7 +142,7 @@ describe("Self-monitoring", () => {
 
     await setTimeout(kTimeout);
 
-    assert.equal(getCalls(), 1);
+    assert.equal(kTestingNotifier.notifCount, 1);
   });
 
   it("should send alert as there are is no filter", async() => {
@@ -161,7 +162,7 @@ describe("Self-monitoring", () => {
 
     await setTimeout(kTimeout);
 
-    assert.equal(getCalls(), 1);
+    assert.equal(kTestingNotifier.notifCount, 1);
   });
 
   it("should have throttle", async() => {
@@ -179,22 +180,22 @@ describe("Self-monitoring", () => {
 
     task.execute();
     await setTimeout(kTimeout);
-    assert.equal(getCalls(), 1);
+    assert.equal(kTestingNotifier.notifCount, 1);
 
     task.execute();
     await setTimeout(kTimeout);
     // Still 1 call as throttle is activated
-    assert.equal(getCalls(), 1);
+    assert.equal(kTestingNotifier.notifCount, 1);
 
     task.execute();
     await setTimeout(kTimeout);
     // Still 1 call as throttle is activated
-    assert.equal(getCalls(), 1);
+    assert.equal(kTestingNotifier.notifCount, 1);
 
     task.execute();
     await setTimeout(kTimeout);
     // Throttle is OFF, alert sent again.
-    assert.equal(getCalls(), 2);
+    assert.equal(kTestingNotifier.notifCount, 2);
   });
 
   it("should wait remaining activationThreshold (3) before activate throttle", async() => {
@@ -214,38 +215,38 @@ describe("Self-monitoring", () => {
     task.execute();
     await setTimeout(kTimeout);
     // first alert, no throttle (remaining: 2)
-    assert.equal(getCalls(), 1);
+    assert.equal(kTestingNotifier.notifCount, 1);
 
 
     task.execute();
     await setTimeout(kTimeout);
     // because of activationThreshold, no throttle (remaining: 1)
-    assert.equal(getCalls(), 2);
+    assert.equal(kTestingNotifier.notifCount, 2);
 
     task.execute();
     await setTimeout(kTimeout);
     // because of activationThreshold, no throttle (remaining: 0 -> now throttle is ON)
-    assert.equal(getCalls(), 3);
+    assert.equal(kTestingNotifier.notifCount, 3);
 
     task.execute();
     await setTimeout(kTimeout);
     // Now that throttle is activated (count = 3, 2 more to get OFF), alert not sent.
-    assert.equal(getCalls(), 3);
+    assert.equal(kTestingNotifier.notifCount, 3);
 
     task.execute();
     await setTimeout(kTimeout);
     // Throttle is still activated (count = 3, 1 more to get OFF), alert not sent.
-    assert.equal(getCalls(), 3);
+    assert.equal(kTestingNotifier.notifCount, 3);
 
     task.execute();
     await setTimeout(kTimeout);
     // Throttle is still activated (count = 3, 0 more, throttle is off now), alert not sent.
-    assert.equal(getCalls(), 3);
+    assert.equal(kTestingNotifier.notifCount, 3);
 
     // Throttle is OFF, alert sent again.
     task.execute();
     await setTimeout(kTimeout);
-    assert.equal(getCalls(), 4);
+    assert.equal(kTestingNotifier.notifCount, 4);
   });
 
   it("should disable throttle after interval", async() => {
@@ -264,24 +265,24 @@ describe("Self-monitoring", () => {
     task.execute();
     await setTimeout(kTimeout);
     // first alert, no throttle
-    assert.equal(getCalls(), 1);
+    assert.equal(kTestingNotifier.notifCount, 1);
 
     task.execute();
     await setTimeout(kTimeout);
     // throttle activated, still 1 call
-    assert.equal(getCalls(), 1);
+    assert.equal(kTestingNotifier.notifCount, 1);
 
     task.execute();
     await setTimeout(kTimeout);
     // throttle activated, still 1 call
-    assert.equal(getCalls(), 1);
+    assert.equal(kTestingNotifier.notifCount, 1);
 
     // wait 5s (the interval value)
     await setTimeout(5000);
     task.execute();
     await setTimeout(kTimeout);
     // throttle deactivated, now 2 calls
-    assert.equal(getCalls(), 2);
+    assert.equal(kTestingNotifier.notifCount, 2);
   });
 
   describe("With both activationThreshold & interval", () => {
@@ -290,7 +291,7 @@ describe("Self-monitoring", () => {
     let task: AsyncTask;
 
     before(async() => {
-      resetCalls();
+      kTestingNotifier.clear();
       resetAgentFailures();
       config = await initConfig(kRuleActivationThresholdThrottleConfigLocation);
       rule = new Rule(config.rules[0], { logger: kLogger });
@@ -308,23 +309,23 @@ describe("Self-monitoring", () => {
     it("should have throttle for 5s once activationThreshold is reached", async() => {
       task.execute();
       await setTimeout(kTimeout);
-      assert.equal(getCalls(), 1, "should send a first alert (1 / 4)");
+      assert.equal(kTestingNotifier.notifCount, 1, "should send a first alert (1 / 4)");
 
       task.execute();
       await setTimeout(kTimeout);
-      assert.equal(getCalls(), 2, "should send alert when activationThreshold is not reached (2 / 4)");
+      assert.equal(kTestingNotifier.notifCount, 2, "should send alert when activationThreshold is not reached (2 / 4)");
 
       task.execute();
       await setTimeout(kTimeout);
-      assert.equal(getCalls(), 3, "should send alert when activationThreshold is not reached (3 / 4)");
+      assert.equal(kTestingNotifier.notifCount, 3, "should send alert when activationThreshold is not reached (3 / 4)");
 
       task.execute();
       await setTimeout(kTimeout);
-      assert.equal(getCalls(), 4, "should send alert when activationThreshold is not reached (4 / 4)");
+      assert.equal(kTestingNotifier.notifCount, 4, "should send alert when activationThreshold is not reached (4 / 4)");
 
       task.execute();
       await setTimeout(kTimeout);
-      assert.equal(getCalls(), 4, "should NOT send alert when activationThreshold is reached (5 / 4)");
+      assert.equal(kTestingNotifier.notifCount, 4, "should NOT send alert when activationThreshold is reached (5 / 4)");
 
       function intervalCallback() {
         task.execute();
@@ -335,7 +336,7 @@ describe("Self-monitoring", () => {
 
       task.execute();
       await setTimeout(kTimeout);
-      assert.equal(getCalls(), 5, "should send alert when throttle ends with accumulated failures");
+      assert.equal(kTestingNotifier.notifCount, 5, "should send alert when throttle ends with accumulated failures");
     });
   });
 });

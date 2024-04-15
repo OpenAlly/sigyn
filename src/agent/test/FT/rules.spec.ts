@@ -120,7 +120,7 @@ describe("Rule.getAlertFormattedRule()", () => {
 
     const rule = new Rule(config.rules[0], { logger: kLogger });
     rule.init();
-    await rule.walkOnLogs([
+    rule.walkOnLogs([
       { values: ["one"], stream: { foo: "bar" } },
       { values: ["two"], stream: { foo: "baz", foz: "boz" } }
     ]);
@@ -145,7 +145,7 @@ describe("Rule.getAlertFormattedRule()", () => {
     getDB().exec("DELETE from ruleLabels");
 
     const rule = new Rule(config.rules[0], { logger: kLogger });
-    await rule.walkOnLogs([
+    rule.walkOnLogs([
       { values: ["one"], stream: { foo: "bar" } },
       { values: ["two"], stream: { foo: "baz", foz: "boz" } },
       { values: ["three"], stream: { foo: "baz", foz: "boz" } }
@@ -165,7 +165,7 @@ describe("Rule.getAlertFormattedRule()", () => {
     const rule = new Rule(ruleConfig.rules[0], { logger: kLogger });
     rule.init();
     // rule match statusCode 4xx & 5xx so the 200 should be skipped
-    await rule.walkOnLogs([
+    rule.walkOnLogs([
       { values: ["statusCode: 200"], stream: { statusCode: "200" } },
       { values: ["statusCode: 400"], stream: { statusCode: "400" } },
       { values: ["statusCode: 500"], stream: { statusCode: "500" } }

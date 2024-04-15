@@ -427,7 +427,7 @@ describe("Rule.walkOnLogs()", () => {
 
     it("should store labels", async() => {
       const rule = new Rule(config.rules[0], { logger: kLogger });
-      await rule.walkOnLogs([
+      rule.walkOnLogs([
         { values: ["one"], stream: { foo: "bar" } },
         { values: ["two"], stream: { foo: "baz", foz: "boz" } }
       ]);
@@ -452,7 +452,7 @@ describe("Rule.walkOnLogs()", () => {
 
       const rule = new Rule(config.rules[0], { logger: kLogger });
 
-      await rule.walkOnLogs([
+      rule.walkOnLogs([
         { values: ["one"], stream: { foo: "bar" } },
         { values: ["two"], stream: { foo: "bar" } }
       ]);
@@ -537,7 +537,7 @@ describe("Rule.walkOnLogs()", () => {
       const rule = new Rule(config.rules[0], { logger: kLogger });
       rule.init();
 
-      const createAlert = await rule.walkOnLogs([
+      const createAlert = rule.walkOnLogs([
         { values: ["one new log"], stream: { app: "foo" } }
       ]);
 
@@ -552,7 +552,7 @@ describe("Rule.walkOnLogs()", () => {
       const rule = new Rule(config.rules[0], { logger: kLogger });
       rule.init();
 
-      const createAlert = await rule.walkOnLogs([
+      const createAlert = rule.walkOnLogs([
         { values: ["one new log"], stream: { app: "foo" } }
       ]);
 
@@ -564,7 +564,7 @@ describe("Rule.walkOnLogs()", () => {
       const rule = new Rule(config.rules[0], { logger: kLogger });
       rule.init();
 
-      const createAlert = await rule.walkOnLogs([
+      const createAlert = rule.walkOnLogs([
         { values: ["one new log"], stream: { app: "bar" } }
       ]);
 
@@ -579,7 +579,7 @@ describe("Rule.walkOnLogs()", () => {
       const rule = new Rule(config.rules[0], { logger: kLogger });
       rule.init();
 
-      const createAlert = await rule.walkOnLogs([
+      const createAlert = rule.walkOnLogs([
         { values: ["one new log"], stream: { app: "bar" } }
       ]);
 
@@ -594,7 +594,7 @@ describe("Rule.walkOnLogs()", () => {
 
       // APP FOO
       {
-        const createAlert = await rule.walkOnLogs([
+        const createAlert = rule.walkOnLogs([
           { values: ["one new log"], stream: { app: "foo" } }
         ]);
 
@@ -605,7 +605,7 @@ describe("Rule.walkOnLogs()", () => {
 
       // APP BAR
       {
-        const createAlert = await rule.walkOnLogs([
+        const createAlert = rule.walkOnLogs([
           { values: ["one new log"], stream: { app: "bar" } }
         ]);
 
