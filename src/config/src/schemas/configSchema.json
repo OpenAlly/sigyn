@@ -266,7 +266,11 @@
             "additionalProperties": false
           },
           "muteRules": {
-            "title": "Weither matched rules should stop trigger alert when a higher-lever composite rule triggers",
+            "title": "Whether matched rules should stop trigger alert when a higher-lever composite rule triggers",
+            "type": "boolean"
+          },
+          "muteUntriggered": {
+            "title": "Whether to mute rules that haven't triggered any alerts. Default `true`",
             "type": "boolean"
           },
           "muteDuration": {

@@ -702,6 +702,45 @@ describe("Composite rules validations", () => {
     });
   });
 
+  it("compositeRules property 'muteUntriggered' should be optional", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            muteUntriggered: undefined
+          }
+        ]
+      });
+    });
+  });
+
+  it("compositeRules property 'muteUntriggered' must be boolean", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            muteUntriggered: "yes" as any
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/muteUntriggered: must be boolean"
+    });
+  });
+
   it("compositeRules property 'muteDuration' should be optional", () => {
     assert.doesNotThrow(() => {
       validateConfig({

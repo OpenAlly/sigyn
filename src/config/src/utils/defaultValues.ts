@@ -75,6 +75,7 @@ export function applyDefaultValues(
       }
 
       rule.muteRules ??= false;
+      rule.muteUntriggered ??= true;
       rule.muteDuration ??= kMuteCompositeRulesDefaultDuration;
 
       return rule as SigynInitializedCompositeRule;

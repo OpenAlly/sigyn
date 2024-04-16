@@ -68,13 +68,18 @@ export function handleCompositeRules(logger: Logger) {
       `SELECT id FROM rules WHERE name IN (${compositeRule.rules.map(() => "?").join(",")})`
     ).all(compositeRule.rules) as { id: number }[];
     const ruleIds = ruleIdsObj.map(({ id }) => id);
+    const subtractedInterval = utils.cron.durationOrCronToDate(compositeRule.interval, "subtract").valueOf();
     const { count } = getDB()
       // eslint-disable-next-line max-len
       .prepare(`SELECT COUNT(id) as count FROM alerts WHERE processed = 0 AND createdAt >= ? AND ruleId IN (${ruleIds.map(() => "?").join(",")})`)
       .get(
-        utils.cron.durationOrCronToDate(compositeRule.interval, "subtract").valueOf(),
+        subtractedInterval,
         ...ruleIds
       ) as { count: number };
+    const processedRulesIdsObj = getDB()
+      .prepare(`SELECT ruleId FROM alerts WHERE createdAt >= ? AND ruleId IN (${ruleIds.map(() => "?").join(",")})`)
+      .all(subtractedInterval, ...ruleIds) as { ruleId: number }[];
+    const processedRulesIds = [...new Set(processedRulesIdsObj.flatMap(({ ruleId }) => ruleIds.filter((id) => id === ruleId)))];
 
     if (count < compositeRule.notifCount) {
       logger.info(`[${compositeRule.name}](alertsCount:${count}|notifCount:${compositeRule.notifCount})`);
@@ -130,12 +135,14 @@ export function handleCompositeRules(logger: Logger) {
       return;
     }
 
+    const processedRulesIdsPlaceholder = processedRulesIds.map(() => "?").join(",");
+    const placeholder = compositeRule.muteUntriggered ? ruleIdsPlaceholder : processedRulesIdsPlaceholder;
     const muteUntilTimestamp = utils.cron.durationOrCronToDate(compositeRule.muteDuration, "add").valueOf();
     getDB()
-      .prepare(`UPDATE rules SET muteUntil = ? WHERE id IN (${ruleIdsPlaceholder})`)
+      .prepare(`UPDATE rules SET muteUntil = ? WHERE id IN (${placeholder})`)
       .run(
         muteUntilTimestamp,
-        ...ruleIds
+        ...(compositeRule.muteUntriggered ? ruleIds : processedRulesIds)
       );
   }
 }
