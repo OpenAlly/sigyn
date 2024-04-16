@@ -7,6 +7,7 @@ import { minimatch } from "minimatch";
 // Import Internal Dependencies
 import { SigynConfig, SigynCompositeRule, SigynInitializedCompositeRule } from "../types";
 import { extendsTemplates } from "./templates";
+import { ruleSeverity } from "./defaultValues";
 
 // CONSTANTS
 const kDefaultCompositeRuleInterval = "1d";
@@ -20,13 +21,17 @@ export function initialize(config: SigynConfig): SigynInitializedCompositeRule[]
   const compositeRules: SigynInitializedCompositeRule[] = [];
 
   for (const compositeRule of config.compositeRules) {
-    const excludeRules = (compositeRule.exclude ?? []).flatMap(
+    const excludeRules = (compositeRule?.filters?.exclude ?? []).flatMap(
       (ruleToExclude) => ruleNames.filter((ruleName) => minimatch(ruleName, ruleToExclude))
     );
-    const includeRules = compositeRule.include?.flatMap(
+    const includeRules = compositeRule?.filters?.include?.flatMap(
       (ruleToInclude) => ruleNames.filter((ruleName) => minimatch(ruleName, ruleToInclude))
     ) ?? ruleNames;
-    const rules = ruleNames.filter((rule) => includeRules.includes(rule) && !excludeRules.includes(rule));
+    const severities = new Set(compositeRule?.filters?.severity ?? ["critical", "error", "warning", "info"]);
+    const rules = config.rules.filter((rule) => includeRules.includes(rule.name) &&
+      !excludeRules.includes(rule.name) &&
+      severities.has(ruleSeverity(config, rule))
+    ).map((rule) => rule.name);
 
     compositeRules.push({
       ...compositeRule,

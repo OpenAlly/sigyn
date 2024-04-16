@@ -22,6 +22,10 @@ const kUntriggeredCompositeRulesConfigLocation = path.join(
   __dirname,
   "/fixtures/composite-rules-no-mute-untriggered/sigyn.config.json"
 );
+const kSeverityFilterCompositeRulesConfigLocation = path.join(
+  __dirname,
+  "/fixtures/composite-rules-sev-filters/sigyn.config.json"
+);
 const kLogger = new MockLogger();
 const kMockAgent = new MockAgent();
 const kGlobalDispatcher = getGlobalDispatcher();
@@ -238,6 +242,73 @@ describe("Composite Rules with muteUntriggered falsy", { concurrency: 1 }, () =>
     assert.ok(ruleMuteUntilTimestamp(rules[0]) > Date.now());
     assert.ok(ruleMuteUntilTimestamp(rules[1]) > Date.now());
     assert.equal(ruleMuteUntilTimestamp(rules[2]), 0);
+  });
+});
+
+describe("Composite Rules with severity filters", { concurrency: 1 }, () => {
+  let config: SigynInitializedConfig;
+  let rules: any;
+
+  before(async() => {
+    if (!fs.existsSync(".temp")) {
+      fs.mkdirSync(".temp");
+    }
+
+    initDB(kLogger, { databaseFilename: ".temp/test.sqlite3" });
+
+    process.env.GRAFANA_API_TOKEN = "toto";
+    setGlobalDispatcher(kMockAgent);
+
+    const pool = kMockAgent.get("https://discord.com");
+    pool.intercept({
+      method: "POST",
+      path: () => true
+    }).reply(200);
+
+    initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
+
+    config = await initConfig(kSeverityFilterCompositeRulesConfigLocation);
+    rules = config.rules.map((ruleConfig) => {
+      const rule = new Rule(ruleConfig, { logger: kLogger });
+      rule.init();
+
+      return rule;
+    });
+  });
+
+  beforeEach(() => {
+    getDB().prepare("DELETE FROM alerts").run();
+  });
+
+  after(() => {
+    setGlobalDispatcher(kGlobalDispatcher);
+  });
+
+  it("should not mute rules that have not triggered alerts when muteUntrigged is false", async() => {
+    resetRuteMuteUntil(rules[0]);
+    resetRuteMuteUntil(rules[1]);
+    resetRuteMuteUntil(rules[2]);
+    resetRuteMuteUntil(rules[3]);
+
+    getDB().prepare("DELETE FROM compositeRuleAlerts").run();
+
+    assert.equal(ruleMuteUntilTimestamp(rules[0]), 0);
+    assert.equal(ruleMuteUntilTimestamp(rules[1]), 0);
+    assert.equal(ruleMuteUntilTimestamp(rules[2]), 0);
+    assert.equal(ruleMuteUntilTimestamp(rules[3]), 0);
+
+    createRuleAlert(rules[0], 5);
+    createRuleAlert(rules[1], 5);
+    createRuleAlert(rules[2], 5);
+    createRuleAlert(rules[3], 5);
+
+    handleCompositeRules(kLogger);
+    await setTimeout(kTimeout);
+
+    assert.ok(ruleMuteUntilTimestamp(rules[0]) > Date.now());
+    assert.equal(ruleMuteUntilTimestamp(rules[1]), 0);
+    assert.ok(ruleMuteUntilTimestamp(rules[2]) > Date.now());
+    assert.ok(ruleMuteUntilTimestamp(rules[3]) > Date.now());
   });
 });
 

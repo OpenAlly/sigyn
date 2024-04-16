@@ -110,7 +110,7 @@ export interface SigynAlert {
     minimumLabelCount?: number;
   },
   template: string | SigynAlertTemplate;
-  severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
+  severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "info">;
   throttle?: {
     count: number;
     interval: string;
@@ -130,7 +130,7 @@ export interface SigynInitializedAlert {
     minimumLabelCount?: number;
   },
   template: SigynInitializedTemplate;
-  severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "information">;
+  severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "info">;
   throttle?: {
     count: number;
     interval: string;
@@ -212,8 +212,11 @@ export interface SigynInitializedSelfMonitoring {
 
 export interface SigynCompositeRule {
   name: string;
-  include?: string[];
-  exclude?: string[];
+  filters?: {
+    include?: string[];
+    exclude?: string[];
+    severity?: Extract<AlertSeverity, "critical" | "error" | "warning" | "info">[];
+  }
   notifCount: number;
   ruleCountThreshold?: number;
   interval?: string;

@@ -197,7 +197,7 @@ describe("Composite rules validations", () => {
     });
   });
 
-  it("compositeRules property 'include' can be set", () => {
+  it("compositeRules property 'filters' can be set", () => {
     assert.doesNotThrow(() => {
       validateConfig({
         ...VALID_CONFIG,
@@ -208,14 +208,14 @@ describe("Composite rules validations", () => {
               title: "title"
             },
             name: "foo",
-            include: ["foo"]
+            filters: {}
           }
         ]
       });
     });
   });
 
-  it("compositeRules property 'include' must be array", () => {
+  it("compositeRules property 'filters' must be object", () => {
     assert.throws(() => {
       validateConfig({
         ...VALID_CONFIG,
@@ -226,38 +226,17 @@ describe("Composite rules validations", () => {
               title: "title"
             },
             name: "foo",
-            include: "foo" as any
+            filters: "foo" as any
           }
         ]
       });
     }, {
       name: "Error",
-      message: "Invalid config: /compositeRules/0/include: must be array"
+      message: "Invalid config: /compositeRules/0/filters: must be object"
     });
   });
 
-  it("compositeRules property 'include' items must be string", () => {
-    assert.throws(() => {
-      validateConfig({
-        ...VALID_CONFIG,
-        compositeRules: [
-          {
-            notifCount: 12,
-            template: {
-              title: "title"
-            },
-            name: "foo",
-            include: [5] as any
-          }
-        ]
-      });
-    }, {
-      name: "Error",
-      message: "Invalid config: /compositeRules/0/include/0: must be string"
-    });
-  });
-
-  it("compositeRules property 'exclude' can be set", () => {
+  it("compositeRules filters property 'include' can be set", () => {
     assert.doesNotThrow(() => {
       validateConfig({
         ...VALID_CONFIG,
@@ -268,14 +247,16 @@ describe("Composite rules validations", () => {
               title: "title"
             },
             name: "foo",
-            exclude: ["foo"]
+            filters: {
+              include: ["foo"]
+            }
           }
         ]
       });
     });
   });
 
-  it("compositeRules property 'exclude' must be array", () => {
+  it("compositeRules filters property 'include' must be array", () => {
     assert.throws(() => {
       validateConfig({
         ...VALID_CONFIG,
@@ -286,17 +267,19 @@ describe("Composite rules validations", () => {
               title: "title"
             },
             name: "foo",
-            exclude: "foo" as any
+            filters: {
+              include: "foo" as any
+            }
           }
         ]
       });
     }, {
       name: "Error",
-      message: "Invalid config: /compositeRules/0/exclude: must be array"
+      message: "Invalid config: /compositeRules/0/filters/include: must be array"
     });
   });
 
-  it("compositeRules property 'exclude' items must be string", () => {
+  it("compositeRules filters property 'include' items must be string", () => {
     assert.throws(() => {
       validateConfig({
         ...VALID_CONFIG,
@@ -307,13 +290,193 @@ describe("Composite rules validations", () => {
               title: "title"
             },
             name: "foo",
-            exclude: [5] as any
+            filters: {
+              include: [5] as any
+            }
           }
         ]
       });
     }, {
       name: "Error",
-      message: "Invalid config: /compositeRules/0/exclude/0: must be string"
+      message: "Invalid config: /compositeRules/0/filters/include/0: must be string"
+    });
+  });
+
+  it("compositeRules filters property 'exclude' can be set", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            filters: {
+              exclude: ["foo"]
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("compositeRules filters property 'exclude' must be array", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            filters: {
+              exclude: "foo" as any
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/filters/exclude: must be array"
+    });
+  });
+
+  it("compositeRules filters property 'exclude' items must be string", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            filters: {
+              exclude: [5] as any
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/filters/exclude/0: must be string"
+    });
+  });
+
+  it("compositeRules filters property 'severity' can be set", () => {
+    assert.doesNotThrow(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            filters: {
+              severity: ["critical"]
+            }
+          }
+        ]
+      });
+    });
+  });
+
+  it("compositeRules filters property 'severity' must be array", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            filters: {
+              severity: "foo" as any
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/filters/severity: must be array"
+    });
+  });
+
+  it("compositeRules filters property 'severity' items must be string", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            filters: {
+              severity: [5] as any
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/filters/severity/0: must be string"
+    });
+  });
+
+  it("compositeRules filters property 'severity' items must be valid severity", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            filters: {
+              severity: ["foo" as any]
+            }
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/filters/severity/0: must be equal to one of the allowed values"
+    });
+  });
+
+  it("compositeRules filters cannot have additional property", () => {
+    assert.throws(() => {
+      validateConfig({
+        ...VALID_CONFIG,
+        compositeRules: [
+          {
+            notifCount: 12,
+            template: {
+              title: "title"
+            },
+            name: "foo",
+            filters: {
+              foo: "bar"
+            } as any
+          }
+        ]
+      });
+    }, {
+      name: "Error",
+      message: "Invalid config: /compositeRules/0/filters: must NOT have additional properties"
     });
   });
 

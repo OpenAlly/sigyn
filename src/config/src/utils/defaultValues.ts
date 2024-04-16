@@ -4,7 +4,8 @@ import {
   SigynConfig,
   SigynInitializedConfig,
   SigynInitializedRule,
-  SigynInitializedCompositeRule
+  SigynInitializedCompositeRule,
+  SigynRule
 } from "../types";
 import { getSeverity } from "./severity";
 
@@ -15,6 +16,10 @@ const kDefaultAlertSeverity = "error";
 const kDefaultAlertThrottleCount = 0;
 const kDefaultRulePollingStrategy = "unbounded";
 const kMuteCompositeRulesDefaultDuration = "30m";
+
+export function ruleSeverity(config: SigynConfig | PartialSigynConfig, rule: SigynRule) {
+  return getSeverity(rule.alert.severity ?? config.defaultSeverity ?? kDefaultAlertSeverity);
+}
 
 export function applyDefaultValues(
   config: PartialSigynConfig | SigynConfig
@@ -34,7 +39,7 @@ export function applyDefaultValues(
     defaultSeverity: config.defaultSeverity ?? kDefaultAlertSeverity,
     rules: config.rules.map((rule) => {
       rule.polling ??= kDefaultRulePolling;
-      rule.alert.severity = getSeverity(rule.alert.severity ?? config.defaultSeverity ?? kDefaultAlertSeverity);
+      rule.alert.severity = ruleSeverity(config, rule);
       rule.alert.template.title ??= "";
       rule.alert.template.content ??= [];
       if (rule.alert.throttle) {

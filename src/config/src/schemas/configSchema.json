@@ -191,23 +191,44 @@
             "type": "string",
             "minLength": 1
           },
-          "include": {
-            "title": "Defines the rule to be included",
-            "description": "A list of rule name, glob supported",
-            "type": "array",
-            "items": {
-              "type": "string"
+          "filters": {
+            "type"  : "object",
+            "title": "Defines the filters to apply to the rules",
+            "properties": {
+              "include": {
+                "title": "Defines the rule to be included",
+                "description": "A list of rule name, glob supported",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              },
+              "exclude": {
+                "title": "Defines the rule to be excluded",
+                "description": "A list of rule name, glob supported",
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 1
+              },
+              "severity": {
+                "type": "array",
+                "title": "Defines the severity to be included",
+                "description": "A list of severity",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "error",
+                    "warning",
+                    "information"
+                  ]
+                }
+              }
             },
-            "minItems": 1
-          },
-          "exclude": {
-            "title": "Defines the rule to be excluded",
-            "description": "A list of rule name, glob supported",
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "minItems": 1
+            "additionalProperties": false
           },
           "notifCount": {
             "title": "The count of notifications sent by the rules to trigger alert",
