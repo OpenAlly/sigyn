@@ -1,9 +1,11 @@
 // Import Third-party Dependencies
-import { ExecuteWebhookOptions, WebhookNotifier } from "@sigyn/notifiers";
+import { MorphixOptions } from "@sigyn/morphix";
+import { WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
 
 // CONSTANTS
 const kWebhookUsername = "Sigyn Agent";
 const kAvatarUrl = "https://user-images.githubusercontent.com/39910767/261796970-1c07ee01-30e4-464c-b9f9-903b93f84ff3.png";
+
 // https://gist.github.com/thomasbnt/b6f455e2c7d743b796917fa3c205f812
 const kEmbedColor = {
   critical: 15548997,
@@ -12,21 +14,35 @@ const kEmbedColor = {
   info: 16777215
 };
 
-class DiscordNotifier extends WebhookNotifier {
-  contentTemplateOptions() {
+export interface DiscordEmbed {
+  title: string;
+  description: string;
+  color: number;
+}
+
+export interface DiscordWebhookBodyFormat {
+  embeds: DiscordEmbed[];
+  username: string;
+  avatar_url?: string;
+}
+
+class DiscordNotifier extends WebhookNotifier<DiscordWebhookBodyFormat> {
+  contentTemplateOptions(): MorphixOptions {
     return {
       transform: ({ key, value }) => (key === "lokiUrl" ? value : `**${value === undefined ? "unknown" : value}**`),
       ignoreMissing: true
     };
   }
 
-  async formatWebhook(): Promise<any> {
+  async formatWebhookBody(): Promise<DiscordWebhookBodyFormat> {
     if (this.data.ruleConfig?.logql) {
       this.data.ruleConfig.logql = this.#formatLogQL(this.data.ruleConfig.logql);
     }
 
-    const title = await this.formatTitle();
-    const content = await this.formatContent();
+    const [title, content] = await Promise.all([
+      this.formatTitle(),
+      this.formatContent()
+    ]);
 
     return {
       embeds: [{
@@ -44,8 +60,13 @@ class DiscordNotifier extends WebhookNotifier {
   }
 }
 
-export function execute(options: ExecuteWebhookOptions) {
+export async function execute(
+  options: WebhookNotifierOptions
+) {
   const notifier = new DiscordNotifier(options);
+  const body = await notifier.formatWebhookBody();
 
-  return notifier.execute();
+  return notifier.execute(
+    body
+  );
 }

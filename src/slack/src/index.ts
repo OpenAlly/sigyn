@@ -1,5 +1,7 @@
 // Import Third-party Dependencies
-import { ExecuteWebhookOptions, WebhookNotifier } from "@sigyn/notifiers";
+import { MorphixOptions } from "@sigyn/morphix";
+import { WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
+import { MessageAttachment } from "@slack/types";
 
 // CONSTANTS
 const kAttachmentColor = {
@@ -9,21 +11,19 @@ const kAttachmentColor = {
   info: "#E7E7E7"
 };
 
-class SlackNotifier extends WebhookNotifier {
-  contentTemplateOptions() {
-    return {
-      transform: ({ value, key }) => {
-        if (key === "logql" || key === "lokiUrl") {
-          return value;
-        }
+export interface SlackWebhookBodyFormat {
+  attachments?: MessageAttachment[];
+}
 
-        return `*${value ?? "unknown"}*`;
-      },
+class SlackNotifier extends WebhookNotifier<SlackWebhookBodyFormat> {
+  contentTemplateOptions(): MorphixOptions {
+    return {
+      transform: ({ value, key }) => (key === "logql" || key === "lokiUrl" ? value : `*${value ?? "unknown"}*`),
       ignoreMissing: true
     };
   }
 
-  async formatWebhook(): Promise<any> {
+  async formatWebhookBody(): Promise<SlackWebhookBodyFormat> {
     if (this.data.ruleConfig?.logql) {
       this.data.ruleConfig.logql = this.#formatLogQL(this.data.ruleConfig.logql);
     }
@@ -40,8 +40,10 @@ class SlackNotifier extends WebhookNotifier {
       return formattedText;
     });
 
-    const title = await this.formatTitle();
-    const content = await this.formatContent();
+    const [title, content] = await Promise.all([
+      this.formatTitle(),
+      this.formatContent()
+    ]);
 
     return {
       attachments: [
@@ -51,6 +53,7 @@ class SlackNotifier extends WebhookNotifier {
           title,
           fields: [
             {
+              title,
               value: content.join("\n").replaceAll(/>(?!\s|$)/g, "›"),
               short: false
             }
@@ -65,8 +68,13 @@ class SlackNotifier extends WebhookNotifier {
   }
 }
 
-export function execute(options: ExecuteWebhookOptions) {
+export async function execute(
+  options: WebhookNotifierOptions
+) {
   const notifier = new SlackNotifier(options);
+  const body = await notifier.formatWebhookBody();
 
-  return notifier.execute();
+  return notifier.execute(
+    body
+  );
 }

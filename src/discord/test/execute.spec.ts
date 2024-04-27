@@ -37,7 +37,9 @@ describe("executeWebhook()", () => {
       data: {
         counter: 10,
         severity: "error",
-        label: { foo: "bar" }
+        label: { foo: "bar" },
+        labelCount: 0,
+        labelMatchCount: 0
       },
       template: { title: "foo", content: [] }
     });
@@ -56,7 +58,9 @@ describe("executeWebhook()", () => {
       data: {
         counter: 10,
         severity: "error",
-        label: { foo: "bar" }
+        label: { foo: "bar" },
+        labelCount: 0,
+        labelMatchCount: 0
       },
       template: { title: "foo", content: [] }
     }), {
