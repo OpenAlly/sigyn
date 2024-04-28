@@ -8,6 +8,7 @@ on:
     paths:
       - "package-lock.json"
       - "src/agent/**"
+      - ".github/workflows/agent.yml"
       - "!src/agent/**/*.md"
 
 permissions:
@@ -33,7 +34,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - uses: Wandalen/wretry.action@0dd1d5d77d019a6f85beb53d29e2ea2c7294d4f2 # v3.4.0
         with:
-          command: npm run test --workspace=src/agent
+          command: npm ci && npm run build && npm run test --workspace=src/agent
           attempt_limit: 3
       - name: Install dependencies
         run: npm ci
