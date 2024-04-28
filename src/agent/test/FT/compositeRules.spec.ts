@@ -37,9 +37,7 @@ describe("Composite Rules", { concurrency: 1 }, () => {
   let rules: any;
 
   before(async() => {
-    if (!fs.existsSync(".temp")) {
-      fs.mkdirSync(".temp");
-    }
+    fs.mkdirSync(".temp", { recursive: true });
 
     initDB(kLogger, { databaseFilename: ".temp/test.sqlite3" });
 
@@ -186,9 +184,7 @@ describe("Composite Rules with muteUntriggered falsy", { concurrency: 1 }, () =>
   let rules: any;
 
   before(async() => {
-    if (!fs.existsSync(".temp")) {
-      fs.mkdirSync(".temp");
-    }
+    fs.mkdirSync(".temp", { recursive: true });
 
     initDB(kLogger, { databaseFilename: ".temp/test.sqlite3" });
 
@@ -250,9 +246,7 @@ describe("Composite Rules with severity filters", { concurrency: 1 }, () => {
   let rules: any;
 
   before(async() => {
-    if (!fs.existsSync(".temp")) {
-      fs.mkdirSync(".temp");
-    }
+    fs.mkdirSync(".temp", { recursive: true });
 
     initDB(kLogger, { databaseFilename: ".temp/test.sqlite3" });
 
