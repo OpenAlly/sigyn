@@ -8,6 +8,7 @@ on:
     paths:
       - "package-lock.json"
       - "src/agent/**"
+      - ".github/workflows/agent.yml"
       - "!src/agent/**/*.md"
 
 permissions:
