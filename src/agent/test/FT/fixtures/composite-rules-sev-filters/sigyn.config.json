@@ -1,0 +1,107 @@
+{
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
+  "grafana": {
+    "apiUrl": "http://localhost:3000"
+  },
+  "notifiers": {
+    "discord": {
+      "notifier": "discord",
+      "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
+    }
+  },
+  "rules": [
+    {
+      "name": "A. Critical severity",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "severity": "critical",
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "B. Information severity",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "severity": "info",
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "C. Error severity",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "severity": "error",
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "D. Critical severity",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "severity": "critical",
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}"
+          ]
+        }
+      }
+    }
+  ],
+  "compositeRules": [
+    {
+      "name": "Composite Rule Based on Severity",
+      "template": {
+        "title": "title",
+        "content": ["content"]
+      },
+      "notifCount": 6,
+      "throttle": {
+        "interval": "5m",
+        "count": 3
+      },
+      "ruleCountThreshold": 2,
+      "muteRules": true,
+      "filters": {
+        "severity": ["critical", "error"]
+      }
+    }
+  ]
+}

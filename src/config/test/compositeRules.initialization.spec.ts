@@ -12,12 +12,12 @@ import * as utils from "../src/utils";
 describe("Composite rules initialization", () => {
   describe("Given rules foo, bar & baz", () => {
     const rules = [
-      { name: "foo" },
-      { name: "bar" },
-      { name: "baz" }
+      { name: "foo", alert: { severity: "critical" } },
+      { name: "bar", alert: { severity: "error" } },
+      { name: "baz", alert: { severity: "info" } }
     ];
 
-    it("Composite rule should match foo, bar & baz when include & exclude are not supplied", () => {
+    it("Composite rule should match all rules when filters are not supplied", () => {
       const compositeRules = utils.compositeRules.initialize({
         rules,
         compositeRules: [
@@ -40,7 +40,9 @@ describe("Composite rules initialization", () => {
             name: "foo",
             notifCount: 5,
             template: { title: "foo" },
-            exclude: ["baz"]
+            filters: {
+              exclude: ["baz"]
+            }
           }
         ]
       } as any);
@@ -56,7 +58,9 @@ describe("Composite rules initialization", () => {
             name: "foo",
             notifCount: 5,
             template: { title: "foo" },
-            exclude: ["f*"]
+            filters: {
+              exclude: ["f*"]
+            }
           }
         ]
       } as any);
@@ -72,7 +76,9 @@ describe("Composite rules initialization", () => {
             name: "foo",
             notifCount: 5,
             template: { title: "foo" },
-            include: ["b*"]
+            filters: {
+              include: ["b*"]
+            }
           }
         ]
       } as any);
@@ -88,8 +94,28 @@ describe("Composite rules initialization", () => {
             name: "foo",
             notifCount: 5,
             template: { title: "foo" },
-            include: ["b*", "foo"],
-            exclude: ["foo"]
+            filters: {
+              include: ["b*", "foo"],
+              exclude: ["foo"]
+            }
+          }
+        ]
+      } as any);
+
+      assert.deepStrictEqual(compositeRules[0].rules, ["bar", "baz"]);
+    });
+
+    it("Composite rule should match bar, baz when severity is ['error', 'info']", () => {
+      const compositeRules = utils.compositeRules.initialize({
+        rules,
+        compositeRules: [
+          {
+            name: "foo",
+            notifCount: 5,
+            template: { title: "foo" },
+            filters: {
+              severity: ["error", "info"]
+            }
           }
         ]
       } as any);
@@ -106,7 +132,9 @@ describe("Composite rules initialization", () => {
               name: "foo",
               notifCount: 5,
               template: { title: "foo" },
-              exclude: ["*"]
+              filters: {
+                exclude: ["*"]
+              }
             }
           ]
         } as any);
@@ -153,7 +181,9 @@ describe("Composite rules initialization", () => {
               name: "bar",
               notifCount: 5,
               template: { title: "foo" },
-              exclude: ["foo"]
+              filters: {
+                exclude: ["foo"]
+              }
             }
           ]
         } as any);

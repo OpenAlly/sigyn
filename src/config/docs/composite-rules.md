@@ -90,23 +90,6 @@ Defines the notifiers to send alerts on.
 }
 ```
 
-### `include`
-
-A list of rule to monitor, you can use glob i.e `My Service -*`.  
-By default, the composite rule is based on each rule.
-
-| Type       | Required |
-|------------|----------|
-| `string[]` | ❌       |
-
-### `exclude`
-
-A list of rule to exclude from monitoring, you can use glob i.e `My Service -*`.  
-
-| Type       | Required |
-|------------|----------|
-| `string[]` | ❌       |
-
 ### `notifCount`
 
 The minimum alert to have been sent from each rules to triggers the composite rule.
@@ -166,3 +149,32 @@ Defines the duration for which rules should be muted when `muteRules` is `true`.
 | Type     | Required | Default |
 |----------|----------|---------|
 | `string` | ❌       | `30m`   |
+
+### Filterings rules
+
+The `filters` object allows to filter rules to be included in the composite rule.
+
+### `include`
+
+A list of rule to monitor, you can use glob i.e `My Service -*`.  
+By default, the composite rule is based on each rule.
+
+| Type       | Required |
+|------------|----------|
+| `string[]` | ❌       |
+
+### `exclude`
+
+A list of rule to exclude from monitoring, you can use glob i.e `My Service -*`.  
+
+| Type       | Required |
+|------------|----------|
+| `string[]` | ❌       |
+
+### `severity`
+
+A list of severity to include in the composite rule. Valid values are `information`, `warning`, `error`, `critical`.  
+
+| Type       | Required |
+|------------|----------|
+| `string[]` | ❌       |

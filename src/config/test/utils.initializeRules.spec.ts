@@ -39,7 +39,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             title: "title"
           }
@@ -56,7 +56,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             title: "title"
           }
@@ -73,7 +73,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             title: "title"
           }
@@ -89,7 +89,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             title: "title"
           }
@@ -106,7 +106,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             title: "title"
           }
@@ -123,7 +123,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             title: "title"
           }
@@ -140,7 +140,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             title: "title"
           }
@@ -157,7 +157,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             title: "title"
           }
@@ -183,7 +183,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             extends: "foo",
             content: ["bar"]
@@ -200,7 +200,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             content: [
               "foo",
@@ -236,7 +236,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             extends: "foo",
             content: ["bar"]
@@ -253,7 +253,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             content: [
               "foo",
@@ -290,7 +290,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             extends: "foo",
             content: {
@@ -309,7 +309,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             content: [
               "foo",
@@ -346,7 +346,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             extends: "foo",
             content: {
@@ -365,7 +365,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             content: [
               "bar",
@@ -402,7 +402,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             extends: "foo",
             content: {
@@ -422,7 +422,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             content: [
               "bar",
@@ -460,7 +460,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             extends: "foo",
             title: "bar"
@@ -477,7 +477,7 @@ describe("utils.initializeRules()", () => {
             count: 5,
             interval: "1h"
           },
-          severity: "information",
+          severity: "info",
           template: {
             content: [],
             title: "bar"
