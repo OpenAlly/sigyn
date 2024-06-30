@@ -8,6 +8,22 @@ import { StreamSelector } from "../src/streamSelector";
 import { LineFilters } from "../src/lineFilters";
 
 describe("LogQL", () => {
+  describe("static type", () => {
+    it("should return 'metric' given a metric query", () => {
+      assert.strictEqual(
+        LogQL.type("count_over_time({ label = `value` } [5m])"),
+        "metric"
+      );
+    });
+
+    it("should return 'query' given a normal query with no aggregations etc", () => {
+      assert.strictEqual(
+        LogQL.type("{ label = `value` }"),
+        "query"
+      );
+    });
+  });
+
   describe("constructor", () => {
     it("should create a new instance of LogQL", () => {
       const logql = new LogQL();
