@@ -7,6 +7,14 @@ import { ParserExpression } from "./parserExpression";
 export { StreamSelector, LineFilters, LabelFilters, ParserExpression };
 
 export class LogQL {
+  static type(QL: string | LogQL) {
+    if (typeof QL === "string") {
+      return /^[a-zA-Z_\s]+\(/g.test(QL) ? "metric" : "query";
+    }
+
+    return QL.type;
+  }
+
   #type: "metric" | "query" = "query";
   #rawInit: string;
 
@@ -19,7 +27,7 @@ export class LogQL {
     init?: string | string[] | StreamSelector | LineFilters | LabelFilters | ParserExpression
   ) {
     if (typeof init === "string") {
-      this.#type = /^[a-zA-Z_\s]+\(/g.test(init) ? "metric" : "query";
+      this.#type = LogQL.type(init);
 
       if (this.#type === "metric") {
         this.#rawInit = init;
