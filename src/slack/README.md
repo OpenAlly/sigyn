@@ -24,27 +24,34 @@
   </a>
 </p>
 
-## 🚧 Requirements
-
-- [Node.js](https://nodejs.org/en/) version 18 or higher
-
-## 🚀 Getting Started
-
-This package is available in the Node Package Repository and can be easily installed with [npm](https://doc.npmjs.com/getting-started/what-is-npm) or [yarn](https://yarnpkg.com)
-
-::: code-group
-
-```sh [npm]
-npm install @sigyn/slack
+```bash
+$ npm i @sigyn/slack
+# or
+$ yarn add @sigyn/slack
 ```
-```sh [pnpm]
-pnpm install @sigyn/slack
+
+## 📚 Usage
+
+Add the Slack notifier to your Sigyn config:
+
+```json
+
+{
+  "notifiers": {
+    "@sigyn/slack": {
+      "webhookUrl": "https://hooks.slack.com/services/aaa/bbb"
+    },
+    ...
+  },
+  "rules": [
+    ...
+  ]
+}
 ```
-```sh [yarn]
-yarn add @sigyn/slack
-```
-:::
-## Please see the [documentation here](https://myunisoft.github.io/sigyn/slack/installation).
+
+**Webhook URL**
+
+You can follow [this guide](https://api.slack.com/messaging/webhooks) for guidance on how to create a Slack webhook.
 
 ## License
 MIT
