@@ -24,28 +24,36 @@
   </a>
 </p>
 
-## 🚧 Requirements
-
-- [Node.js](https://nodejs.org/en/) version 18 or higher
-
-## 🚀 Getting Started
-
-This package is available in the Node Package Repository and can be easily installed with [npm](https://doc.npmjs.com/getting-started/what-is-npm) or [yarn](https://yarnpkg.com)
-
-::: code-group
-
-```sh [npm]
-npm install @sigyn/teams
+```bash
+$ npm i @sigyn/teams
+# or
+$ yarn add @sigyn/teams
 ```
-```sh [pnpm]
-pnpm install @sigyn/teams
-```
-```sh [yarn]
-yarn add @sigyn/teams
-```
-:::
 
-## Please see the [documentation here](https://myunisoft.github.io/sigyn/teams/installation).
+## 📚 Usage
+
+Add the Teams notifier to your Sigyn config:
+
+```json
+
+{
+  "notifiers": {
+    "@sigyn/teams": {
+      "webhookUrl": "https://biz.webhook.office.com/webhook2/xxx/yyy"
+    },
+    ...
+  },
+  "rules": [
+    ...
+  ]
+}
+```
+
+> [!IMPORTANT]
+> Unlike other notifiers, **Teams** require both a `title` and a `content` otherwise it will fail with a 400.
+**Webhook URL**
+
+You can follow [this guide](https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=dotnet#create-incoming-webhooks-1s) for guidance on how to create a Teams webhook.
 
 ## License
 MIT
