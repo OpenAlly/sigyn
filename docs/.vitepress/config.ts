@@ -60,10 +60,6 @@ export default defineConfig({
                 link: "/config/self-monitoring"
               },
               {
-                text: "Templates",
-                link: "/config/templates"
-              },
-              {
                 text: "Throttle",
                 link: "/config/throttle"
               },
