@@ -4,14 +4,28 @@
 import { capitalize, dnsresolve } from "./functions";
 
 // CONSTANTS
-const kFunctions = {
+const kDefaultFunctions: Record<string, MorphixFunction> = {
   capitalize,
   dnsresolve
 };
 
+export type MorphixFunction = (value: string) => Promise<string> | string;
+
 export interface MorphixOptions {
+  /**
+   * Performs arbitrary operations for each interpolation.
+   * If the returned value is undefined, the behavior depends on the ignoreMissing option.
+   * Otherwise, the returned value is converted to a string and embedded into the template.
+   */
   transform?: (data: { value: unknown; key: string }) => unknown;
+  /**
+   * By default, Morphix throws a MissingValueError when a placeholder resolves to undefined.
+   * If this option is set to true, it simply ignores the unresolved placeholder and leaves it as is.
+   *
+   * @default false
+   */
   ignoreMissing?: boolean;
+  customFunctions?: Record<string, MorphixFunction>;
 }
 
 export class MissingValueError extends Error {
@@ -31,8 +45,10 @@ export async function morphix(
 ) {
   const {
     transform = ({ value }) => value,
-    ignoreMissing = false
+    ignoreMissing = false,
+    customFunctions = {}
   } = options;
+  const functions = { ...customFunctions, ...kDefaultFunctions };
 
   if (typeof template !== "string") {
     throw new TypeError(`Expected a \`string\` in the first argument, got \`${typeof template}\``);
@@ -62,7 +78,7 @@ export async function morphix(
       return String(transformedValue);
     }
 
-    return await kFunctions[func](String(transformedValue));
+    return await functions[func](String(transformedValue));
   };
 
   const braceFnRegex = /{\s{0,1}([a-z0-9-.]*)\s{0,1}(?:\|\s{0,1}((?:(?!{)[a-z0-9-]*)*?)\s{0,1})?}/gi;

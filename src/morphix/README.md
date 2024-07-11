@@ -42,8 +42,9 @@ import { morphix } from "@sigyn/morphix";
 await morphix("Hello {name | capitalize}", { name: "john" });
 ```
 
-> [!NOTE]
-> `morphix()` is async because it supports async **functions**
+> [!IMPORTANT]
+> `morphix()` is asynchrone because it supports async **functions**
+
 ## 🌐 API
 
 ### `morphix`
@@ -68,22 +69,31 @@ Data to interpolate into template.
 
 The keys should be a valid JS identifier or number (a-z, A-Z, 0-9).
 
-**options**
-Type: `object`
+#### Options
 
-**ignoreMissing**
-Type: `boolean`
-Default: `false`
+```ts
+type MorphixFunction = (value: string) => Promise<string> | string;
 
-By default, Morphix throws a MissingValueError when a placeholder resolves to undefined. With this option set to true, it simply ignores it and leaves the placeholder as is.
+export interface MorphixOptions {
+  /**
+   * Performs arbitrary operations for each interpolation.
+   * If the returned value is undefined, the behavior depends on the ignoreMissing option.
+   * Otherwise, the returned value is converted to a string and embedded into the template.
+   */
+  transform?: (data: { value: unknown; key: string }) => unknown;
+  /**
+   * By default, Morphix throws a MissingValueError when a placeholder resolves to undefined.
+   * If this option is set to true, it simply ignores the unresolved placeholder and leaves it as is.
+   *
+   * @default false
+   */
+  ignoreMissing?: boolean;
+  customFunctions?: Record<string, MorphixFunction>;
+}
+```
 
-**transform**
-Type: `(data: { value: unknown; key: string }) => unknown` (default: `({value}) => value)`)
-
-Performs arbitrary operation for each interpolation. If the returned value was undefined, it behaves differently depending on the ignoreMissing option. Otherwise, the returned value will be interpolated into a string and embedded into the template.
-
-**MissingValueError**
-Exposed for instance checking.
+> [!NOTE]
+> MissingValueError is exported, which is useful for instance and type checking.
 
 ## 📦 Functions
 
@@ -97,20 +107,31 @@ Retrieve host of a given IP. It uses `dns.reverse`.
 
 If it fails to retrieve the host, it returns the ip instead.
 
-## 🖋️ Interfaces
+### Adding custom functions
+
+Morphix lets you inject your own custom functions.
 
 ```ts
-interface MorphixOptions {
-    transform?: (data: {
-        value: unknown;
-        key: string;
-    }) => unknown;
-    ignoreMissing?: boolean;
-}
+import { morphix } from "@sigyn/morphix";
+import assert from "node:assert";
+
+const transformedData = await morphix(
+  "{ data | lower }",
+  { data: "HELLO WORLD" },
+  {
+    customFunctions: {
+      lower: (value) => value.toLowerCase()
+    }
+  }
+);
+assert.strictEqual(
+  transformedData,
+  "hello world"
+);
 ```
 
 ## Credits
-This package is heavily inspired by [pupa](https://github.com/sindresorhus/pupa). Morphix is a fork with function support and doesn't support HTML escape.
+This package is heavily inspired by [pupa](https://github.com/sindresorhus/pupa). Morphix is a fork that includes function support and does not support HTML escape.
 
 ## License
 MIT
