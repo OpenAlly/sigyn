@@ -23,6 +23,7 @@
     <img src="https://img.shields.io/github/license/MyUnisoft/sigyn?style=for-the-badge" alt="license">
   </a>
 </p>
+
 ## 🚧 Requirements
 
 - [Node.js](https://nodejs.org/en/) version 18 or higher

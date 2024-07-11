@@ -67,6 +67,7 @@ new Pattern([
 
 > [!TIP]
 > Use `as const` to benefit from type inference
+
 ## 🌐 API
 
 - [Pattern](./docs/Pattern.md)
