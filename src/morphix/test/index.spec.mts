@@ -6,7 +6,7 @@ import { describe, it } from "node:test";
 import esmock from "esmock";
 
 // Import Internal Dependencies
-import { morphix } from "../dist/index.mjs";
+import { morphix, type MorphixFunction } from "../dist/index.mjs";
 
 describe("Morphix", () => {
   it("main", async() => {
@@ -99,5 +99,23 @@ describe("Morphix", () => {
       }
     });
     assert.equal(await morphix("host: {foo | dnsresolve}", { foo: "8.8.8.8" }), "host: 8.8.8.8");
+  });
+
+  describe("customFunctions", () => {
+    it("should use a new custom 'replace' function", async() => {
+      const customFunctions: Record<string, MorphixFunction> = {
+        replace: (value) => value.replaceAll("o", "i")
+      };
+
+      const computedStr = await morphix(
+        "{ foo | replace }",
+        { foo: "foo" },
+        { customFunctions }
+      );
+      assert.strictEqual(
+        computedStr,
+        "fii"
+      );
+    });
   });
 });
