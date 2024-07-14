@@ -78,7 +78,6 @@ describe("Self-monitoring", { concurrency: 1 }, () => {
   });
 
   it("should not send alert when error does not match ruleFilters", async() => {
-    initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
     const config = await initConfig(kRuleNotMatchFiltersConfigLocation);
     const rule = new Rule(config.rules[0], { logger: kLogger });
     rule.init();
@@ -99,7 +98,6 @@ describe("Self-monitoring", { concurrency: 1 }, () => {
   });
 
   it("should send alert as rule matches ruleFilters", async() => {
-    initDB(kLogger, { databaseFilename: ".temp/test-agent.sqlite3" });
     const config = await initConfig(kRuleMatchRuleFiltersConfigLocation);
 
     for (const ruleConfig of config.rules) {

@@ -1,15 +1,23 @@
-import { EventEmitter } from "node:events";
+import os from "node:os";
+import fs from "node:fs";
+import path from "node:path";
 
 // This is the notifier execute function that will be called by the agent
 export function execute(...fnArgs) {
   const testingNotifier = TestingNotifier.getInstance();
   testingNotifier.push(fnArgs);
-  testingNotifier.emit("notif");
 }
 
-export class TestingNotifier extends EventEmitter {
-  notifArguments = [];
+export class TestingNotifier {
   static instance;
+
+  get notifArguments() {
+    if (fs.existsSync(path.join(os.tmpdir(), "sigyn-notif-args.json"))) {
+      return JSON.parse(fs.readFileSync(path.join(os.tmpdir(), "sigyn-notif-args.json")));
+    }
+
+    return [];
+  }
 
   static getInstance() {
     TestingNotifier.instance ??= new TestingNotifier();
@@ -26,11 +34,16 @@ export class TestingNotifier extends EventEmitter {
   }
 
   push(call) {
-    this.notifArguments.push(call[0]);
+    const cache = [];
+    if (fs.existsSync(path.join(os.tmpdir(), "sigyn-notif-args.json"))) {
+      cache.push(...JSON.parse(fs.readFileSync(path.join(os.tmpdir(), "sigyn-notif-args.json"))));
+    }
+    cache.push(call[0]);
+    fs.writeFileSync(path.join(os.tmpdir(), "sigyn-notif-args.json"), JSON.stringify(cache));
   }
 
   clear() {
-    this.notifArguments = [];
+    fs.rmSync(path.join(os.tmpdir(), "sigyn-notif-args.json"), { force: true });
   }
 
   toHaveBeenCalledWith(data) {

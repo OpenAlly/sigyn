@@ -121,8 +121,8 @@ describe("Rule.getAlertFormattedRule()", () => {
     const rule = new Rule(config.rules[0], { logger: kLogger });
     rule.init();
     rule.walkOnLogs([
-      { values: ["one"], stream: { foo: "bar" } },
-      { values: ["two"], stream: { foo: "baz", foz: "boz" } }
+      { values: [[0, "one"]], labels: { foo: "bar" } },
+      { values: [[0, "two"]], labels: { foo: "baz", foz: "boz" } }
     ]);
 
     const ruleWithLabels = rule.getAlertFormattedRule();
@@ -146,9 +146,9 @@ describe("Rule.getAlertFormattedRule()", () => {
 
     const rule = new Rule(config.rules[0], { logger: kLogger });
     rule.walkOnLogs([
-      { values: ["one"], stream: { foo: "bar" } },
-      { values: ["two"], stream: { foo: "baz", foz: "boz" } },
-      { values: ["three"], stream: { foo: "baz", foz: "boz" } }
+      { values: [[0, "one"]], labels: { foo: "bar" } },
+      { values: [[0, "two"]], labels: { foo: "baz", foz: "boz" } },
+      { values: [[0, "three"]], labels: { foo: "baz", foz: "boz" } }
     ]);
 
     const ruleWithLabels = rule.getAlertFormattedRule();
@@ -166,9 +166,9 @@ describe("Rule.getAlertFormattedRule()", () => {
     rule.init();
     // rule match statusCode 4xx & 5xx so the 200 should be skipped
     rule.walkOnLogs([
-      { values: ["statusCode: 200"], stream: { statusCode: "200" } },
-      { values: ["statusCode: 400"], stream: { statusCode: "400" } },
-      { values: ["statusCode: 500"], stream: { statusCode: "500" } }
+      { values: [[0, "statusCode: 200"]], labels: { statusCode: "200" } },
+      { values: [[0, "statusCode: 400"]], labels: { statusCode: "400" } },
+      { values: [[0, "statusCode: 500"]], labels: { statusCode: "500" } }
     ]);
 
     const ruleWithLabels = rule.getAlertFormattedRule();

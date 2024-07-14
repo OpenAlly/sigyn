@@ -32,10 +32,10 @@ function getRule(rule: SigynRule): DbRule {
   return getDB().prepare("SELECT * FROM rules WHERE name = ?").get(rule.name) as DbRule;
 }
 
-async function pollingIn200ms(rule: Rule, logs: string[], stream: Record<string, string> = {}): Promise<Result<true, string>> {
+async function pollingIn200ms(rule: Rule, logs: string[], labels: Record<string, string> = {}): Promise<Result<true, string>> {
   const t0 = performance.now();
 
-  const createAlert = rule.walkOnLogs([{ values: logs, stream }]);
+  const createAlert = rule.walkOnLogs([{ values: logs.map((log) => ([0, log])), labels }]);
 
   const timeToHandleLogsInMs = Math.floor(performance.now() - t0);
 
@@ -428,8 +428,8 @@ describe("Rule.walkOnLogs()", () => {
     it("should store labels", async() => {
       const rule = new Rule(config.rules[0], { logger: kLogger });
       rule.walkOnLogs([
-        { values: ["one"], stream: { foo: "bar" } },
-        { values: ["two"], stream: { foo: "baz", foz: "boz" } }
+        { values: [[0, "one"]], labels: { foo: "bar" } },
+        { values: [[0, "two"]], labels: { foo: "baz", foz: "boz" } }
       ]);
 
       const labels = getDB().prepare("SELECT * FROM ruleLabels").all() as DbRuleLabel[];
@@ -453,8 +453,8 @@ describe("Rule.walkOnLogs()", () => {
       const rule = new Rule(config.rules[0], { logger: kLogger });
 
       rule.walkOnLogs([
-        { values: ["one"], stream: { foo: "bar" } },
-        { values: ["two"], stream: { foo: "bar" } }
+        { values: [[0, "one"]], labels: { foo: "bar" } },
+        { values: [[0, "two"]], labels: { foo: "bar" } }
       ]);
 
       const labels = getDB().prepare("SELECT * FROM ruleLabels").all() as DbRuleLabel[];
@@ -538,7 +538,7 @@ describe("Rule.walkOnLogs()", () => {
       rule.init();
 
       const createAlert = rule.walkOnLogs([
-        { values: ["one new log"], stream: { app: "foo" } }
+        { values: [[0, "one new log"]], labels: { app: "foo" } }
       ]);
 
       assert.equal(createAlert.ok, true);
@@ -553,7 +553,7 @@ describe("Rule.walkOnLogs()", () => {
       rule.init();
 
       const createAlert = rule.walkOnLogs([
-        { values: ["one new log"], stream: { app: "foo" } }
+        { values: [[0, "one new log"]], labels: { app: "foo" } }
       ]);
 
       assert.equal(createAlert.ok, false);
@@ -565,7 +565,7 @@ describe("Rule.walkOnLogs()", () => {
       rule.init();
 
       const createAlert = rule.walkOnLogs([
-        { values: ["one new log"], stream: { app: "bar" } }
+        { values: [[0, "one new log"]], labels: { app: "bar" } }
       ]);
 
       assert.equal(createAlert.ok, true);
@@ -580,7 +580,7 @@ describe("Rule.walkOnLogs()", () => {
       rule.init();
 
       const createAlert = rule.walkOnLogs([
-        { values: ["one new log"], stream: { app: "bar" } }
+        { values: [[0, "one new log"]], labels: { app: "bar" } }
       ]);
 
       assert.equal(createAlert.ok, false);
@@ -595,7 +595,7 @@ describe("Rule.walkOnLogs()", () => {
       // APP FOO
       {
         const createAlert = rule.walkOnLogs([
-          { values: ["one new log"], stream: { app: "foo" } }
+          { values: [[0, "one new log"]], labels: { app: "foo" } }
         ]);
 
         assert.equal(createAlert.ok, true);
@@ -606,7 +606,7 @@ describe("Rule.walkOnLogs()", () => {
       // APP BAR
       {
         const createAlert = rule.walkOnLogs([
-          { values: ["one new log"], stream: { app: "bar" } }
+          { values: [[0, "one new log"]], labels: { app: "bar" } }
         ]);
 
         assert.equal(createAlert.ok, true);
