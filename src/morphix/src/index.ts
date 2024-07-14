@@ -60,9 +60,17 @@ export async function morphix(
 
   const replace = async(placeholder: string, key: string, func: string | undefined) => {
     let value: string | undefined = undefined;
-    for (const property of key?.split(".")) {
-      // eslint-disable-next-line no-nested-ternary
-      value = value ? value[property] : data ? data[property] : undefined;
+    const keys = key?.split(".") ?? [];
+    for (const property of keys) {
+      if (data[property] !== void 0) {
+        value = data[property];
+      }
+      else if (value && value[property]) {
+        value = value[property];
+      }
+      else {
+        break;
+      }
     }
 
     const transformedValue = transform({ value, key });

@@ -44,6 +44,13 @@ describe("Morphix", () => {
     assert.equal(await morphix(template, {}, options), template);
   });
 
+  it("should ignore missing (nested)", async() => {
+    assert.equal(
+      await morphix("FOO {bar.foo} BAR", { foo: "!" }, { ignoreMissing: true }),
+      "FOO {bar.foo} BAR"
+    );
+  });
+
   it("throw on undefined by default", async() => {
     assert.rejects(async() => {
       await morphix("{foo}", {});
