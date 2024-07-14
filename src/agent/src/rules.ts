@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 // Import Third-party Dependencies
 import { SigynInitializedRule } from "@sigyn/config";
-import { LokiStreamResult } from "@myunisoft/loki";
+import { LokiCombined } from "@myunisoft/loki";
 import dayjs from "dayjs";
 import ms from "ms";
 import cronParser from "cron-parser";
@@ -98,7 +98,7 @@ export class Rule {
     }
   }
 
-  walkOnLogs(logs: LokiStreamResult<string>[]): Result<true, string> {
+  walkOnLogs(logs: LokiCombined<string>[]): Result<true, string> {
     this.#lastFetchedStream = null;
     this.#now = dayjs().valueOf();
 
@@ -163,7 +163,7 @@ export class Rule {
     return Ok(true);
   }
 
-  #insertLogsInDB(logs: LokiStreamResult<string>[]): void {
+  #insertLogsInDB(logs: LokiCombined<string>[]): void {
     const rule = this.getRuleFromDatabase();
     const ruleLabels = this.getDistinctLabelsFromDatabase(rule.id);
     const existingLabels = new Set();
@@ -175,7 +175,7 @@ export class Rule {
     const ruleLogInsertStmt = db.prepare("INSERT INTO ruleLogs (ruleId, log, timestamp) VALUES (?, ?, ?)");
 
     db.transaction(() => {
-      for (const { stream, values } of logs) {
+      for (const { labels: stream, values } of logs) {
         if (this.#lastFetchedStream === null) {
           this.#lastFetchedStream = stream;
         }
@@ -199,7 +199,7 @@ export class Rule {
           }
         }
 
-        for (const log of values) {
+        for (const [log] of values) {
           ruleLogInsertStmt.run(rule.id, log, this.#now);
         }
       }

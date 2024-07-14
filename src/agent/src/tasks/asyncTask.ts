@@ -32,7 +32,7 @@ export function asyncTask(ruleConfig: SigynInitializedRule, options: AsyncTaskOp
 
     const t0 = performance.now();
     try {
-      const { logs } = await lokiApi.Loki.queryRangeStream<string>(ruleConfig.logql, {
+      const { streams: logs } = await lokiApi.Loki.queryRangeStream<string>(ruleConfig.logql, {
         start
       });
       const logsCount = logs.reduce((acc, curr) => acc + curr.values.length, 0);

@@ -2,7 +2,7 @@
 import { before, describe, it } from "node:test";
 import assert from "node:assert";
 import path from "node:path";
-import { once } from "node:events";
+import { setTimeout } from "node:timers/promises";
 
 // Import Internal Dependencies
 import { TestingNotifier } from "../FT/mocks/sigyn-test-notifier";
@@ -16,6 +16,7 @@ const kTestingNotifier = TestingNotifier.getInstance();
 describe("Given a rule with 'on.count: 1'", () => {
   before(async() => {
     process.env.GRAFANA_API_TOKEN = "toto";
+    kTestingNotifier.clear();
   });
 
   it("Should send an alert when at least one log is found ", async() => {
@@ -25,10 +26,8 @@ describe("Given a rule with 'on.count: 1'", () => {
     await fetchLoggingEndpoint();
 
     const scheduler = await start(kConfigLocation);
+    await setTimeout(10_000);
     try {
-      const signal = AbortSignal.timeout(20_000);
-      await once(kTestingNotifier, "notif", { signal });
-
       assert.equal(kTestingNotifier.notifCount, 1);
       assert.ok(kTestingNotifier.toHaveBeenCalledWith({
         counter: 1,

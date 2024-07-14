@@ -41,23 +41,23 @@
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@myunisoft/httpie": "^4.0.1",
-    "@myunisoft/loki": "^3.0.1",
-    "@openally/result": "^1.2.0",
-    "better-sqlite3": "^11.0.0",
+    "@myunisoft/httpie": "^5.0.0",
+    "@myunisoft/loki": "^5.0.0",
+    "@openally/result": "^1.2.1",
+    "better-sqlite3": "^11.1.2",
     "cron-parser": "^4.9.0",
-    "croner": "^8.0.0",
-    "dayjs": "^1.11.10",
-    "dotenv": "^16.4.3",
+    "croner": "^8.1.0",
+    "dayjs": "^1.11.11",
+    "dotenv": "^16.4.5",
     "ms": "^2.1.3",
-    "pino": "^9.1.0",
+    "pino": "^9.2.0",
     "toad-scheduler": "^3.0.1"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.9",
+    "@types/better-sqlite3": "^7.6.11",
     "is-ci": "^3.0.1",
     "mockdate": "^3.0.5",
-    "pino-pretty": "^11.0.0",
-    "testcontainers": "^10.8.1"
+    "pino-pretty": "^11.2.1",
+    "testcontainers": "^10.10.3"
   }
 }
