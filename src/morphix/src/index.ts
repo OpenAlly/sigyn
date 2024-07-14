@@ -64,13 +64,13 @@ export async function morphix(
     for (const property of keys) {
       if (data[property] !== void 0) {
         value = data[property];
-        continue;
       }
       else if (value && value[property]) {
         value = value[property];
-        continue;
       }
-      break;
+      else {
+        break;
+      }
     }
 
     const transformedValue = transform({ value, key });
