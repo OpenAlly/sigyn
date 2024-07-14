@@ -1,6 +1,6 @@
 {
   "name": "@sigyn/morphix",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Micro templating with function pipes support",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
