@@ -26,7 +26,7 @@ export class Datasource {
 
     const datasources = await this.datasource.fetchDatasources();
     const lokiDatasources = datasources.filter((datasource) => datasource.type === "loki")!;
-    const datasource = datasources.find((datasource) => datasource.isDefault) ?? lokiDatasources.at(0)!;
+    const datasource = lokiDatasources.find((lokiDatasource) => lokiDatasource.isDefault) ?? lokiDatasources.at(0)!;
     this.cache = datasource;
 
     return datasource;
