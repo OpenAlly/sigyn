@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 
 // Import Internal Dependencies
 import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "../../src/database";
+import { Rule } from "../../src/rules";
 
 // CONSTANTS
 const kDatabaseFilename = "test/.temp/test-db.sqlite3";
@@ -65,4 +66,27 @@ export class MockLogger {
 
 export function resetAgentFailures() {
   getDB().prepare("DELETE FROM agentFailures").run();
+}
+
+export function createRuleAlert(rule: Rule, times: number) {
+  let i = 0;
+  while (i++ < times) {
+    getDB()
+      .prepare("INSERT INTO alerts (ruleId, createdAt) VALUES (?, ?)")
+      .run(rule.getRuleFromDatabase().id, Date.now());
+  }
+}
+
+export function ruleMuteUntilTimestamp(rule: Rule): number {
+  const { muteUntil } = getDB()
+    .prepare("SELECT muteUntil FROM rules WHERE name = ?")
+    .get(rule.config.name) as { muteUntil: number };
+
+  return muteUntil;
+}
+
+export function resetRuteMuteUntil(rule: Rule): void {
+  getDB()
+    .prepare("UPDATE rules SET muteUntil = ? WHERE name = ?")
+    .run(0, rule.config.name);
 }

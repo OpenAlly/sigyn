@@ -135,3 +135,6 @@ dist
 src/**/temp
 docs/.vitepress/dist
 docs/.vitepress/cache
+
+# Ignore all local SQLite files
+*.sqlite3*

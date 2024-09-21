@@ -64,10 +64,10 @@ export function handleCompositeRules(logger: Logger) {
   }
 
   for (const compositeRule of compositeRules) {
-    const ruleIdsObj = getDB().prepare(
-      `SELECT id FROM rules WHERE name IN (${compositeRule.rules.map(() => "?").join(",")})`
-    ).all(compositeRule.rules) as { id: number }[];
-    const ruleIds = ruleIdsObj.map(({ id }) => id);
+    const rulesObj = getDB().prepare(
+      `SELECT id, name FROM rules WHERE name IN (${compositeRule.rules.map(() => "?").join(",")})`
+    ).all(compositeRule.rules) as { id: number, name: string }[];
+    const ruleIds = rulesObj.map(({ id }) => id);
     const subtractedInterval = utils.cron.durationOrCronToDate(compositeRule.interval, "subtract").valueOf();
     const { count } = getDB()
       // eslint-disable-next-line max-len
@@ -76,10 +76,11 @@ export function handleCompositeRules(logger: Logger) {
         subtractedInterval,
         ...ruleIds
       ) as { count: number };
-    const processedRulesIdsObj = getDB()
+    const processedRules = getDB()
       .prepare(`SELECT ruleId FROM alerts WHERE createdAt >= ? AND ruleId IN (${ruleIds.map(() => "?").join(",")})`)
       .all(subtractedInterval, ...ruleIds) as { ruleId: number }[];
-    const processedRulesIds = [...new Set(processedRulesIdsObj.flatMap(({ ruleId }) => ruleIds.filter((id) => id === ruleId)))];
+    const processedRulesIds = processedRules.map(({ ruleId }) => ruleId);
+    const processedRulesNames = rulesObj.filter(({ id }) => processedRulesIds.includes(id)).map(({ name }) => name);
 
     if (count < compositeRule.notifCount) {
       logger.info(`[${compositeRule.name}](alertsCount:${count}|notifCount:${compositeRule.notifCount})`);
@@ -117,7 +118,8 @@ export function handleCompositeRules(logger: Logger) {
       compositeRule.notifiers.map((notifierName) => {
         return {
           notifierConfig: notifiers[notifierName],
-          compositeRuleName: compositeRule.name
+          compositeRuleName: compositeRule.name,
+          ruleNames: processedRulesNames
         };
       })
     );
