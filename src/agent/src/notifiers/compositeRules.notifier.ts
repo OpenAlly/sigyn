@@ -9,6 +9,7 @@ const kCompositeRuleSeverity = "critical";
 
 export interface CompositeRuleAlert extends Alert {
   compositeRuleName: string;
+  ruleNames: string[];
 }
 
 export class CompositeRuleNotifier extends Notifier<CompositeRuleAlert> {
@@ -52,7 +53,7 @@ export class CompositeRuleNotifier extends Notifier<CompositeRuleAlert> {
   }
 
   #compositeRuleAlertData(alert: CompositeRuleAlert) {
-    const { compositeRuleName } = alert;
+    const { compositeRuleName, ruleNames } = alert;
 
     const compositeRule = this.config.compositeRules!.find((compositeRule) => compositeRule.name === compositeRuleName)!;
     const rulesLabels = Object.create(null);
@@ -73,7 +74,7 @@ export class CompositeRuleNotifier extends Notifier<CompositeRuleAlert> {
       severity: kCompositeRuleSeverity,
       compositeRuleName,
       label: rulesLabels,
-      rules: compositeRule.rules.join(", ")
+      rules: ruleNames.join(", ")
     };
   }
 }

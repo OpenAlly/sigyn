@@ -1,0 +1,83 @@
+{
+  "loki": {
+    "apiUrl": "http://localhost:3100"
+  },
+  "grafana": {
+    "apiUrl": "http://localhost:3000"
+  },
+  "notifiers": {
+    "../../test/FT/mocks/sigyn-test-notifier.js": {
+      "notifier": "../../test/FT/mocks/sigyn-test-notifier.js",
+      "webhookUrl": "foo"
+    }
+  },
+  "rules": [
+    {
+      "name": "Local AAA",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Local BBB",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Local CCC",
+      "logql": "{env=\"preprod\"} |= `my super logql`",
+      "polling": "200ms",
+      "alert": {
+        "on": {
+          "count": "1",
+          "interval": "1s"
+        },
+        "template": {
+          "title": "{ruleName} - Triggered {counter} times!",
+          "content": [
+            "- LogQL: {logql}"
+          ]
+        }
+      }
+    }
+  ],
+  "compositeRules": [
+    {
+      "name": "Composite Rule",
+      "template": {
+        "title": "title",
+        "content": ["content"]
+      },
+      "notifCount": 6,
+      "throttle": {
+        "interval": "5m",
+        "count": 3
+      },
+      "ruleCountThreshold": 2,
+      "muteRules": true
+    }
+  ]
+}
