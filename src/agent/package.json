@@ -46,7 +46,7 @@
     "@openally/result": "^1.2.1",
     "better-sqlite3": "^11.1.2",
     "cron-parser": "^4.9.0",
-    "croner": "^8.1.0",
+    "croner": "^9.0.0",
     "dayjs": "^1.11.11",
     "dotenv": "^16.4.5",
     "ms": "^2.1.3",
