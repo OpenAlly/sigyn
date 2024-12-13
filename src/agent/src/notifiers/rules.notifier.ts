@@ -76,13 +76,13 @@ export class RuleNotifier extends Notifier<RuleNotifierAlert> {
     const { notifierConfig, rule } = alert;
     const ruleConfig = this.config.rules.find((configRule) => configRule.name === rule.name)!;
 
-    const notifierOptions = {
-      ...notifierConfig,
-      data: await this.#notiferAlertData(alert),
-      template: ruleConfig!.alert.template
-    };
-
     try {
+      const notifierOptions = {
+        ...notifierConfig,
+        data: await this.#notiferAlertData(alert),
+        template: ruleConfig!.alert.template
+      };
+
       await this.execute(notifierOptions);
 
       this.logger.info(`[${rule.name}](notify: success|notifier: ${notifierConfig.notifier})`);
