@@ -1,4 +1,4 @@
-/* eslint-disable max-lines */
+/* eslint-disable max-lines, @stylistic/max-len */
 // Import Node.js Dependencies
 import assert from "node:assert";
 import { describe, it } from "node:test";
@@ -596,7 +596,7 @@ describe("Composite rules validations", () => {
       });
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
+
       message: "Invalid config: /compositeRules/0/interval: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
     });
   });
@@ -775,7 +775,7 @@ describe("Composite rules validations", () => {
       });
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
+
       message: "Invalid config: /compositeRules/0/throttle/interval: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
     });
   });
@@ -960,7 +960,7 @@ describe("Composite rules validations", () => {
       });
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
+
       message: "Invalid config: /compositeRules/0/muteDuration: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
     });
   });

@@ -1,20 +1,20 @@
 // Import Third-party Dependencies
-import { SigynInitializedSelfMonitoring, getConfig } from "@sigyn/config";
+import { type SigynInitializedSelfMonitoring, getConfig } from "@sigyn/config";
 import { Result, Ok, Err } from "@openally/result";
 
 // Import Internal Dependencies
-import { DbAgentFailure, getDB } from "../database";
-import * as cronUtils from "./cron";
-import { Rule } from "../rules";
-import { Logger } from "..";
-import { createAgentFailureAlert } from "../alert";
-import { AgentFailureAlert } from "../notifiers/agentFailure.notifier";
+import { type DbAgentFailure, getDB } from "../database.js";
+import * as cronUtils from "./cron.js";
+import { Rule } from "../rules.js";
+import { type Logger } from "../index.js";
+import { createAgentFailureAlert } from "../alert.js";
+import { type AgentFailureAlert } from "../notifiers/agentFailure.notifier.js";
 
 export function getAgentFailureRules(alert: AgentFailureAlert): string {
   const ruleIds = new Set(alert.failures.map(({ ruleId }) => ruleId));
   const failures = getDB()
     .prepare(`SELECT name FROM rules WHERE id IN (${[...ruleIds].map(() => "?").join(",")})`)
-    .all([...ruleIds]) as { name: string }[];
+    .all([...ruleIds]) as { name: string; }[];
 
   return failures.map(({ name }) => name).join(", ");
 }
@@ -29,10 +29,10 @@ function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throt
   const intervalDate = cronUtils.durationOrCronToDate(interval, "subtract").valueOf();
   const agentFailuresAlert = (getDB()
     .prepare("SELECT count FROM agentFailures WHERE timestamp >= ? ORDER BY count DESC")
-    .get(intervalDate) as { count: number });
+    .get(intervalDate) as { count: number; });
   const unprocessedAgentFailuresAlertFromThrottle = (getDB()
     .prepare("SELECT count FROM agentFailures WHERE timestamp <= ? AND processed = 0 ORDER BY count DESC")
-    .get(intervalDate) as { count: number });
+    .get(intervalDate) as { count: number; });
   const lastAgentFailureAlert = (getDB()
     .prepare("SELECT * FROM agentFailures ORDER BY count DESC LIMIT 1")
     .get() as DbAgentFailure);
@@ -44,7 +44,7 @@ function hasAgentFailureThrottle(throttle: SigynInitializedSelfMonitoring["throt
   const intervalExceeded = lastAgentFailureAlert.processed && lastAgentFailureAlert.timestamp > intervalDate;
 
   function logMessage(throttle: boolean, details: string) {
-    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @stylistic/max-len
     return `(throttle: ${throttle ? "on" : "off"}|details: ${details}|processed: ${lastAgentFailureAlert.processed}|lastAlertTime: ${lastAgentFailureAlert.timestamp}|activationThreshold: ${activationThreshold}|agentFailuresCount: ${agentFailuresAlertCount}|count: ${count})`;
   }
 
@@ -133,7 +133,7 @@ export function handleAgentFailure(errorMessage: string, rule: Rule, logger: Log
       db.prepare("DELETE FROM agentFailures WHERE timestamp < ?").run(intervalDate);
     }
   }
-  catch (error) {
+  catch (error: any) {
     logger.error(`[SELF MONITORING](error: ${error.message})`);
     logger.debug(error);
   }

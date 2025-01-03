@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 // Import Node.js Dependencies
 import assert from "node:assert";
 import { describe, it } from "node:test";

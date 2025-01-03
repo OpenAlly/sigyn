@@ -3,7 +3,7 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 
 // Import Internal Dependencies
-import { ParserExpression } from "../src/parserExpression";
+import { ParserExpression } from "../src/parserExpression.js";
 
 describe("ParserExpression", () => {
   describe("Parsing", () => {

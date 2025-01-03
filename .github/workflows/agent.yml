@@ -3,7 +3,7 @@ name: Sigyn Agent
 on:
   push:
     branches: [main]
-    
+
   pull_request:
     paths:
       - "package-lock.json"
@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]
       fail-fast: false
     steps:
       - name: Harden Runner

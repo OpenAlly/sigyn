@@ -10,8 +10,8 @@ type NotifierQueueAlert<T> = T & {
   _nonUniqueMatcher: (notification: T, newNotifications: T) => boolean;
   notifierConfig: {
     notifier: string;
-  }
-}
+  };
+};
 
 export class NotifierQueue<T = any> extends EventEmitter {
   /**

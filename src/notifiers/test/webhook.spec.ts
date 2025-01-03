@@ -6,7 +6,7 @@ import { describe, it, after, before, test } from "node:test";
 import { MockAgent, MockPool, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 
 // Import Internal Dependencies
-import { WebhookNotifier } from "../src/webhook";
+import { WebhookNotifier } from "../src/webhook.js";
 
 // CONSTANTS
 const kMockAgent = new MockAgent();
@@ -114,7 +114,7 @@ describe("Webhook", () => {
   });
 });
 
-class DummyWebhookNotifier extends WebhookNotifier<{ foo: string }> {
+class DummyWebhookNotifier extends WebhookNotifier<{ foo: string; }> {
   async formatWebhookBody() {
     return { foo: "bar" };
   }

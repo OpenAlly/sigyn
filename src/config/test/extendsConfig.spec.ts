@@ -2,6 +2,7 @@
 import assert from "node:assert";
 import { after, before, describe, it } from "node:test";
 import path from "node:path";
+import url from "node:url";
 
 // Import Third-party Dependencies
 import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
@@ -13,6 +14,8 @@ import { initConfig } from "../src";
 const kLokiFixtureApiUrl = "http://localhost:3100";
 const kMockAgent = new MockAgent();
 const kGlobalDispatcher = getGlobalDispatcher();
+
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 describe("Extended configs", () => {
   before(() => {

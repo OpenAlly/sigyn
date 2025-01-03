@@ -1,11 +1,11 @@
-// Import Internal Dependencies
-import { Logger } from "..";
-import { getDB } from "../database";
-import { NotifierQueue } from "./notifierQueue";
-
 // Import Third-party Dependencies
 import SQLite3 from "better-sqlite3";
-import { SigynInitializedConfig, getConfig } from "@sigyn/config";
+import { type SigynInitializedConfig, getConfig } from "@sigyn/config";
+
+// Import Internal Dependencies
+import { type Logger } from "../index.js";
+import { getDB } from "../database.js";
+import { NotifierQueue } from "./notifierQueue.js";
 
 export interface Alert {
   notifierConfig: {
@@ -59,16 +59,13 @@ export class Notifier<T extends Alert> {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected sendNotification(alert: T): void {
     throw new Error("sendNotification must be implemented");
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected nonUniqueMatcher(notification: T, newNotifications: T): boolean {
     throw new Error("nonUniqueMatcher must be implemented");
   }
-
 
   protected async execute(options: Alert["notifierConfig"]) {
     try {

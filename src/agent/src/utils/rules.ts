@@ -1,8 +1,8 @@
 // Import Third-party Dependencies
-import { SigynRule } from "@sigyn/config";
+import { type SigynRule } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { isCron } from "./cron";
+import { isCron } from "./cron.js";
 
 // CONSTANTS
 const kOnlyDigitsRegExp = /^\d+$/;

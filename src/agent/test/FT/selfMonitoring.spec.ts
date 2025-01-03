@@ -1,6 +1,7 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
 import path from "node:path";
+import url from "node:url";
 import { afterEach, before, beforeEach, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
@@ -10,13 +11,14 @@ import { AsyncTask } from "toad-scheduler";
 import isCI from "is-ci";
 
 // Import Internal Dependencies
-import { asyncTask } from "../../src/tasks/asyncTask";
-import { MockLogger, resetAgentFailures } from "./helpers";
-import { Rule } from "../../src/rules";
-import { getDB, initDB } from "../../src/database";
-import { TestingNotifier } from "./mocks/sigyn-test-notifier";
+import { asyncTask } from "../../src/tasks/asyncTask.js";
+import { MockLogger, resetAgentFailures } from "./helpers.js";
+import { Rule } from "../../src/rules.js";
+import { getDB, initDB } from "../../src/database.js";
+import { TestingNotifier } from "./mocks/sigyn-test-notifier.js";
 
 // CONSTANTS
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const kFixturePath = path.join(__dirname, "/fixtures");
 const kRuleConfigLocation = path.join(kFixturePath, "/self-monitoring/sigyn.config.json");
 const kRuleNotMatchFiltersConfigLocation = path.join(kFixturePath, "/not-match-rule-filters/sigyn.config.json");
@@ -113,7 +115,6 @@ describe("Self-monitoring", { concurrency: 1 }, () => {
 
       task.execute();
     }
-
 
     await setTimeout(kTimeout);
 
@@ -214,7 +215,6 @@ describe("Self-monitoring", { concurrency: 1 }, () => {
     await setTimeout(kTimeout);
     // first alert, no throttle (remaining: 2)
     assert.equal(kTestingNotifier.notifCount, 1);
-
 
     task.execute();
     await setTimeout(kTimeout);

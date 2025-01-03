@@ -1,7 +1,7 @@
 // Import Internal Dependencies
-import { Logger } from "..";
-import { Rule } from "../rules";
-import { Alert, Notifier } from "./notifier";
+import { type Logger } from "../index.js";
+import { Rule } from "../rules.js";
+import { type Alert, Notifier } from "./notifier.js";
 
 // CONSTANTS
 const kIdentifier = Symbol("compositeRuleNotifier");
@@ -29,11 +29,11 @@ export class CompositeRuleNotifier extends Notifier<CompositeRuleAlert> {
     return this.shared;
   }
 
-  nonUniqueMatcher(notification: CompositeRuleAlert, newNotifications: CompositeRuleAlert) {
+  override nonUniqueMatcher(notification: CompositeRuleAlert, newNotifications: CompositeRuleAlert) {
     return notification.compositeRuleName === newNotifications.compositeRuleName;
   }
 
-  async sendNotification(alert: CompositeRuleAlert) {
+  override async sendNotification(alert: CompositeRuleAlert) {
     const { notifierConfig, compositeRuleName } = alert;
     const notifierOptions = {
       ...notifierConfig,
@@ -46,7 +46,7 @@ export class CompositeRuleNotifier extends Notifier<CompositeRuleAlert> {
 
       this.logger.info(`[${compositeRuleName}](notify: success|notifier: ${notifierConfig.notifier})`);
     }
-    catch (error) {
+    catch (error: any) {
       this.logger.error(`[${compositeRuleName}](notify: error|notifier: ${notifierConfig.notifier}|message: ${error.message})`);
       this.logger.debug(error);
     }

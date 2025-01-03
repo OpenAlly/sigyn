@@ -1,13 +1,13 @@
 // Import Internal Dependencies
-import {
+import type {
   PartialSigynConfig,
   SigynConfig,
   SigynInitializedConfig,
   SigynInitializedRule,
   SigynInitializedCompositeRule,
   SigynRule
-} from "../types";
-import { getSeverity } from "./severity";
+} from "../types.js";
+import { getSeverity } from "./severity.js";
 
 // CONSTANTS
 const kDefaultMissingLabelStrategy = "ignore";
@@ -69,7 +69,7 @@ export function applyDefaultValues(
         count: config.selfMonitoring.throttle.count ?? 0
       } : undefined
     } : undefined,
-    compositeRules: config.compositeRules ? config.compositeRules.map((rule: SigynInitializedCompositeRule) => {
+    compositeRules: config.compositeRules ? (config.compositeRules as SigynInitializedCompositeRule[]).map((rule) => {
       // Note: rules are already initialized with `initializeCompositeRules()`.
       rule.notifiers ??= Object.values(config.notifiers!).map(({ notifier }) => notifier);
       rule.template.title ??= "";

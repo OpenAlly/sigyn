@@ -2,6 +2,7 @@
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
+import url from "node:url";
 import { before, beforeEach, after, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
@@ -11,12 +12,13 @@ import { SigynInitializedConfig, initConfig } from "@sigyn/config";
 import isCI from "is-ci";
 
 // Import Internal Dependencies
-import { getDB, initDB } from "../../src/database";
-import { createRuleAlert, MockLogger, resetRuteMuteUntil, ruleMuteUntilTimestamp } from "./helpers";
-import { handleCompositeRules } from "../../src/compositeRules";
-import { Rule } from "../../src/rules";
+import { getDB, initDB } from "../../src/database.js";
+import { createRuleAlert, MockLogger, resetRuteMuteUntil, ruleMuteUntilTimestamp } from "./helpers.js";
+import { handleCompositeRules } from "../../src/compositeRules.js";
+import { Rule } from "../../src/rules.js";
 
 // CONSTANTS
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const kSeverityFilterCompositeRulesConfigLocation = path.join(
   __dirname,
   "/fixtures/composite-rules-sev-filters/sigyn.config.json"

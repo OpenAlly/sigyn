@@ -1,5 +1,5 @@
 // Import Internal Dependencies
-import {
+import type {
   LokiLiteralPattern,
   LokiPatternType
 } from "./types.js";
@@ -59,7 +59,7 @@ export class Pattern<T extends LokiPatternType> implements PatternShape<T> {
   }
 }
 
-export {
+export type {
   LokiLiteralPattern,
   LokiPatternType
 };

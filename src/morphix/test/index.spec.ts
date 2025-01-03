@@ -1,12 +1,10 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
 import { describe, it } from "node:test";
-
-// Import Third-party Dependencies
-import esmock from "esmock";
+import dns from "node:dns/promises";
 
 // Import Internal Dependencies
-import { morphix, type MorphixFunction } from "../dist/index.mjs";
+import { morphix, type MorphixFunction } from "../src/index.js";
 
 describe("Morphix", () => {
   it("main", async() => {
@@ -88,22 +86,14 @@ describe("Morphix", () => {
     assert.equal(await morphix("{foo | capitalize}", { foo: "foo" }), "Foo");
   });
 
-  it("should find ip hostname", async() => {
-    const { morphix } = await esmock("../dist/index.mjs", {
-      "node:dns/promises": {
-        reverse: async() => ["dns.google"]
-      }
-    });
+  it("should find ip hostname", async(t) => {
+    t.mock.method(dns, "reverse", async() => ["dns.google"]);
     assert.equal(await morphix("host: {foo | dnsresolve}", { foo: "8.8.8.8" }), "host: dns.google");
   });
 
-  it("should not find ip hostname", async() => {
-    const { morphix } = await esmock("../dist/index.mjs", {
-      "node:dns/promises": {
-        reverse: async() => {
-          throw new Error("Not found");
-        }
-      }
+  it("should not find ip hostname", async(t) => {
+    t.mock.method(dns, "reverse", async() => {
+      throw new Error("boo");
     });
     assert.equal(await morphix("host: {foo | dnsresolve}", { foo: "8.8.8.8" }), "host: 8.8.8.8");
   });

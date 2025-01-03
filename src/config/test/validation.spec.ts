@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+
 // Import Node.js Dependencies
 import assert from "node:assert";
 import { describe, it } from "node:test";
@@ -304,7 +304,6 @@ describe("Config validation", () => {
     });
   });
 
-
   it("given a root template without title and content, it should throws", () => {
     assert.throws(() => {
       validateConfig({
@@ -315,6 +314,7 @@ describe("Config validation", () => {
       });
     }, {
       name: "Error",
+      // eslint-disable-next-line @stylistic/max-len
       message: "Invalid config: /templates/foo: must have required property 'title', /templates/foo: must have required property 'content', /templates/foo: must have required property 'extends', /templates/foo: must match a schema in anyOf"
     });
   });

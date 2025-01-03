@@ -116,7 +116,7 @@ export class StreamSelector extends Map<string, StreamSelectorValue> {
    *
    * If `labelValue` is a `string`, the default operator will be an **exactlyEqual** and must be passed as a third argument to be modified.
    */
-  set(
+  override set(
     labelKey: string,
     labelValue: LabelValue | string,
     op?: LabelMatchingOperator
@@ -133,7 +133,7 @@ export class StreamSelector extends Map<string, StreamSelectorValue> {
     return this;
   }
 
-  toString() {
+  override toString() {
     const selectorStr = [...this.entries()]
       .map(([key, { operator, value }]) => `${key}${operator}"${value}"`)
       .join(",");
