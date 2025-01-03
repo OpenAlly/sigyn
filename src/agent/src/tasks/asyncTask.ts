@@ -2,16 +2,16 @@
 import { performance } from "node:perf_hooks";
 
 // Import Third-party Dependencies
-import { SigynInitializedRule } from "@sigyn/config";
+import { type SigynInitializedRule } from "@sigyn/config";
 import { GrafanaApi } from "@myunisoft/loki";
 import { AsyncTask } from "toad-scheduler";
 import ms from "ms";
 
 // Import Internal Dependencies
-import { Rule } from "../rules";
-import { Logger } from "..";
-import { createRuleAlert } from "../alert";
-import { handleAgentFailure } from "../utils/selfMonitoring";
+import { Rule } from "../rules.js";
+import { type Logger } from "../index.js";
+import { createRuleAlert } from "../alert.js";
+import { handleAgentFailure } from "../utils/selfMonitoring.js";
 
 export interface AsyncTaskOptions {
   logger: Logger;
@@ -47,7 +47,7 @@ export function asyncTask(ruleConfig: SigynInitializedRule, options: AsyncTaskOp
         logger.debug(`[${ruleConfig.name}](debug: ${createAlertResult.val})`);
       }
     }
-    catch (error) {
+    catch (error: any) {
       logger.error(`[${ruleConfig.name}](error: ${error.message}|execTime: ${ms(performance.now() - t0)})`);
       logger.debug(error);
 

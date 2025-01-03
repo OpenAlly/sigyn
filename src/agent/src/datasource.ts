@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import { GrafanaApi, Datasource as GrafanaDatasource } from "@myunisoft/loki";
+import { GrafanaApi, type Datasource as GrafanaDatasource } from "@myunisoft/loki";
 
 export class Datasource {
   #grafanaApi: GrafanaApi;

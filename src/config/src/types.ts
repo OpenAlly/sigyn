@@ -58,7 +58,7 @@ export interface GrafanaConfig {
 
 export interface SigynRule {
   name: string;
-  logql: string | { query: string; vars?: Record<string, string | string[]> };
+  logql: string | { query: string; vars?: Record<string, string | string[]>; };
   polling: string | string[];
   pollingStrategy: "bounded" | "unbounded";
   alert: SigynAlert;
@@ -80,7 +80,7 @@ export interface SigynInitializedRule {
 
 export interface PartialSigynRule {
   name: string;
-  logql: string | { query: string; vars?: Record<string, string | string[]> };
+  logql: string | { query: string; vars?: Record<string, string | string[]>; };
   polling?: string | string[];
   pollingStrategy?: "bounded" | "unbounded";
   alert: PartialSigynAlert;
@@ -90,7 +90,7 @@ export interface PartialSigynRule {
 }
 
 export type NotifierFormattedSigynRule = Omit<SigynInitializedRule, "alert"> & {
-  alert: Omit<SigynInitializedAlert, "template">
+  alert: Omit<SigynInitializedAlert, "template">;
 };
 
 export type AlertSeverity =
@@ -108,7 +108,7 @@ export interface SigynAlert {
     valueMatch?: string;
     percentThreshold?: number;
     minimumLabelCount?: number;
-  },
+  };
   template: string | SigynAlertTemplate;
   severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "info">;
   throttle?: {
@@ -128,7 +128,7 @@ export interface SigynInitializedAlert {
     valueMatch?: string;
     percentThreshold?: number;
     minimumLabelCount?: number;
-  },
+  };
   template: SigynInitializedTemplate;
   severity: Extract<AlertSeverity, "critical" | "error" | "warning" | "info">;
   throttle?: {
@@ -148,7 +148,7 @@ export interface PartialSigynAlert {
     valueMatch?: string;
     percentThreshold?: number;
     minimumLabelCount?: number;
-  },
+  };
   template: string | SigynAlertTemplate;
   severity?: AlertSeverity;
   throttle?: {
@@ -216,7 +216,7 @@ export interface SigynCompositeRule {
     include?: string[];
     exclude?: string[];
     severity?: Extract<AlertSeverity, "critical" | "error" | "warning" | "info">[];
-  }
+  };
   notifCount: number;
   ruleCountThreshold?: number;
   interval?: string;

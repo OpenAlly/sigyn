@@ -1,18 +1,19 @@
 // Import Third-party Dependencies
-import Ajv, { ErrorObject } from "ajv/dist/2020.js";
-import ajvKeywords from "ajv-keywords";
+import { Ajv2020 as Ajv, type ErrorObject } from "ajv/dist/2020.js";
+import _ajvKeywords from "ajv-keywords";
 
 // Import Internal Dependencies
-import { ExtendedSigynConfig, PartialSigynConfig } from "./types";
-import rulesSchema from "./schemas/rules.json";
-import templateSchema from "./schemas/templates.json";
-import configSchema from "./schemas/configSchema.json";
-import extendedConfigSchema from "./schemas/extendedConfigSchema.json";
+import type { ExtendedSigynConfig, PartialSigynConfig } from "./types.js";
+import rulesSchema from "./schemas/rules.json" with { type: "json" };
+import templateSchema from "./schemas/templates.json" with { type: "json" };
+import configSchema from "./schemas/configSchema.json" with { type: "json" };
+import extendedConfigSchema from "./schemas/extendedConfigSchema.json" with { type: "json" };
 
 // CONSTANTS
 const kAjv = new Ajv();
 kAjv.addSchema(rulesSchema);
 kAjv.addSchema(templateSchema);
+const ajvKeywords = _ajvKeywords as unknown as typeof _ajvKeywords.default;
 ajvKeywords(kAjv);
 
 export function validateConfig(config: PartialSigynConfig) {

@@ -1,11 +1,11 @@
 // Import Third-party Dependencies
-import { getConfig, SigynInitializedCompositeRule } from "@sigyn/config";
+import { getConfig, type SigynInitializedCompositeRule } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { getDB } from "./database";
-import { Logger } from ".";
-import * as utils from "./utils";
-import { CompositeRuleNotifier } from "./notifiers/compositeRules.notifier";
+import { getDB } from "./database.js";
+import { type Logger } from "./index.js";
+import * as utils from "./utils/index.js";
+import { CompositeRuleNotifier } from "./notifiers/compositeRules.notifier.js";
 
 function compositeRuleHasThrottle(
   compositeRule: SigynInitializedCompositeRule,
@@ -23,15 +23,15 @@ function compositeRuleHasThrottle(
   const intervalDate = utils.cron.durationOrCronToDate(interval, "subtract").valueOf();
   const { count: compositeRuleAlertsCount } = getDB()
     .prepare("SELECT COUNT(id) as count FROM compositeRuleAlerts WHERE name = ? AND createdAt >= ?")
-    .get(compositeRule.name, intervalDate) as { count: number };
+    .get(compositeRule.name, intervalDate) as { count: number; };
 
   if (compositeRuleAlertsCount > 0) {
     const { createdAt } = getDB()
       .prepare("SELECT createdAt FROM compositeRuleAlerts WHERE name = ? AND createdAt >= ? ORDER BY createdAt DESC")
-      .get(compositeRule.name, intervalDate) as { createdAt: number };
+      .get(compositeRule.name, intervalDate) as { createdAt: number; };
 
     if (intervalDate < createdAt && alertsCount / compositeRule.notifCount < count) {
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       logger.info(`[${compositeRule.name}](throttle:on|intervalDate:${intervalDate}|olderAlertTimestamp|${createdAt}|alertsCount:${alertsCount}|notifCount:${compositeRule.notifCount}|throttleCount:${count})`);
 
       return true;
@@ -44,14 +44,15 @@ function compositeRuleHasThrottle(
     return false;
   }
   else if (compositeRuleAlertsCount <= activationThreshold) {
-    // eslint-disable-next-line max-len
+    // eslint-disable-next-line @stylistic/max-len
     logger.info(`[${compositeRule.name}](throttle:off|compositeRuleAlertsCount:${compositeRuleAlertsCount}|activationThreshold:${activationThreshold})`);
 
     return false;
   }
 
   const hasThrottle = compositeRuleAlertsCount === 1 ? false : compositeRuleAlertsCount - activationThreshold <= count;
-  // eslint-disable-next-line max-len
+
+  // eslint-disable-next-line @stylistic/max-len
   logger.info(`[${compositeRule.name}](throttle:${hasThrottle ? "on" : "off"}|compositeRuleAlertsCount:${compositeRuleAlertsCount}|activationThreshold:${activationThreshold}|thresholdCount:${count})`);
 
   return hasThrottle;
@@ -66,19 +67,19 @@ export function handleCompositeRules(logger: Logger) {
   for (const compositeRule of compositeRules) {
     const rulesObj = getDB().prepare(
       `SELECT id, name FROM rules WHERE name IN (${compositeRule.rules.map(() => "?").join(",")})`
-    ).all(compositeRule.rules) as { id: number, name: string }[];
+    ).all(compositeRule.rules) as { id: number; name: string; }[];
     const ruleIds = rulesObj.map(({ id }) => id);
     const subtractedInterval = utils.cron.durationOrCronToDate(compositeRule.interval, "subtract").valueOf();
     const { count } = getDB()
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       .prepare(`SELECT COUNT(id) as count FROM alerts WHERE processed = 0 AND createdAt >= ? AND ruleId IN (${ruleIds.map(() => "?").join(",")})`)
       .get(
         subtractedInterval,
         ...ruleIds
-      ) as { count: number };
+      ) as { count: number; };
     const processedRules = getDB()
       .prepare(`SELECT ruleId FROM alerts WHERE createdAt >= ? AND ruleId IN (${ruleIds.map(() => "?").join(",")})`)
-      .all(subtractedInterval, ...ruleIds) as { ruleId: number }[];
+      .all(subtractedInterval, ...ruleIds) as { ruleId: number; }[];
     const processedRulesIds = processedRules.map(({ ruleId }) => ruleId);
     const processedRulesNames = rulesObj.filter(({ id }) => processedRulesIds.includes(id)).map(({ name }) => name);
 
@@ -90,12 +91,12 @@ export function handleCompositeRules(logger: Logger) {
     const ruleIdsPlaceholder = ruleIds.map(() => "?").join(",");
     if (compositeRule.ruleCountThreshold) {
       const { distinctCount } = getDB()
-      // eslint-disable-next-line max-len
+        // eslint-disable-next-line @stylistic/max-len
         .prepare(`SELECT COUNT(DISTINCT ruleId) as distinctCount FROM alerts WHERE compositeProcessed = 0 AND createdAt >= ? AND ruleId IN (${ruleIdsPlaceholder})`)
         .get(
           utils.cron.durationOrCronToDate(compositeRule.interval, "subtract").valueOf(),
           ...ruleIds
-        ) as { distinctCount: number };
+        ) as { distinctCount: number; };
 
       if (distinctCount < compositeRule.ruleCountThreshold) {
         logger.info(

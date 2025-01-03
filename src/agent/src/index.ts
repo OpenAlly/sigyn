@@ -11,10 +11,10 @@ import { pino } from "pino";
 import ms from "ms";
 
 // Import Internal Dependencies
-import { initDB, cleanRulesInDb } from "./database";
-import { asyncTask } from "./tasks/asyncTask";
-import { Rule } from "./rules";
-import * as utils from "./utils/index";
+import { initDB, cleanRulesInDb } from "./database.js";
+import { asyncTask } from "./tasks/asyncTask.js";
+import { Rule } from "./rules.js";
+import * as utils from "./utils/index.js";
 
 // CONSTANTS
 const kScheduler = new ToadScheduler();

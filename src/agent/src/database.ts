@@ -1,15 +1,17 @@
 // Import Node.js Dependencies
 import path from "node:path";
 import fs from "node:fs";
+import url from "node:url";
 
 // Import Third-party Dependencies
 import SQLite3 from "better-sqlite3";
-import { SigynRule } from "@sigyn/config";
+import { type SigynRule } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { Logger } from ".";
+import { type Logger } from "./index.js";
 
 // CONSTANTS
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const kDefaultDatabaseFilename = process.env.SIGYN_DB ?? "sigyn.sqlite3";
 const kDatabaseInitPath = path.join(__dirname, "../data/init-db.sql");
 

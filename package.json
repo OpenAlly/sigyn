@@ -5,6 +5,7 @@
   "scripts": {
     "build": "npm run build --ws --if-present",
     "test": "npm run test --ws --if-present",
+    "lint": "npm run lint --ws --if-present",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs"
@@ -24,17 +25,18 @@
     "src/pattern"
   ],
   "devDependencies": {
-    "@nodesecure/eslint-config": "^1.9.0",
-    "@types/node": "^22.0.0",
-    "c8": "^10.1.2",
+    "@openally/config.eslint": "^1.1.0",
+    "@openally/config.typescript": "^1.0.3",
+    "@types/node": "^22.10.5",
+    "c8": "^10.1.3",
     "cross-env": "^7.0.3",
-    "fastify": "^5.0.0",
+    "fastify": "^5.2.0",
     "glob": "^11.0.0",
-    "pino-loki": "^2.3.0",
-    "tsup": "^8.1.0",
-    "tsx": "^4.16.2",
-    "typescript": "^5.5.3",
-    "vitepress": "^1.3.1"
+    "pino-loki": "^2.4.0",
+    "tsup": "^8.3.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitepress": "^1.5.0"
   },
   "type": "module"
 }

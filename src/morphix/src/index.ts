@@ -1,7 +1,7 @@
 /* eslint-disable func-style */
 
 // Import Internal Dependencies
-import { capitalize, dnsresolve } from "./functions";
+import { capitalize, dnsresolve } from "./functions/index.js";
 
 // CONSTANTS
 const kDefaultFunctions: Record<string, MorphixFunction> = {
@@ -17,7 +17,7 @@ export interface MorphixOptions {
    * If the returned value is undefined, the behavior depends on the ignoreMissing option.
    * Otherwise, the returned value is converted to a string and embedded into the template.
    */
-  transform?: (data: { value: unknown; key: string }) => unknown;
+  transform?: (data: { value: unknown; key: string; }) => unknown;
   /**
    * By default, Morphix throws a MissingValueError when a placeholder resolves to undefined.
    * If this option is set to true, it simply ignores the unresolved placeholder and leaves it as is.
@@ -59,7 +59,7 @@ export async function morphix(
   }
 
   const replace = async(placeholder: string, key: string, func: string | undefined) => {
-    let value: string | undefined = undefined;
+    let value: string | undefined;
     const keys = key?.split(".") ?? [];
     for (const property of keys) {
       if (data[property] !== void 0) {

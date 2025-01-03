@@ -3,9 +3,9 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 
 // Import Internal Dependencies
-import { LogQL } from "../src/index";
-import { StreamSelector } from "../src/streamSelector";
-import { LineFilters } from "../src/lineFilters";
+import { LogQL } from "../src/index.js";
+import { StreamSelector } from "../src/streamSelector.js";
+import { LineFilters } from "../src/lineFilters.js";
 
 describe("LogQL", () => {
   describe("static type", () => {

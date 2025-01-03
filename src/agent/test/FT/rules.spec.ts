@@ -1,6 +1,7 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
 import path from "node:path";
+import url from "node:url";
 import { before, describe, it } from "node:test";
 
 // Import Third-party Dependencies
@@ -9,11 +10,12 @@ import MockDate from "mockdate";
 import { SigynInitializedConfig, initConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { getDB, initDB } from "../../src/database";
-import { MockLogger } from "./helpers";
-import { Rule } from "../../src/rules";
+import { getDB, initDB } from "../../src/database.js";
+import { MockLogger } from "./helpers.js";
+import { Rule } from "../../src/rules.js";
 
 // CONSTANTS
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const kMultiPollingConfigLocation = path.join(__dirname, "/fixtures/multi-polling/sigyn.config.json");
 const kLabelValueMatchConfigLocation = path.join(__dirname, "/fixtures/label-value-match/sigyn.config.json");
 const kLogger = new MockLogger();

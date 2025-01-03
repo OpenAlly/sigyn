@@ -94,7 +94,7 @@ export class LineFilters extends Map<LineFilterOperator, string[]> {
     return this;
   }
 
-  toString() {
+  override toString() {
     function serializeExpression(values: string[], operator: string) {
       return values.map((value) => `${operator} \`${value}\``).join(` ${operator} `);
     }

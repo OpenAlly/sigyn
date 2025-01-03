@@ -3,7 +3,7 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 
 // Import Internal Dependencies
-import { StreamSelector } from "../src/streamSelector";
+import { StreamSelector } from "../src/streamSelector.js";
 
 describe("StreamSelector", () => {
   describe("constructor", () => {

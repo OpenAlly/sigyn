@@ -1,12 +1,12 @@
 // Import Third-party Dependencies
-import { SigynRule, SigynSelfMonitoring, getConfig } from "@sigyn/config";
+import { type SigynRule, type SigynSelfMonitoring, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { DbAgentFailure, getDB } from "./database";
-import { Logger } from ".";
-import { handleCompositeRules } from "./compositeRules";
-import { RuleNotifier, RuleNotifierAlert } from "./notifiers/rules.notifier";
-import { AgentFailureNotifier } from "./notifiers/agentFailure.notifier";
+import { type DbAgentFailure, getDB } from "./database.js";
+import { type Logger } from "./index.js";
+import { handleCompositeRules } from "./compositeRules.js";
+import { RuleNotifier, type RuleNotifierAlert } from "./notifiers/rules.notifier.js";
+import { AgentFailureNotifier } from "./notifiers/agentFailure.notifier.js";
 
 export function createRuleAlert(
   rule: RuleNotifierAlert["rule"],

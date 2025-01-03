@@ -2,6 +2,7 @@
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
+import url from "node:url";
 import { before, beforeEach, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
@@ -10,13 +11,14 @@ import { SigynInitializedConfig, initConfig } from "@sigyn/config";
 import isCI from "is-ci";
 
 // Import Internal Dependencies
-import { getDB, initDB } from "../../src/database";
-import { createRuleAlert, MockLogger } from "./helpers";
-import { handleCompositeRules } from "../../src/compositeRules";
-import { Rule } from "../../src/rules";
+import { getDB, initDB } from "../../src/database.js";
+import { createRuleAlert, MockLogger } from "./helpers.js";
+import { handleCompositeRules } from "../../src/compositeRules.js";
+import { Rule } from "../../src/rules.js";
 import { TestingNotifier } from "./mocks/sigyn-test-notifier.js";
 
 // CONSTANTS
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const kCompositeRulesConfigLocation = path.join(__dirname, "/fixtures/composite-rules-local/sigyn.config.json");
 const kLogger = new MockLogger();
 // time to wait for the task to be fully executed (alert sent)

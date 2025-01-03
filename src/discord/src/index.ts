@@ -1,6 +1,6 @@
 // Import Third-party Dependencies
-import { MorphixOptions } from "@sigyn/morphix";
-import { WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
+import { type MorphixOptions } from "@sigyn/morphix";
+import { type WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
 
 // CONSTANTS
 const kWebhookUsername = "Sigyn Agent";
@@ -27,7 +27,7 @@ export interface DiscordWebhookBodyFormat {
 }
 
 class DiscordNotifier extends WebhookNotifier<DiscordWebhookBodyFormat> {
-  contentTemplateOptions(): MorphixOptions {
+  override contentTemplateOptions(): MorphixOptions {
     return {
       transform: ({ key, value }) => (key === "lokiUrl" ? value : `**${value === undefined ? "unknown" : value}**`),
       ignoreMissing: true

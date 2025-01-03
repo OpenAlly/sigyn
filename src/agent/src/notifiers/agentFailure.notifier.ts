@@ -2,10 +2,10 @@
 import { isDeepStrictEqual } from "node:util";
 
 // Import Internal Dependencies
-import { Logger } from "..";
-import { DbAgentFailure } from "../database";
-import { getAgentFailureRules } from "../utils/selfMonitoring";
-import { Alert, Notifier } from "./notifier";
+import { type Logger } from "../index.js";
+import { type DbAgentFailure } from "../database.js";
+import { getAgentFailureRules } from "../utils/selfMonitoring.js";
+import { type Alert, Notifier } from "./notifier.js";
 
 // CONSTANTS
 const kIdentifier = Symbol("agentFailureNotifier");
@@ -32,11 +32,11 @@ export class AgentFailureNotifier extends Notifier<AgentFailureAlert> {
     return this.shared;
   }
 
-  nonUniqueMatcher(notification: AgentFailureAlert, newNotifications: AgentFailureAlert) {
+  override nonUniqueMatcher(notification: AgentFailureAlert, newNotifications: AgentFailureAlert) {
     return isDeepStrictEqual(notification.failures, newNotifications.failures);
   }
 
-  async sendNotification(alert: AgentFailureAlert) {
+  override async sendNotification(alert: AgentFailureAlert) {
     try {
       const { notifierConfig } = alert;
       const notifierOptions = {
@@ -49,7 +49,7 @@ export class AgentFailureNotifier extends Notifier<AgentFailureAlert> {
 
       this.logger.info(`[SELF-MONITORING](notify: success|notifier: ${notifierConfig.notifier})`);
     }
-    catch (error) {
+    catch (error: any) {
       this.logger.error(`[SELF-MONITORING](notify: error|notifier: ${alert.notifierConfig.notifier}|message: ${error.message})`);
       this.logger.debug(error);
     }

@@ -1,5 +1,6 @@
 // Import Node.js Dependencies
 import path from "node:path";
+import url from "node:url";
 
 // Import Third-party Dependencies
 import { DockerComposeEnvironment } from "testcontainers";
@@ -8,13 +9,14 @@ import Fastify from "fastify";
 import { GrafanaApi } from "@myunisoft/loki";
 
 // CONSTANTS
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const kMockAgent = new MockAgent();
 const kDefaultGrafanaHost = "http://localhost:3000";
 
 export const LOG_MESSAGE = "Hello World";
 
 export interface SetupEnvironmentOptions {
-  grafanaHost?: string
+  grafanaHost?: string;
 }
 
 export async function setupEnvironment(options: SetupEnvironmentOptions = {}) {

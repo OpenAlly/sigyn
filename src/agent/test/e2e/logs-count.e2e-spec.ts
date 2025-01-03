@@ -2,14 +2,16 @@
 import { before, describe, it } from "node:test";
 import assert from "node:assert";
 import path from "node:path";
+import url from "node:url";
 import { setTimeout } from "node:timers/promises";
 
 // Import Internal Dependencies
-import { TestingNotifier } from "../FT/mocks/sigyn-test-notifier";
-import { setupEnvironment } from "./setup";
-import { start } from "../../src";
+import { TestingNotifier } from "../FT/mocks/sigyn-test-notifier.js";
+import { setupEnvironment } from "./setup.js";
+import { start } from "../../src/index.js";
 
 // CONSTANTS
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const kConfigLocation = path.join(__dirname, "./configs/count-logs");
 const kTestingNotifier = TestingNotifier.getInstance();
 

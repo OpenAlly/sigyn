@@ -1,11 +1,11 @@
 // Import Third-party Dependencies
 import dayjs from "dayjs";
-import { SigynInitializedRule, getConfig } from "@sigyn/config";
+import { type SigynInitializedRule, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { Datasource } from "../datasource";
-import { durationOrCronToDate } from "./cron";
-import { RuleNotifierAlert } from "../notifiers/rules.notifier";
+import { Datasource } from "../datasource.js";
+import { durationOrCronToDate } from "./cron.js";
+import { type RuleNotifierAlert } from "../notifiers/rules.notifier.js";
 
 export async function getLokiUrl(
   rule: RuleNotifierAlert["rule"],

@@ -2,6 +2,7 @@
 import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
+import url from "node:url";
 import timers from "node:timers/promises";
 import { after, before, describe, it } from "node:test";
 
@@ -12,11 +13,12 @@ import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/
 import { Result } from "@openally/result";
 
 // Import Internal Dependencies
-import { DbRule, DbRuleLabel, getDB, initDB } from "../../src/database";
-import { MockLogger } from "./helpers";
-import { Rule } from "../../src/rules";
+import { DbRule, DbRuleLabel, getDB, initDB } from "../../src/database.js";
+import { MockLogger } from "./helpers.js";
+import { Rule } from "../../src/rules.js";
 
 // CONSTANTS
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const kMultiPollingConfigLocation = path.join(__dirname, "/fixtures/multi-polling/sigyn.config.json");
 const kLabelConfigLocation = path.join(__dirname, "/fixtures/label/sigyn.config.json");
 const kLabelRangeValueConfigLocation = path.join(__dirname, "/fixtures/label-range-value/sigyn.config.json");
@@ -292,7 +294,7 @@ describe("Rule.walkOnLogs()", () => {
           }
         });
 
-        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @stylistic/max-len
         it("should then activate threshold and not send another alert whithin interval and with less logs than count threshold", async() => {
           for (let i = 0; i < 5; i++) {
             const rule = new Rule(ruleConfig, { logger: kLogger });
@@ -436,7 +438,6 @@ describe("Rule.walkOnLogs()", () => {
 
       assert.equal(labels.length, 3);
       assert.deepEqual(labels.map((label) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { timestamp, ...labelWithouTimestamp } = label;
 
         return labelWithouTimestamp;

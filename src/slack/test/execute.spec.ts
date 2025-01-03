@@ -6,7 +6,7 @@ import { after, before, describe, it } from "node:test";
 import { MockAgent, MockPool, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
 
 // Import Internal Dependencies
-import * as slack from "../src/index";
+import * as slack from "../src/index.js";
 
 const kMockAgent = new MockAgent();
 const kDispatcher = getGlobalDispatcher();

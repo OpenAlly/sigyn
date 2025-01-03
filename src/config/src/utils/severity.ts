@@ -1,5 +1,5 @@
 // Import Internal Dependencies
-import { AlertSeverity } from "../types";
+import type { AlertSeverity } from "../types.js";
 
 export function getSeverity(sev: AlertSeverity): "critical" | "error" | "warning" | "info" {
   switch (sev) {

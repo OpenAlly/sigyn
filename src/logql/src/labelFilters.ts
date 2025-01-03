@@ -78,7 +78,7 @@ export class LabelFilters extends Map<string, LabelFilter[]> {
    * If `labelValue` is a `string` or a `number`, the default operator will be an **exactlyEqual** and must be passed as
    * a third argument to be modified.
    * */
-  set(labelKey: string, labelValue: LabelValue[] | LabelValue | string | number, op: LabelFilterOperator = "=") {
+  override set(labelKey: string, labelValue: LabelValue[] | LabelValue | string | number, op: LabelFilterOperator = "=") {
     if (typeof labelValue === "string" || typeof labelValue === "number") {
       this.#set(labelKey, { value: labelValue, operator: op });
 
@@ -102,7 +102,7 @@ export class LabelFilters extends Map<string, LabelFilter[]> {
     return this;
   }
 
-  toString() {
+  override toString() {
     return `${[...this.entries()].flatMap(([key, values], index) => values.map(({ operator, value }) => {
       const delimiter = this.#getDelimiter(value, operator);
 

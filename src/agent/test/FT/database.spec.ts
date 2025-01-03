@@ -7,8 +7,8 @@ import fs from "node:fs";
 import SQLite3 from "better-sqlite3";
 
 // Import Internal Dependencies
-import { initDB } from "../../src/database";
-import * as testHelpers from "./helpers";
+import { initDB } from "../../src/database.js";
+import * as testHelpers from "./helpers.js";
 
 // CONSTANTS
 const kDummyLogger = { info: () => null } as any;

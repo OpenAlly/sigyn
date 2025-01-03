@@ -3,11 +3,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 // Import Internal Dependencies
-import { SigynInitializedConfig } from "./types";
-import { validateConfig, validateExtendedConfig } from "./validate";
-import * as utils from "./utils";
+import { type SigynInitializedConfig } from "./types.js";
+import { validateConfig, validateExtendedConfig } from "./validate.js";
+import * as utils from "./utils/index.js";
 
-export * from "./types";
+export * from "./types.js";
 export { validateConfig, validateExtendedConfig };
 
 let initializedConfig: SigynInitializedConfig;

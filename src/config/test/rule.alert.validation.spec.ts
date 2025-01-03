@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 // Import Node.js Dependencies
 import assert from "node:assert";
 import { describe, it } from "node:test";
@@ -244,7 +244,7 @@ describe("Rule alert validations", () => {
       }));
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
+
       message: "Invalid config: /rules/0/alert/on/interval: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
     });
   });
@@ -553,7 +553,7 @@ describe("Rule alert validations", () => {
       }));
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
+
       message: "Invalid config: /rules/0/alert/throttle/interval: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
     });
   });

@@ -1,5 +1,5 @@
 // Import Internal Dependencies
-import { SigynAlertTemplate, SigynConfig, SigynInitializedTemplate } from "../types";
+import type { SigynAlertTemplate, SigynConfig, SigynInitializedTemplate } from "../types.js";
 
 export function extendsTemplates(template: SigynAlertTemplate, config: SigynConfig): SigynInitializedTemplate {
   const configTemplates = config.templates!;

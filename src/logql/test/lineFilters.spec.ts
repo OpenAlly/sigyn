@@ -3,7 +3,7 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 
 // Import Internal Dependencies
-import { LineFilters } from "../src/lineFilters";
+import { LineFilters } from "../src/lineFilters.js";
 
 describe("LineFilters", () => {
   describe("parsing", () => {

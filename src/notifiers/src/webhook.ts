@@ -1,9 +1,9 @@
 // Import Third-party Dependencies
-import {
+import type {
   SigynInitializedTemplate,
   NotifierFormattedSigynRule
 } from "@sigyn/config";
-import { morphix, MorphixOptions } from "@sigyn/morphix";
+import { morphix, type MorphixOptions } from "@sigyn/morphix";
 import * as httpie from "@myunisoft/httpie";
 
 // CONSTANTS
@@ -37,7 +37,7 @@ export interface WebhookData {
   agentFailure?: {
     errors: string;
     rules: string;
-  }
+  };
   rules?: string;
   labelCount: number;
   labelMatchCount: number;

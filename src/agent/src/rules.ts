@@ -1,18 +1,18 @@
-/* eslint-disable max-len */
+
 // Import Third-party Dependencies
-import { SigynInitializedRule } from "@sigyn/config";
-import { LokiCombined } from "@myunisoft/loki";
+import { type SigynInitializedRule } from "@sigyn/config";
+import { type LokiCombined } from "@myunisoft/loki";
 import dayjs from "dayjs";
 import ms from "ms";
 import cronParser from "cron-parser";
-import { Database } from "better-sqlite3";
+import { type Database } from "better-sqlite3";
 import { Result, Ok, Err } from "@openally/result";
 
 // Import Internal Dependencies
-import { DbRule, DbRuleLabel, getDB, getOldestLabelTimestamp } from "./database";
-import * as utils from "./utils/index";
-import { Logger } from ".";
-import { RuleNotifierAlert } from "./notifiers/rules.notifier";
+import { type DbRule, type DbRuleLabel, getDB, getOldestLabelTimestamp } from "./database.js";
+import * as utils from "./utils/index.js";
+import { type Logger } from "./index.js";
+import { type RuleNotifierAlert } from "./notifiers/rules.notifier.js";
 
 export interface RuleOptions {
   logger: Logger;
@@ -50,7 +50,11 @@ export class Rule {
 
         if (wantedValue) {
           const rangeValueMatch = utils.rules.OPERATOR_VALUE_REGEXP.exec(wantedValue);
-          if (rangeValueMatch && !utils.rules.countMatchOperator(rangeValueMatch[1] as utils.rules.RuleOperators, Number(value), Number(rangeValueMatch[2]))) {
+          if (rangeValueMatch && !utils.rules.countMatchOperator(
+            rangeValueMatch[1] as utils.rules.RuleOperators,
+            Number(value),
+            Number(rangeValueMatch[2])
+          )) {
             continue;
           }
           else if (value !== wantedValue) {
@@ -122,7 +126,9 @@ export class Rule {
       .valueOf();
 
     if (rule.lastIntervalReset === null || rule.lastIntervalReset - timeThreshold < 0) {
-      db.prepare("UPDATE rules SET lastIntervalReset = ?, firstReset = ? WHERE id = ?").run(this.#now, rule.lastIntervalReset === null ? 1 : 0, rule.id);
+      db
+        .prepare("UPDATE rules SET lastIntervalReset = ?, firstReset = ? WHERE id = ?")
+        .run(this.#now, rule.lastIntervalReset === null ? 1 : 0, rule.id);
       rule.firstReset = rule.lastIntervalReset === null ? 1 : 0;
       rule.lastIntervalReset = this.#now;
     }
@@ -130,12 +136,13 @@ export class Rule {
     const previousCounter = rule.counter;
     rule.counter = (
       db.prepare("SELECT COUNT(id) as counter FROM ruleLogs WHERE ruleId = ? AND processed = 0 AND timestamp >= ?")
-        .get(rule.id, timeThreshold) as { counter: null | number }
+        .get(rule.id, timeThreshold) as { counter: null | number; }
     ).counter ?? 0;
 
     db.prepare("UPDATE rules SET counter = ? WHERE id = ?").run(rule.counter, rule.id);
 
     const alertThreshold = this.config.alert.on.count!;
+    // eslint-disable-next-line @stylistic/max-len
     this.#logger.info(`[${rule.name}](state: handle|polling: ${this.#getCurrentPolling()[1]}|previous: ${previousCounter}|new: ${rule.counter - previousCounter}|next: ${rule.counter}|alertThreshold: ${alertThreshold}|timeThreshold: ${timeThreshold})`);
 
     const [operator, value] = utils.rules.countThresholdOperator(alertThreshold);
@@ -156,7 +163,9 @@ export class Rule {
     this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
 
     db.transaction(() => {
-      db.prepare("UPDATE rules SET counter = 0, threshold = ?, lastIntervalReset = ? WHERE id = ?").run(rule.counter, this.#now, rule.id);
+      db
+        .prepare("UPDATE rules SET counter = 0, threshold = ?, lastIntervalReset = ? WHERE id = ?")
+        .run(rule.counter, this.#now, rule.id);
       db.prepare("UPDATE ruleLogs SET processed = 1 WHERE ruleId = ?").run(rule.id);
     })();
 
@@ -207,9 +216,19 @@ export class Rule {
   }
 
   #checkLabelThreshold(rule: DbRule): boolean {
-    const { label, value, valueMatch, percentThreshold, count, minimumLabelCount, interval } = this.config.alert.on;
+    const {
+      label,
+      value,
+      valueMatch,
+      percentThreshold,
+      count,
+      minimumLabelCount,
+      interval
+    } = this.config.alert.on;
 
-    const labels = getDB().prepare("SELECT * FROM ruleLabels WHERE key = ? AND ruleId = ? ORDER BY timestamp ASC").all(label, rule.id) as DbRuleLabel[];
+    const labels = getDB()
+      .prepare("SELECT * FROM ruleLabels WHERE key = ? AND ruleId = ? ORDER BY timestamp ASC")
+      .all(label, rule.id) as DbRuleLabel[];
     const [olderLabel] = labels;
     if (olderLabel === undefined) {
       this.#logger.info(`[${rule.name}](state: skip|label: ${label})`);
@@ -221,6 +240,7 @@ export class Rule {
     const countReached = minimumLabelCount ? minimumLabelCount <= labels.length : true;
 
     if (!intervalReached || !countReached) {
+      // eslint-disable-next-line @stylistic/max-len
       this.#logger.info(`[${rule.name}](state: unreached|labelCount: ${labels.length}|minimumLabelCount: ${minimumLabelCount || "*"}|oldestTimestamp: ${olderLabel.timestamp}|minimumTimestamp: ${intervalTimestamp ?? "*"})`);
 
       return false;
@@ -231,7 +251,11 @@ export class Rule {
         const rangeValueMatch = utils.rules.OPERATOR_VALUE_REGEXP.exec(value);
 
         if (rangeValueMatch) {
-          return utils.rules.countMatchOperator(rangeValueMatch[1] as utils.rules.RuleOperators, Number(label.value), Number(rangeValueMatch[2]));
+          return utils.rules.countMatchOperator(
+            rangeValueMatch[1] as utils.rules.RuleOperators,
+            Number(label.value),
+            Number(rangeValueMatch[2])
+          );
         }
 
         return label.value === value;
@@ -240,6 +264,7 @@ export class Rule {
       return label.value.match(valueMatch!);
     }).length;
 
+    // eslint-disable-next-line @stylistic/max-len
     this.#logger.info(`[${rule.name}](state: reached|actual: ${labels.length}|count: ${count ?? "x"}|thresholdCount: ${labelMatchCount}|percentThreshold: ${percentThreshold}|actualPercent: ${labelMatchCount / labels.length * 100})`);
 
     this.#labelCount = labels.length;
@@ -265,7 +290,7 @@ export class Rule {
 
       const alerts = getDB().prepare(
         `SELECT alertId, key, value FROM alertLabels WHERE key IN (${labelScope.map(() => "?").join(",")})`
-      ).all(labelScope) as { alertId: number; key: string; value: string }[];
+      ).all(labelScope) as { alertId: number; key: string; value: string; }[];
 
       const alertIds = alerts.flatMap((alert) => {
         if (this.#lastFetchedStream![alert.key].split(",").includes(alert.value)) {
@@ -279,16 +304,19 @@ export class Rule {
         return 0;
       }
 
-      return (getDB().prepare(`SELECT COUNT(id) as count FROM alerts WHERE id IN (${alertIds.map(() => "?").join(",")}) AND createdAt >= ?`).get(
-        alertIds,
-        interval
-      ) as { count: number }).count;
+      return (getDB()
+        .prepare(`SELECT COUNT(id) as count FROM alerts WHERE id IN (${alertIds.map(() => "?").join(",")}) AND createdAt >= ?`)
+        .get(
+          alertIds,
+          interval
+        ) as { count: number; }
+      ).count;
     }
 
     return (getDB().prepare("SELECT COUNT(id) as count FROM alerts WHERE ruleId = ? AND createdAt >= ?").get(
       rule.id,
       interval
-    ) as { count: number }).count;
+    ) as { count: number; }).count;
   }
 
   #checkThrottle(rule: DbRule, db: Database): boolean {
@@ -309,6 +337,7 @@ export class Rule {
       return true;
     }
     else if (ruleAlertsCount <= activationThreshold!) {
+      // eslint-disable-next-line @stylistic/max-len
       this.#logger.error(`[${rule.name}](activationThreshold: ${activationThreshold}|actual: ${ruleAlertsCount}|labelScope: ${labelScope})`);
 
       return false;

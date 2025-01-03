@@ -1,19 +1,16 @@
-/* eslint-disable @typescript-eslint/ban-types */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 type ConvertEmptyRecord<T, R = string> = T extends Record<string, never> ? R : T;
 
 type Split<S extends string, D extends string> =
   string extends S ? string[] :
-  S extends "" ? [] :
-  S extends `${infer T}${D}${infer U}` ? [`${T}${D}`, ...Split<U, D>] : [S];
+    S extends "" ? [] :
+      S extends `${infer T}${D}${infer U}` ? [`${T}${D}`, ...Split<U, D>] : [S];
 
 type Trim<S extends string> =
   S extends ` ${infer U}` ? Trim<U> :
-  S extends `${infer U} ` ? Trim<U> :
-  S;
+    S extends `${infer U} ` ? Trim<U> :
+      S;
 
 type Concat<T extends string[]> = T extends [infer F extends string, ...infer R extends string[]]
   ? `${F} ${Concat<R>}`
@@ -21,8 +18,8 @@ type Concat<T extends string[]> = T extends [infer F extends string, ...infer R 
 
 type ArrayToString<T extends LokiPatternType> =
   T extends string[] ? Concat<T> :
-  T extends readonly string[] ? Concat<[...T]> :
-  T;
+    T extends readonly string[] ? Concat<[...T]> :
+      T;
 
 type ExtractPattern<Pattern extends string> =
   Pattern extends `${infer _}<${infer Name}>${infer _}` ?

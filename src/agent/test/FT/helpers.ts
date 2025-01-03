@@ -5,8 +5,8 @@ import fs from "node:fs";
 import dayjs from "dayjs";
 
 // Import Internal Dependencies
-import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "../../src/database";
-import { Rule } from "../../src/rules";
+import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "../../src/database.js";
+import { Rule } from "../../src/rules.js";
 
 // CONSTANTS
 const kDatabaseFilename = "test/.temp/test-db.sqlite3";
@@ -80,7 +80,7 @@ export function createRuleAlert(rule: Rule, times: number) {
 export function ruleMuteUntilTimestamp(rule: Rule): number {
   const { muteUntil } = getDB()
     .prepare("SELECT muteUntil FROM rules WHERE name = ?")
-    .get(rule.config.name) as { muteUntil: number };
+    .get(rule.config.name) as { muteUntil: number; };
 
   return muteUntil;
 }

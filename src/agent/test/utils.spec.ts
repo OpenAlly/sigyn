@@ -2,6 +2,7 @@
 import assert from "node:assert";
 import { after, before, describe, it } from "node:test";
 import path from "node:path";
+import url from "node:url";
 
 // Import Third-party Dependencies
 import { initConfig } from "@sigyn/config";
@@ -9,9 +10,10 @@ import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/
 import dayjs from "dayjs";
 
 // Import Internal Dependencies
-import * as utils from "../src/utils/index";
+import * as utils from "../src/utils/index.js";
 
 // CONSTANTS
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const kDummyUrl = "http://localhost:3000";
 const kMockAgent = new MockAgent();
 const kGlobalDispatcher = getGlobalDispatcher();

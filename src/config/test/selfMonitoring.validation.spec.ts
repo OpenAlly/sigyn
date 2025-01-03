@@ -6,7 +6,6 @@ import { describe, it } from "node:test";
 import { validateConfig } from "../src/validate";
 import { VALID_CONFIG } from "./helpers";
 
-
 // CONSTANTS
 const kDurations = [
   "20milliseconds", "20 milliseconds",
@@ -410,7 +409,8 @@ describe("Self-monitoring validations", () => {
       });
     }, {
       name: "Error",
-      // eslint-disable-next-line max-len
+
+      // eslint-disable-next-line @stylistic/max-len
       message: "Invalid config: /selfMonitoring/throttle/interval: must match pattern \"^((?:\\d+)?\\.?\\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$\""
     });
   });

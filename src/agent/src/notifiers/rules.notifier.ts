@@ -6,10 +6,10 @@ import { getConfig } from "@sigyn/config";
 import { StreamSelector } from "@sigyn/logql";
 
 // Import Internal Dependencies
-import { Logger } from "..";
-import { DbRule, DbAlertNotif, DbAlert, DbNotifier } from "../database";
-import { Alert, Notifier } from "./notifier";
-import * as utils from "../utils";
+import { type Logger } from "../index.js";
+import type { DbRule, DbAlertNotif, DbAlert, DbNotifier } from "../database.js";
+import { type Alert, Notifier } from "./notifier.js";
+import * as utils from "../utils/index.js";
 
 // CONSTANTS
 const kIdentifier = Symbol("ruleNotifier");
@@ -45,7 +45,7 @@ export class RuleNotifier extends Notifier<RuleNotifierAlert> {
     return this.shared;
   }
 
-  sendAlerts(alerts: Omit<RuleNotifierAlert, "notif">[]) {
+  override sendAlerts(alerts: Omit<RuleNotifierAlert, "notif">[]) {
     const notificationAlerts: RuleNotifierAlert[] = [];
 
     for (const alert of alerts) {
@@ -67,12 +67,12 @@ export class RuleNotifier extends Notifier<RuleNotifierAlert> {
     this.push(notificationAlerts);
   }
 
-  nonUniqueMatcher(notification: RuleNotifierAlert, newNotifications: RuleNotifierAlert) {
+  override nonUniqueMatcher(notification: RuleNotifierAlert, newNotifications: RuleNotifierAlert) {
     return notification.rule.name === newNotifications.rule.name &&
       isDeepStrictEqual(notification.rule.labels, newNotifications.rule.labels);
   }
 
-  async sendNotification(alert: RuleNotifierAlert) {
+  override async sendNotification(alert: RuleNotifierAlert) {
     const { notifierConfig, rule } = alert;
     const ruleConfig = this.config.rules.find((configRule) => configRule.name === rule.name)!;
 
@@ -91,7 +91,7 @@ export class RuleNotifier extends Notifier<RuleNotifierAlert> {
         .prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?")
         .run("success", alert.notif.alertId);
     }
-    catch (error) {
+    catch (error: any) {
       this.db
         .prepare("UPDATE alertNotifs SET status = ? WHERE alertId = ?")
         .run("failed", alert.notif.alertId);
