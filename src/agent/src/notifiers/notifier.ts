@@ -59,11 +59,11 @@ export class Notifier<T extends Alert> {
     );
   }
 
-  protected sendNotification(alert: T): void {
+  protected sendNotification(_alert: T): void {
     throw new Error("sendNotification must be implemented");
   }
 
-  protected nonUniqueMatcher(notification: T, newNotifications: T): boolean {
+  protected nonUniqueMatcher(_notification: T, _newNotifications: T): boolean {
     throw new Error("nonUniqueMatcher must be implemented");
   }
 

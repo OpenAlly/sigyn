@@ -10,7 +10,7 @@ export interface LabelFilter {
   operator: LabelFilterOperator;
 }
 
-export type LabelValue = Partial<LabelFilter> & Pick<LabelFilter, "value">
+export type LabelValue = Partial<LabelFilter> & Pick<LabelFilter, "value">;
 
 export class LabelFilters extends Map<string, LabelFilter[]> {
   static removeStreamSelector(query: string) {

@@ -109,7 +109,7 @@ describe("LogQL", () => {
 
   it("should parse a LogQL with lineFilter, labelFilter and parseExpression", () => {
     const logql = new LogQL(
-      // eslint-disable-next-line max-len
+      // eslint-disable-next-line @stylistic/max-len
       `{app="discussion",env="production"} |= "returned "GET /rooms/availableUsers" | regexp \`((?P<execTime>[0-9.]+)ms)\` | execTime > 500`
     );
 
