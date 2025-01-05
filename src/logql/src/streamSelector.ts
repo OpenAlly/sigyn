@@ -11,7 +11,7 @@ export interface StreamSelectorValue {
 }
 
 export type LabelValue = Partial<StreamSelectorValue> & Pick<StreamSelectorValue, "value">;
-export type StreamSelectorOp = { [kEqual]?: string | RegExp } | { [kNotEqual]?: string | RegExp };
+export type StreamSelectorOp = { [kEqual]?: string | RegExp; } | { [kNotEqual]?: string | RegExp; };
 
 export class StreamSelector extends Map<string, StreamSelectorValue> {
   static Equal(value: string | RegExp) {
