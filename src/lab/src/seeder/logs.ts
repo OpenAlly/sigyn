@@ -30,6 +30,10 @@ export interface Superhero {
   company: string;
 }
 
+interface SendOptions {
+  debug?: boolean;
+}
+
 export class LogGenerator {
   mode: Mode;
   count: number;
@@ -70,9 +74,12 @@ export class LogGenerator {
     return modes[Math.floor(Math.random() * modes.length)];
   }
 
-  refresh() {
+  #refresh() {
     if (this.mode === "random") {
       this.currentMode = LogGenerator.randomMode();
+    }
+    else {
+      this.currentMode = this.mode;
     }
 
     this.timestamp = (this.startUnixEpoch + Math.floor(Math.random() * (this.endUnixEpoch - this.startUnixEpoch))).toString();
@@ -85,24 +92,24 @@ export class LogGenerator {
 
   * generate() {
     while (this.count--) {
-      this.refresh();
+      this.#refresh();
 
       const hero = randSuperhero() as Superhero;
 
-      yield this.debug(hero);
-      yield* this.log(hero);
+      yield this.#debug(hero);
+      yield* this.#log(hero);
     }
   }
 
-  get baseHeader() {
+  get #baseHeader() {
     return `${this.ip} <${this.reqId}>`;
   }
 
-  baseFormatted() {
-    return `${this.baseHeader} "${this.method} /api/v1/superhero"`;
+  #baseFormatted() {
+    return `${this.#baseHeader} "${this.method} /api/v1/superhero"`;
   }
 
-  baseJson() {
+  #baseJson() {
     return {
       ip: this.ip,
       reqId: this.reqId,
@@ -113,10 +120,12 @@ export class LogGenerator {
     };
   }
 
-  send(message: string): LokiIngestLogs {
+  #send(message: string, options: SendOptions = {}): LokiIngestLogs {
+    const { debug = false } = options;
+
     return {
       stream: {
-        level: this.level,
+        level: debug ? "debug" : this.level,
         format: this.currentMode,
         ...this.labels
       },
@@ -126,28 +135,28 @@ export class LogGenerator {
     };
   }
 
-  debug(
+  #debug(
     hero: Superhero
   ) {
     if (this.currentMode === "formated") {
-      return this.send(
-        `${this.baseHeader} (realName:${hero.realName}|alterEgo:${hero.alterEgo}|company:${hero.company})`
-      );
+      const log = `${this.#baseHeader} (realName:${hero.realName}|alterEgo:${hero.alterEgo}|company:${hero.company})`;
+
+      return this.#send(log, { debug: true });
     }
 
-    const base = this.baseJson();
+    const base = this.#baseJson();
     Object.assign(base.req, { body: { ...hero } });
 
-    return this.send(JSON.stringify({ ...base }));
+    return this.#send(JSON.stringify({ ...base }), { debug: true });
   }
 
-  * log(
+  * #log(
     hero: Superhero
   ) {
     if (this.status === 500) {
       const error = new Error("Internal Server Error");
 
-      yield this.send(error.stack!);
+      yield this.#send(error.stack!);
 
       return;
     }
@@ -156,25 +165,25 @@ export class LogGenerator {
       const error = new Error(`Unknown superhero: ${hero.realName}`);
 
       if (this.currentMode === "formated") {
-        yield this.send(`${this.baseFormatted()} 400 (error: ${error.message})`);
+        yield this.#send(`${this.#baseFormatted()} 400 (error: ${error.message})`);
       }
       else {
-        const { req, ...base } = this.baseJson();
+        const { req, ...base } = this.#baseJson();
         Object.assign(base, { res: { status: 400, error: error.message } });
 
-        yield this.send(JSON.stringify({ ...base }));
+        yield this.#send(JSON.stringify({ ...base }));
       }
 
       return;
     }
 
     if (this.currentMode === "formated") {
-      yield this.send(`${this.baseFormatted()} 200 (time: ${random(1, 1200)}ms)`);
+      yield this.#send(`${this.#baseFormatted()} 200 (time: ${random(1, 1200)}ms)`);
 
       return;
     }
 
-    const base = this.baseJson();
+    const base = this.#baseJson();
     Object.assign(base, { res: { status: 200, count: random(1, 50), time: random(1, 1200) } });
   }
 }

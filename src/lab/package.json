@@ -1,27 +1,28 @@
 {
-  "name": "@sigyn/demo-api",
+  "name": "@sigyn/lab",
   "version": "1.0.0",
-  "description": "TBC",
+  "description": "A test and demonstration tool for generating and exploring logs in both formatted and JSON styles, integrated with Grafana Loki via Docker.",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm --clean",
     "start": "node ./dist/index.js",
-    "lint": "eslint src"
+    "lint": "eslint src test",
+    "test": "glob -c \"tsx --test\" \"./test/**/*.spec.ts\""
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MyUnisoft/sigyn.git",
-    "directory": "src/demo-api"
+    "directory": "src/lab"
   },
   "bugs": {
     "url": "https://github.com/MyUnisoft/sigyn/issues"
   },
-  "homepage": "https://github.com/MyUnisoft/sigyn/blob/main/src/demo-api/README.md",
+  "homepage": "https://github.com/MyUnisoft/sigyn/blob/main/src/lab/README.md",
   "files": [
     "dist",
-    "data"
+    "docker"
   ],
   "keywords": [],
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
