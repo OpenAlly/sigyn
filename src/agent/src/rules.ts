@@ -157,7 +157,7 @@ export class Rule {
 
     const cancelAlert = this.#checkThrottle(rule, db);
     if (cancelAlert) {
-      return Err(`Rule throttle activated`);
+      return Err("Rule throttle activated");
     }
 
     this.#logger.error(`[${rule.name}](state: alert|threshold: ${alertThreshold}|actual: ${rule.counter})`);
