@@ -110,7 +110,7 @@ describe("LogQL", () => {
   it("should parse a LogQL with lineFilter, labelFilter and parseExpression", () => {
     const logql = new LogQL(
       // eslint-disable-next-line @stylistic/max-len
-      `{app="discussion",env="production"} |= "returned "GET /rooms/availableUsers" | regexp \`((?P<execTime>[0-9.]+)ms)\` | execTime > 500`
+      "{app=\"discussion\",env=\"production\"} |= \"returned \"GET /rooms/availableUsers\" | regexp `((?P<execTime>[0-9.]+)ms)` | execTime > 500"
     );
 
     assert.ok(logql.streamSelector.size === 2);
@@ -125,7 +125,7 @@ describe("LogQL", () => {
   });
 
   it("should preserve metric without modifications", () => {
-    const originalQL = `count_over_time({job="mysql"}[5m])`;
+    const originalQL = "count_over_time({job=\"mysql\"}[5m])";
     const logql = new LogQL(originalQL);
 
     assert.strictEqual(logql.type, "metric");
