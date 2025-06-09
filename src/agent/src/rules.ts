@@ -1,10 +1,9 @@
-
 // Import Third-party Dependencies
 import { type SigynInitializedRule } from "@sigyn/config";
 import { type LokiCombined } from "@myunisoft/loki";
 import dayjs from "dayjs";
 import ms from "ms";
-import cronParser from "cron-parser";
+import { CronExpressionParser } from "cron-parser";
 import { type Database } from "better-sqlite3";
 import { Result, Ok, Err } from "@openally/result";
 
@@ -372,7 +371,7 @@ export class Rule {
         }
       }
 
-      const interval = cronParser.parseExpression(polling);
+      const interval = CronExpressionParser.parse(polling);
       const prev = interval.prev().toString();
 
       if (new Date().toString() === prev) {
@@ -404,7 +403,7 @@ export class Rule {
    * **Note: this function pretends the polling strategy to be bounded.**
    */
   #shouldSkipCron(polling: string) {
-    const cron = cronParser.parseExpression(polling);
+    const cron = CronExpressionParser.parse(polling);
     const nextDate = dayjs(cron.next().toString());
     const currentDate = dayjs(cron.prev().toString());
     const previousDate = dayjs(cron.prev().toString());
@@ -425,8 +424,8 @@ export class Rule {
     let currentPolling = rulePollings[0];
 
     for (const [, polling] of rulePollings) {
-      const currentPollingDate = dayjs(cronParser.parseExpression(currentPolling[1]).next().toString());
-      const nextCronDate = dayjs(cronParser.parseExpression(polling).next().toString());
+      const currentPollingDate = dayjs(CronExpressionParser.parse(currentPolling[1]).next().toString());
+      const nextCronDate = dayjs(CronExpressionParser.parse(polling).next().toString());
 
       if (nextCronDate.isBefore(currentPollingDate)) {
         currentPolling = [true, polling];
