@@ -1,7 +1,7 @@
 // Import Third-party Dependencies
 import dayjs, { type Dayjs } from "dayjs";
 import ms from "ms";
-import cronParser from "cron-parser";
+import { CronExpressionParser } from "cron-parser";
 
 const kCronExpressionRegExp = /(((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|\*) ?){5,6}/;
 
@@ -14,7 +14,7 @@ export function durationOrCronToDate(
   operation: "subtract" | "add"
 ): Dayjs {
   if (isCron(durationOrCron)) {
-    const cron = cronParser.parseExpression(durationOrCron).next();
+    const cron = CronExpressionParser.parse(durationOrCron).next();
 
     return dayjs(cron[operation === "subtract" ? "prev" : "next"]().toString());
   }
