@@ -38,7 +38,7 @@
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@myunisoft/loki": "^5.1.0",
+    "@myunisoft/loki": "^6.0.0",
     "ajv": "^8.17.1",
     "ajv-keywords": "^5.1.0",
     "minimatch": "^10.0.1"

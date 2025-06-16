@@ -28,7 +28,7 @@
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@myunisoft/loki": "^5.1.0",
+    "@myunisoft/loki": "^6.0.0",
     "@ngneat/falso": "^7.2.0",
     "fastify": "^5.3.3",
     "testcontainers": "^11.0.2",
