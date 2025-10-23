@@ -2,13 +2,13 @@
   "type": "object",
   "properties": {
     "rules": {
-      "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/rules.json"
+      "$ref": "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/rules.json"
     },
     "templates": {
       "type": "object",
       "patternProperties": {
         "^.*$": {
-          "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/templates.json"
+          "$ref": "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/templates.json"
         }
       }
     }

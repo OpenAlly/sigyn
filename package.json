@@ -1,5 +1,5 @@
 {
-  "name": "@myunisoft/sigyn",
+  "name": "@openally/sigyn",
   "version": "1.0.0",
   "description": "Grafana Loki Alerting Agent",
   "scripts": {

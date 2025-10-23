@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitepress'
+import { defineConfig } from "vitepress";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -69,7 +69,7 @@ export default defineConfig({
       }
     ],
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/MyUnisoft/sigyn/' }
+      { icon: 'github', link: 'https://github.com/OpenAlly/sigyn/' }
     ]
   },
   base: "/sigyn/",

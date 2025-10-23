@@ -8,11 +8,11 @@ You can easily enjoy autocompletion & documentation from JSON schema for your `s
 "json.schemas": [
   {
     "fileMatch": ["*.sigyn.config.json"],
-    "url":  "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/extendedConfigSchema.json"
+    "url":  "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/extendedConfigSchema.json"
   },
   {
     "fileMatch": ["sigyn.config.json"],
-    "url":  "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/configSchema.json"
+    "url":  "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/configSchema.json"
   }
 ]
 ```

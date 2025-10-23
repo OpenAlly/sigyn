@@ -37,12 +37,12 @@
       "type": "object",
       "patternProperties": {
         "^.*$": {
-          "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/templates.json"
+          "$ref": "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/templates.json"
         }
       }
     },
     "rules": {
-      "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/rules.json"
+      "$ref": "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/rules.json"
     },
     "notifiers": {
       "title": "Specify the notifiers configurations",
@@ -107,7 +107,7 @@
           "description": "Can be a string or an object.\nIf it's a string, it must be a reference to a root template key.\nIf it's an object, it will be used as the template itself.",
           "oneOf": [
             {
-              "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/templates.json"
+              "$ref": "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/templates.json"
             },
             {
               "type": "string",
@@ -249,7 +249,7 @@
             "description": "Can be a string or an object.\nIf it's a string, it must be a reference to a root template key.\nIf it's an object, it will be used as the template itself.",
             "oneOf": [
               {
-                "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/templates.json"
+                "$ref": "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/templates.json"
               },
               {
                 "type": "string",

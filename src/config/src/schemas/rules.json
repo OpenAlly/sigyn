@@ -1,5 +1,5 @@
 {
-  "$id": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/rules.json",
+  "$id": "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/rules.json",
   "title": "Specify the Alert Rules",
   "description": "An array of rule objects, each representing a specific monitoring rule.",
   "type": "array",
@@ -286,7 +286,7 @@
             "description": "Can be a string or an object.\nIf it's a string, it must be a reference to a root template key.\nIf it's an object, it will be used as the template itself.",
             "oneOf": [
               {
-                "$ref": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/templates.json"
+                "$ref": "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/templates.json"
               },
               {
                 "type": "string",

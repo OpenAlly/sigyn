@@ -26,13 +26,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MyUnisoft/sigyn.git",
+    "url": "git+https://github.com/OpenAlly/sigyn.git",
     "directory": "src/agent"
   },
   "bugs": {
-    "url": "https://github.com/MyUnisoft/sigyn/issues"
+    "url": "https://github.com/OpenAlly/sigyn/issues"
   },
-  "homepage": "https://github.com/MyUnisoft/sigyn/blob/main/src/agent/README.md",
+  "homepage": "https://github.com/OpenAlly/sigyn/blob/main/src/agent/README.md",
   "files": [
     "dist",
     "data"

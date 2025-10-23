@@ -3,19 +3,19 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/MyUnisoft/sigyn">
-    <img src="https://img.shields.io/github/license/MyUnisoft/sigyn?style=for-the-badge" alt="license">
+  <a href="https://github.com/OpenAlly/sigyn">
+    <img src="https://img.shields.io/github/license/OpenAlly/sigyn?style=for-the-badge" alt="license">
   </a>
-  <a href="https://github.com/MyUnisoft/sigyn">
+  <a href="https://github.com/OpenAlly/sigyn">
     <img src="https://img.shields.io/maintenance/yes/2023?style=for-the-badge" alt="maintained">
   </a>
-  <a href="https://api.securityscorecards.dev/projects/github.com/MyUnisoft/sigyn">
-    <img src="https://api.securityscorecards.dev/projects/github.com/MyUnisoft/sigyn/badge?style=for-the-badge" alt="ossf scorecard">
+  <a href="https://api.securityscorecards.dev/projects/github.com/OpenAlly/sigyn">
+    <img src="https://api.securityscorecards.dev/projects/github.com/OpenAlly/sigyn/badge?style=for-the-badge" alt="ossf scorecard">
   </a>
-  <a href="https://github.com/MyUnisoft/sigyn">
+  <a href="https://github.com/OpenAlly/sigyn">
     <img src="https://img.shields.io/badge/Typescript-294E80.svg?style=for-the-badge&logo=typescript" alt="typescript">
   </a>
-  <a href="https://github.com/MyUnisoft/sigyn">
+  <a href="https://github.com/OpenAlly/sigyn">
     <img src="https://img.shields.io/static/v1?&label=module&message=ESM%20and%20CJS&color=9cf&style=for-the-badge" alt="esm-cjs">
   </a>
 </p>
@@ -63,7 +63,7 @@ $ yarn add @sigyn/agent
 To install and compile all workspaces, just run the following commands at the root
 
 ```bash
-$ npm ci
+$ npm install
 $ npm run build
 ```
 
@@ -100,9 +100,9 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/PierreDemailly"><img src="https://avatars.githubusercontent.com/u/39910767?v=4?s=100" width="100px;" alt="PierreDemailly"/><br /><sub><b>PierreDemailly</b></sub></a><br /><a href="https://github.com/MyUnisoft/sigyn/commits?author=PierreDemailly" title="Code">💻</a> <a href="https://github.com/MyUnisoft/sigyn/commits?author=PierreDemailly" title="Documentation">📖</a> <a href="#maintenance-PierreDemailly" title="Maintenance">🚧</a> <a href="https://github.com/MyUnisoft/sigyn/commits?author=PierreDemailly" title="Tests">⚠️</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/fraxken"><img src="https://avatars.githubusercontent.com/u/4438263?v=4?s=100" width="100px;" alt="Thomas.G"/><br /><sub><b>Thomas.G</b></sub></a><br /><a href="https://github.com/MyUnisoft/sigyn/pulls?q=is%3Apr+reviewed-by%3Afraxken" title="Reviewed Pull Requests">👀</a> <a href="#security-fraxken" title="Security">🛡️</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://sofiand.github.io/portfolio-client/"><img src="https://avatars.githubusercontent.com/u/39944043?v=4?s=100" width="100px;" alt="Yefis"/><br /><sub><b>Yefis</b></sub></a><br /><a href="https://github.com/MyUnisoft/sigyn/commits?author=SofianD" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/PierreDemailly"><img src="https://avatars.githubusercontent.com/u/39910767?v=4?s=100" width="100px;" alt="PierreDemailly"/><br /><sub><b>PierreDemailly</b></sub></a><br /><a href="https://github.com/OpenAlly/sigyn/commits?author=PierreDemailly" title="Code">💻</a> <a href="https://github.com/OpenAlly/sigyn/commits?author=PierreDemailly" title="Documentation">📖</a> <a href="#maintenance-PierreDemailly" title="Maintenance">🚧</a> <a href="https://github.com/OpenAlly/sigyn/commits?author=PierreDemailly" title="Tests">⚠️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/fraxken"><img src="https://avatars.githubusercontent.com/u/4438263?v=4?s=100" width="100px;" alt="Thomas.G"/><br /><sub><b>Thomas.G</b></sub></a><br /><a href="https://github.com/OpenAlly/sigyn/pulls?q=is%3Apr+reviewed-by%3Afraxken" title="Reviewed Pull Requests">👀</a> <a href="#security-fraxken" title="Security">🛡️</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://sofiand.github.io/portfolio-client/"><img src="https://avatars.githubusercontent.com/u/39944043?v=4?s=100" width="100px;" alt="Yefis"/><br /><sub><b>Yefis</b></sub></a><br /><a href="https://github.com/OpenAlly/sigyn/commits?author=SofianD" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>

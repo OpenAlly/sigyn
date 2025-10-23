@@ -13,13 +13,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MyUnisoft/sigyn.git",
+    "url": "git+https://github.com/OpenAlly/sigyn.git",
     "directory": "src/lab"
   },
   "bugs": {
-    "url": "https://github.com/MyUnisoft/sigyn/issues"
+    "url": "https://github.com/OpenAlly/sigyn/issues"
   },
-  "homepage": "https://github.com/MyUnisoft/sigyn/blob/main/src/lab/README.md",
+  "homepage": "https://github.com/OpenAlly/sigyn/blob/main/src/lab/README.md",
   "files": [
     "dist",
     "docker"

@@ -1,5 +1,5 @@
 {
-  "$id": "https://raw.githubusercontent.com/MyUnisoft/sigyn/main/src/config/src/schemas/templates.json",
+  "$id": "https://raw.githubusercontent.com/OpenAlly/sigyn/main/src/config/src/schemas/templates.json",
   "title": "Specify the Alert Templates",
   "description": "A record of template objects that can be used in the \"rules\" section.",
   "type": "object",
