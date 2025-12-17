@@ -6,9 +6,9 @@ import url from "node:url";
 import { setTimeout } from "node:timers/promises";
 
 // Import Internal Dependencies
-import { TestingNotifier } from "../FT/mocks/sigyn-test-notifier.js";
-import { setupEnvironment } from "./setup.js";
-import { start } from "../../src/index.js";
+import { TestingNotifier } from "../FT/mocks/sigyn-test-notifier.ts";
+import { setupEnvironment } from "./setup.ts";
+import { start } from "../../src/index.ts";
 
 // CONSTANTS
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));

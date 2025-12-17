@@ -3,11 +3,19 @@ import assert from "node:assert";
 import { after, before, describe, it } from "node:test";
 
 // Import Third-party Dependencies
-import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
+import {
+  MockAgent,
+  getGlobalDispatcher,
+  setGlobalDispatcher
+} from "@myunisoft/httpie";
 
 // Import Internal Dependencies
-import * as utils from "../src/utils";
-import { AlertSeverity, PartialSigynConfig, SigynConfig } from "../src/types";
+import * as utils from "../src/utils/index.ts";
+import type {
+  AlertSeverity,
+  PartialSigynConfig,
+  SigynConfig
+} from "../src/types.ts";
 
 // CONSTANTS
 const kDummyUrl = "http://localhost:3000";

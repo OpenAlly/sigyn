@@ -8,10 +8,10 @@ import { AsyncTask } from "toad-scheduler";
 import ms from "ms";
 
 // Import Internal Dependencies
-import { Rule } from "../rules.js";
-import { type Logger } from "../index.js";
-import { createRuleAlert } from "../alert.js";
-import { handleAgentFailure } from "../utils/selfMonitoring.js";
+import { Rule } from "../rules.ts";
+import { type Logger } from "../index.ts";
+import { createRuleAlert } from "../alert.ts";
+import { handleAgentFailure } from "../utils/selfMonitoring.ts";
 
 export interface AsyncTaskOptions {
   logger: Logger;

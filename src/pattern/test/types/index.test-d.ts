@@ -1,12 +1,15 @@
 // Import Third-party Dependencies
-import { expectType, expectAssignable } from "tsd";
+import {
+  expectType,
+  expectAssignable
+} from "tsd";
 
 // Import Internal Dependencies
 import {
   Pattern,
-  PatternShape,
+  type PatternShape,
   NoopPattern
-} from "../../src/pattern";
+} from "../../src/pattern.ts";
 
 expectType<Pattern<string>>(new Pattern("foobar"));
 

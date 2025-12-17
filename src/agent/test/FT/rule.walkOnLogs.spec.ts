@@ -8,14 +8,27 @@ import { after, before, describe, it } from "node:test";
 
 // Import Third-party Dependencies
 import dayjs from "dayjs";
-import { SigynInitializedConfig, SigynRule, initConfig } from "@sigyn/config";
-import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
-import { Result } from "@openally/result";
+import {
+  type SigynInitializedConfig,
+  type SigynRule,
+  initConfig
+} from "@sigyn/config";
+import {
+  MockAgent,
+  getGlobalDispatcher,
+  setGlobalDispatcher
+} from "@myunisoft/httpie";
+import type { Result } from "@openally/result";
 
 // Import Internal Dependencies
-import { DbRule, DbRuleLabel, getDB, initDB } from "../../src/database.js";
-import { MockLogger } from "./helpers.js";
-import { Rule } from "../../src/rules.js";
+import {
+  type DbRule,
+  type DbRuleLabel,
+  getDB,
+  initDB
+} from "../../src/database.ts";
+import { MockLogger } from "./helpers.ts";
+import { Rule } from "../../src/rules.ts";
 
 // CONSTANTS
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));

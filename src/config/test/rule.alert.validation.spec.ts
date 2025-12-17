@@ -4,9 +4,9 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 
 // Import Internal Dependencies
-import { validateConfig } from "../src/validate";
-import { VALID_ALERT_SEVERITIES, VALID_CONFIG } from "./helpers";
-import { PartialSigynAlert } from "../src/types";
+import { validateConfig } from "../src/validate.ts";
+import { VALID_ALERT_SEVERITIES, VALID_CONFIG } from "./helpers.ts";
+import type { PartialSigynAlert } from "../src/types.ts";
 
 // CONSTANTS
 const kValidRule = VALID_CONFIG.rules[0];

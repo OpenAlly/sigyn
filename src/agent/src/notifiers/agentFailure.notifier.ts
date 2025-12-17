@@ -2,10 +2,10 @@
 import { isDeepStrictEqual } from "node:util";
 
 // Import Internal Dependencies
-import { type Logger } from "../index.js";
-import { type DbAgentFailure } from "../database.js";
-import { getAgentFailureRules } from "../utils/selfMonitoring.js";
-import { type Alert, Notifier } from "./notifier.js";
+import { type Logger } from "../index.ts";
+import { type DbAgentFailure } from "../database.ts";
+import { getAgentFailureRules } from "../utils/selfMonitoring.ts";
+import { type Alert, Notifier } from "./notifier.ts";
 
 // CONSTANTS
 const kIdentifier = Symbol("agentFailureNotifier");

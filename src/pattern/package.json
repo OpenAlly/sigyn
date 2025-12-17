@@ -13,14 +13,14 @@
     }
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "build": "tsup src/pattern.ts --format cjs,esm --dts --clean",
     "prepublishOnly": "npm run build",
-    "test:tsd": "npm run build && tsd",
-    "test:runner": "glob -c \"tsx --test\" \"./test/*.spec.ts\"",
-    "test": "npm run test:runner && npm run test:tsd",
+    "test-types": "npm run build && tsd",
+    "test-only": "node --test ./test/**/*.spec.ts",
+    "test": "npm run test-only && npm run test-types",
     "coverage": "c8 -r html npm test",
     "lint": "eslint src test"
   },

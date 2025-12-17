@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- [Node.js](https://nodejs.org/en/) version 20 or higher.
+- [Node.js](https://nodejs.org/en/) version 24 or higher.
 
 ## Install locally
 

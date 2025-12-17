@@ -3,9 +3,9 @@ import dayjs from "dayjs";
 import { type SigynInitializedRule, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { Datasource } from "../datasource.js";
-import { durationOrCronToDate } from "./cron.js";
-import { type RuleNotifierAlert } from "../notifiers/rules.notifier.js";
+import { Datasource } from "../datasource.ts";
+import { durationOrCronToDate } from "./cron.ts";
+import { type RuleNotifierAlert } from "../notifiers/rules.notifier.ts";
 
 export async function getLokiUrl(
   rule: RuleNotifierAlert["rule"],

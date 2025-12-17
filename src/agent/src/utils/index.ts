@@ -1,3 +1,3 @@
-export * as rules from "./rules.js";
-export * as cron from "./cron.js";
-export * from "./getLokiUrl.js";
+export * as rules from "./rules.ts";
+export * as cron from "./cron.ts";
+export * from "./getLokiUrl.ts";

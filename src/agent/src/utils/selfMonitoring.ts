@@ -3,12 +3,12 @@ import { type SigynInitializedSelfMonitoring, getConfig } from "@sigyn/config";
 import { Result, Ok, Err } from "@openally/result";
 
 // Import Internal Dependencies
-import { type DbAgentFailure, getDB } from "../database.js";
-import * as cronUtils from "./cron.js";
-import { Rule } from "../rules.js";
-import { type Logger } from "../index.js";
-import { createAgentFailureAlert } from "../alert.js";
-import { type AgentFailureAlert } from "../notifiers/agentFailure.notifier.js";
+import { type DbAgentFailure, getDB } from "../database.ts";
+import * as cronUtils from "./cron.ts";
+import { Rule } from "../rules.ts";
+import { type Logger } from "../index.ts";
+import { createAgentFailureAlert } from "../alert.ts";
+import { type AgentFailureAlert } from "../notifiers/agentFailure.notifier.ts";
 
 export function getAgentFailureRules(alert: AgentFailureAlert): string {
   const ruleIds = new Set(alert.failures.map(({ ruleId }) => ruleId));

@@ -1,7 +1,9 @@
 // Import Internal Dependencies
-import type { AlertSeverity } from "../types.js";
+import type { AlertSeverity } from "../types.ts";
 
-export function getSeverity(sev: AlertSeverity): "critical" | "error" | "warning" | "info" {
+export function getSeverity(
+  sev: AlertSeverity
+): "critical" | "error" | "warning" | "info" {
   switch (sev) {
     case "critical":
       return sev;

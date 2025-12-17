@@ -1,2 +1,1 @@
-// Import Internal Dependencies
-export * from "./webhook.js";
+export * from "./webhook.ts";

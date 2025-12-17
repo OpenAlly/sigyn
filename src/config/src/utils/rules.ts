@@ -2,8 +2,12 @@
 import { GrafanaApi } from "@myunisoft/loki";
 
 // Import Internal Dependencies
-import type { SigynConfig, SigynInitializedRule, SigynRule } from "../types.js";
-import { extendsTemplates } from "./templates.js";
+import type {
+  SigynConfig,
+  SigynInitializedRule,
+  SigynRule
+} from "../types.ts";
+import { extendsTemplates } from "./templates.ts";
 
 export async function initialize(config: SigynConfig): Promise<SigynRule[]> {
   const labels = await fetchLabels(config);

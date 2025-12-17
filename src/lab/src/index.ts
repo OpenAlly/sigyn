@@ -7,7 +7,10 @@ import { DockerComposeEnvironment } from "testcontainers";
 import { GrafanaApi } from "@myunisoft/loki";
 
 // Import Internal Dependencies
-import { LogGenerator, type LogGeneratorOptions } from "./seeder/logs.js";
+import {
+  LogGenerator,
+  type LogGeneratorOptions
+} from "./seeder/logs.ts";
 export { LogGenerator };
 
 // CONSTANTS
@@ -29,7 +32,10 @@ export async function run(options: LogGeneratorOptions = kDefaultOptions) {
 
   const api = new GrafanaApi({
     remoteApiURL: lokiUrl,
-    apiToken: ""
+    authentication: {
+      type: "bearer",
+      token: ""
+    }
   });
 
   const logGenerator = new LogGenerator(options);

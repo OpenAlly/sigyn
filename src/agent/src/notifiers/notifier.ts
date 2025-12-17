@@ -3,9 +3,9 @@ import SQLite3 from "better-sqlite3";
 import { type SigynInitializedConfig, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { type Logger } from "../index.js";
-import { getDB } from "../database.js";
-import { NotifierQueue } from "./notifierQueue.js";
+import { type Logger } from "../index.ts";
+import { getDB } from "../database.ts";
+import { NotifierQueue } from "./notifierQueue.ts";
 
 export interface Alert {
   notifierConfig: {

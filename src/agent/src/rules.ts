@@ -8,10 +8,10 @@ import { type Database } from "better-sqlite3";
 import { Result, Ok, Err } from "@openally/result";
 
 // Import Internal Dependencies
-import { type DbRule, type DbRuleLabel, getDB, getOldestLabelTimestamp } from "./database.js";
-import * as utils from "./utils/index.js";
-import { type Logger } from "./index.js";
-import { type RuleNotifierAlert } from "./notifiers/rules.notifier.js";
+import { type DbRule, type DbRuleLabel, getDB, getOldestLabelTimestamp } from "./database.ts";
+import * as utils from "./utils/index.ts";
+import { type Logger } from "./index.ts";
+import { type RuleNotifierAlert } from "./notifiers/rules.notifier.ts";
 
 export interface RuleOptions {
   logger: Logger;

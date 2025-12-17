@@ -2,10 +2,10 @@
 import { getConfig, type SigynInitializedCompositeRule } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { getDB } from "./database.js";
-import { type Logger } from "./index.js";
-import * as utils from "./utils/index.js";
-import { CompositeRuleNotifier } from "./notifiers/compositeRules.notifier.js";
+import { getDB } from "./database.ts";
+import { type Logger } from "./index.ts";
+import * as utils from "./utils/index.ts";
+import { CompositeRuleNotifier } from "./notifiers/compositeRules.notifier.ts";
 
 function compositeRuleHasThrottle(
   compositeRule: SigynInitializedCompositeRule,

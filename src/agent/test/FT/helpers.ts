@@ -5,8 +5,14 @@ import fs from "node:fs";
 import dayjs from "dayjs";
 
 // Import Internal Dependencies
-import { DbAlert, DbAlertNotif, DbNotifier, DbRule, getDB } from "../../src/database.js";
-import { Rule } from "../../src/rules.js";
+import {
+  type DbAlert,
+  type DbAlertNotif,
+  type DbNotifier,
+  type DbRule,
+  getDB
+} from "../../src/database.ts";
+import { Rule } from "../../src/rules.ts";
 
 // CONSTANTS
 const kDatabaseFilename = "test/.temp/test-db.sqlite3";

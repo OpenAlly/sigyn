@@ -1,2 +1,2 @@
-export { capitalize } from "./capitalize.js";
-export { dnsresolve } from "./dnsresolve.js";
+export { capitalize } from "./capitalize.ts";
+export { dnsresolve } from "./dnsresolve.ts";

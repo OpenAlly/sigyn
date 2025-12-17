@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 
 // Import Internal Dependencies
-import { NoopPattern } from "../src/pattern.js";
+import { NoopPattern } from "../src/pattern.ts";
 
 describe("NoopPattern", () => {
   describe("compile", () => {

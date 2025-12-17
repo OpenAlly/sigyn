@@ -1,6 +1,9 @@
 // Import Third-party Dependencies
-import { type MorphixOptions } from "@sigyn/morphix";
-import { type WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
+import type { MorphixOptions } from "@sigyn/morphix";
+import {
+  type WebhookNotifierOptions,
+  WebhookNotifier
+} from "@sigyn/notifiers";
 
 // CONSTANTS
 const kWebhookUsername = "Sigyn Agent";

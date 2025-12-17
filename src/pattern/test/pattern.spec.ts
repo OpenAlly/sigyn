@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 
 // Import Internal Dependencies
-import { Pattern } from "../src/pattern.js";
+import { Pattern } from "../src/pattern.ts";
 
 describe("Pattern", () => {
   describe("static RegExp()", () => {

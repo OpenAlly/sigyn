@@ -2,11 +2,11 @@
 import { type SigynRule, type SigynSelfMonitoring, getConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { type DbAgentFailure, getDB } from "./database.js";
-import { type Logger } from "./index.js";
-import { handleCompositeRules } from "./compositeRules.js";
-import { RuleNotifier, type RuleNotifierAlert } from "./notifiers/rules.notifier.js";
-import { AgentFailureNotifier } from "./notifiers/agentFailure.notifier.js";
+import { type DbAgentFailure, getDB } from "./database.ts";
+import { type Logger } from "./index.ts";
+import { handleCompositeRules } from "./compositeRules.ts";
+import { RuleNotifier, type RuleNotifierAlert } from "./notifiers/rules.notifier.ts";
+import { AgentFailureNotifier } from "./notifiers/agentFailure.notifier.ts";
 
 export function createRuleAlert(
   rule: RuleNotifierAlert["rule"],

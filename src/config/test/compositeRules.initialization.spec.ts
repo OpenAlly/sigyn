@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 // Import Third-party Dependencies
 
 // Import Internal Dependencies
-import * as utils from "../src/utils";
+import * as utils from "../src/utils/index.ts";
 
 // CONSTANTS
 

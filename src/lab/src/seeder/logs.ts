@@ -3,8 +3,8 @@ import { randIp, randSuperhero } from "@ngneat/falso";
 import type { LokiIngestLogs } from "@myunisoft/loki";
 
 // Import Internal Dependencies
-import * as httpSeeder from "./http.js";
-import { random } from "../utils.js";
+import * as httpSeeder from "./http.ts";
+import { random } from "../utils.ts";
 
 // CONSTANTS
 const kDefaultLogsCount = 100;

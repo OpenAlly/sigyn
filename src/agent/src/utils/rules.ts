@@ -2,7 +2,7 @@
 import { type SigynRule } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { isCron } from "./cron.js";
+import { isCron } from "./cron.ts";
 
 // CONSTANTS
 const kOnlyDigitsRegExp = /^\d+$/;

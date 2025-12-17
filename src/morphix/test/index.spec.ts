@@ -4,7 +4,11 @@ import { describe, it } from "node:test";
 import dns from "node:dns/promises";
 
 // Import Internal Dependencies
-import { morphix, type MorphixFunction } from "../src/index.js";
+import {
+  morphix,
+  type MorphixFunction,
+  type MorphixOptions
+} from "../src/index.ts";
 
 describe("Morphix", () => {
   it("main", async() => {
@@ -58,17 +62,25 @@ describe("Morphix", () => {
   });
 
   it("transform and ignore missing", async() => {
-    const options = {
+    const options: MorphixOptions = {
       ignoreMissing: true,
-      transform: ({ value }) => (Number.isNaN(Number.parseInt(value, 10)) ? undefined : value)
+      transform: ({ value }) => {
+        const valueAsNumeric = Number.parseInt(value as string, 10);
+
+        return Number.isNaN(valueAsNumeric) ? undefined : value;
+      }
     };
     assert.equal(await morphix("{0} {1} {2}", ["0", 42, 3.14], options), "0 42 3.14");
     assert.equal(await morphix("{0} {1} {2}", ["0", null, 3.14], options), "0 {1} 3.14");
   });
 
   it("transform and throw on undefined", async() => {
-    const options = {
-      transform: ({ value }) => (Number.isNaN(Number.parseInt(value, 10)) ? undefined : value)
+    const options: MorphixOptions = {
+      transform: ({ value }) => {
+        const valueAsNumeric = Number.parseInt(value as string, 10);
+
+        return Number.isNaN(valueAsNumeric) ? undefined : value;
+      }
     };
 
     await assert.doesNotReject(async() => {
