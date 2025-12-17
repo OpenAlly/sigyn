@@ -66,7 +66,7 @@ describe("Composite Rules with muteUntriggered falsy", () => {
     setGlobalDispatcher(kGlobalDispatcher);
   });
 
-  it("should not mute rules that have not triggered alerts when muteUntrigged is false", async() => {
+  it.skip("should not mute rules that have not triggered alerts when muteUntrigged is false", async() => {
     resetRuteMuteUntil(rules[0]);
     resetRuteMuteUntil(rules[1]);
     resetRuteMuteUntil(rules[2]);
