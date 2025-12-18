@@ -7,12 +7,12 @@ import { before, describe, it } from "node:test";
 // Import Third-party Dependencies
 import dayjs from "dayjs";
 import MockDate from "mockdate";
-import { SigynInitializedConfig, initConfig } from "@sigyn/config";
+import { type SigynInitializedConfig, initConfig } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { getDB, initDB } from "../../src/database.js";
-import { MockLogger } from "./helpers.js";
-import { Rule } from "../../src/rules.js";
+import { getDB, initDB } from "../../src/database.ts";
+import { MockLogger } from "./helpers.ts";
+import { Rule } from "../../src/rules.ts";
 
 // CONSTANTS
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));

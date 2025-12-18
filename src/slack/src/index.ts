@@ -1,7 +1,10 @@
 // Import Third-party Dependencies
-import { type MorphixOptions } from "@sigyn/morphix";
-import { type WebhookNotifierOptions, WebhookNotifier } from "@sigyn/notifiers";
-import { type MessageAttachment } from "@slack/types";
+import type { MorphixOptions } from "@sigyn/morphix";
+import {
+  type WebhookNotifierOptions,
+  WebhookNotifier
+} from "@sigyn/notifiers";
+import type { MessageAttachment } from "@slack/types";
 
 // CONSTANTS
 const kAttachmentColor = {

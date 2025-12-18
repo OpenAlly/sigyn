@@ -5,10 +5,14 @@ import path from "node:path";
 import url from "node:url";
 
 // Import Third-party Dependencies
-import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
+import {
+  MockAgent,
+  getGlobalDispatcher,
+  setGlobalDispatcher
+} from "@myunisoft/httpie";
 
 // Import Internal Dependencies
-import { initConfig } from "../src";
+import { initConfig } from "../src/index.ts";
 
 // CONSTANTS
 const kLokiFixtureApiUrl = "http://localhost:3100";

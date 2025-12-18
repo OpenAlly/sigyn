@@ -1,3 +1,3 @@
 {
-  "extends": "@openally/config.typescript"
+  "extends": "@openally/config.typescript/esm-ts-next"
 }

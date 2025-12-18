@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 
 // Import Internal Dependencies
-import { randomStatus } from "../src/seeder/http.js";
+import { randomStatus } from "../src/seeder/http.ts";
 
 describe("randomStatus()", { concurrency: 1 }, () => {
   it("level should be critical when status is 500", (tc) => {

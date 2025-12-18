@@ -6,8 +6,8 @@ import type {
   SigynInitializedRule,
   SigynInitializedCompositeRule,
   SigynRule
-} from "../types.js";
-import { getSeverity } from "./severity.js";
+} from "../types.ts";
+import { getSeverity } from "./severity.ts";
 
 // CONSTANTS
 const kDefaultMissingLabelStrategy = "ignore";

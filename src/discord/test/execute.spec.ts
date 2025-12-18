@@ -3,10 +3,15 @@ import assert from "node:assert";
 import { after, before, describe, it } from "node:test";
 
 // Import Third-party Dependencies
-import { MockAgent, MockPool, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
+import {
+  MockAgent,
+  MockPool,
+  getGlobalDispatcher,
+  setGlobalDispatcher
+} from "@myunisoft/httpie";
 
 // Import Internal Dependencies
-import * as discord from "../src/index.js";
+import * as discord from "../src/index.ts";
 
 const kMockAgent = new MockAgent();
 const kDispatcher = getGlobalDispatcher();

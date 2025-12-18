@@ -2,6 +2,7 @@
   "name": "@sigyn/teams",
   "version": "2.0.0",
   "description": "Send Sigyn alerts to Teams via webhook",
+  "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -13,12 +14,12 @@
     }
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "prepublishOnly": "npm run build",
-    "test": "glob -c \"tsx --test\" \"./test/**/*.spec.ts\"",
+    "test": "node --test ./test/**/*.spec.ts",
     "coverage": "c8 -r html npm test",
     "lint": "eslint src test"
   },
@@ -39,6 +40,5 @@
   "license": "MIT",
   "dependencies": {
     "@myunisoft/httpie": "^5.0.1"
-  },
-  "type": "module"
+  }
 }

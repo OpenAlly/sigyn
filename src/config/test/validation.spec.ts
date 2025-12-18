@@ -4,8 +4,8 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 
 // Import Internal Dependencies
-import { validateConfig } from "../src/validate";
-import { VALID_ALERT_SEVERITIES, VALID_CONFIG } from "./helpers";
+import { validateConfig } from "../src/validate.ts";
+import { VALID_ALERT_SEVERITIES, VALID_CONFIG } from "./helpers.ts";
 
 describe("Config validation", () => {
   it("should validate a valid config", () => {

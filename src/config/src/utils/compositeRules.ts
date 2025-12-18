@@ -5,9 +5,13 @@ import { isDeepStrictEqual } from "node:util";
 import { minimatch } from "minimatch";
 
 // Import Internal Dependencies
-import type { SigynConfig, SigynCompositeRule, SigynInitializedCompositeRule } from "../types.js";
-import { extendsTemplates } from "./templates.js";
-import { ruleSeverity } from "./defaultValues.js";
+import type {
+  SigynConfig,
+  SigynCompositeRule,
+  SigynInitializedCompositeRule
+} from "../types.ts";
+import { extendsTemplates } from "./templates.ts";
+import { ruleSeverity } from "./defaultValues.ts";
 
 // CONSTANTS
 const kDefaultCompositeRuleInterval = "1d";

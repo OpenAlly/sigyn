@@ -2,6 +2,7 @@
   "name": "@sigyn/notifiers",
   "version": "1.0.0",
   "description": "Helpers to build a Sigyn notifier",
+  "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -13,12 +14,12 @@
     }
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean --external @myunisoft/httpie",
     "prepublishOnly": "npm run build",
-    "test": "glob -c \"tsx --test\" \"./test/**/*.spec.ts\"",
+    "test": "node --test ./test/**/*.spec.ts",
     "coverage": "c8 -r html npm test",
     "lint": "eslint src test"
   },
@@ -39,6 +40,5 @@
   "license": "MIT",
   "peerDependencies": {
     "@myunisoft/httpie": "^2.0.3"
-  },
-  "type": "module"
+  }
 }

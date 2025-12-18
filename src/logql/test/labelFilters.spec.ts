@@ -3,7 +3,7 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 
 // Import Internal Dependencies
-import { LabelFilters } from "../src/labelFilters.js";
+import { LabelFilters } from "../src/labelFilters.ts";
 
 describe("LabelFilters", () => {
   describe("Constructor", () => {

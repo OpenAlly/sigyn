@@ -1,7 +1,7 @@
 /* eslint-disable func-style */
 
 // Import Internal Dependencies
-import { capitalize, dnsresolve } from "./functions/index.js";
+import { capitalize, dnsresolve } from "./functions/index.ts";
 
 // CONSTANTS
 const kDefaultFunctions: Record<string, MorphixFunction> = {

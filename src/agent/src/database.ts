@@ -8,7 +8,7 @@ import SQLite3 from "better-sqlite3";
 import { type SigynRule } from "@sigyn/config";
 
 // Import Internal Dependencies
-import { type Logger } from "./index.js";
+import { type Logger } from "./index.ts";
 
 // CONSTANTS
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));

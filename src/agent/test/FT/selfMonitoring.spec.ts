@@ -6,16 +6,16 @@ import { afterEach, before, beforeEach, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
 // Import Third-party Dependencies
-import { SigynInitializedConfig, initConfig } from "@sigyn/config";
+import { type SigynInitializedConfig, initConfig } from "@sigyn/config";
 import { AsyncTask } from "toad-scheduler";
 import isCI from "is-ci";
 
 // Import Internal Dependencies
-import { asyncTask } from "../../src/tasks/asyncTask.js";
-import { MockLogger, resetAgentFailures } from "./helpers.js";
-import { Rule } from "../../src/rules.js";
-import { getDB, initDB } from "../../src/database.js";
-import { TestingNotifier } from "./mocks/sigyn-test-notifier.js";
+import { asyncTask } from "../../src/tasks/asyncTask.ts";
+import { MockLogger, resetAgentFailures } from "./helpers.ts";
+import { Rule } from "../../src/rules.ts";
+import { getDB, initDB } from "../../src/database.ts";
+import { TestingNotifier } from "./mocks/sigyn-test-notifier.ts";
 
 // CONSTANTS
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));

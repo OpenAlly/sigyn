@@ -1,5 +1,8 @@
 // Import Internal Dependencies
-import { AlertSeverity, PartialSigynConfig } from "../src/types";
+import type {
+  AlertSeverity,
+  PartialSigynConfig
+} from "../src/types.ts";
 
 export const VALID_CONFIG: PartialSigynConfig = {
   loki: {

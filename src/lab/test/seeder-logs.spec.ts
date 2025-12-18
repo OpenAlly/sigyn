@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert";
 
 // Import Internal Dependencies
-import { LogGenerator } from "../src/seeder/logs.js";
+import { LogGenerator } from "../src/seeder/logs.ts";
 
 describe("LogGenerator", () => {
   it("should generate 2 logs (one debug log + one random log)", (tc) => {

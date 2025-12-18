@@ -4,8 +4,8 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 
 // Import Internal Dependencies
-import { validateConfig } from "../src/validate";
-import { VALID_CONFIG } from "./helpers";
+import { validateConfig } from "../src/validate.ts";
+import { VALID_CONFIG } from "./helpers.ts";
 
 describe("Rule template validations", () => {
   it("given a rule template with only title, it should validate", () => {

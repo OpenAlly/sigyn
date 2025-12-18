@@ -2,6 +2,7 @@
   "name": "@sigyn/config",
   "version": "4.0.0",
   "description": "Sigyn configuration manager",
+  "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -13,12 +14,12 @@
     }
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
     "prepublishOnly": "npm run build",
-    "test": "glob -c \"tsx -r dotenv/config --test\" \"./test/**/*.spec.ts\"",
+    "test": "node --test ./test/**/*.spec.ts",
     "coverage": "c8 -r html npm test",
     "lint": "eslint src test"
   },
@@ -44,8 +45,6 @@
     "minimatch": "^10.0.1"
   },
   "devDependencies": {
-    "@myunisoft/httpie": "^5.0.1",
-    "dotenv": "^17.2.1"
-  },
-  "type": "module"
+    "@myunisoft/httpie": "^5.0.1"
+  }
 }

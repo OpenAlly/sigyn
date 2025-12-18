@@ -3,8 +3,8 @@ import assert from "node:assert";
 import { describe, it } from "node:test";
 
 // Import Internal Dependencies
-import { validateConfig } from "../src/validate";
-import { VALID_CONFIG } from "./helpers";
+import { validateConfig } from "../src/validate.ts";
+import { VALID_CONFIG } from "./helpers.ts";
 
 // CONSTANTS
 const kDurations = [

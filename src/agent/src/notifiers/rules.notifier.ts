@@ -6,10 +6,10 @@ import { getConfig } from "@sigyn/config";
 import { StreamSelector } from "@sigyn/logql";
 
 // Import Internal Dependencies
-import { type Logger } from "../index.js";
-import type { DbRule, DbAlertNotif, DbAlert, DbNotifier } from "../database.js";
-import { type Alert, Notifier } from "./notifier.js";
-import * as utils from "../utils/index.js";
+import { type Logger } from "../index.ts";
+import type { DbRule, DbAlertNotif, DbAlert, DbNotifier } from "../database.ts";
+import { type Alert, Notifier } from "./notifier.ts";
+import * as utils from "../utils/index.ts";
 
 // CONSTANTS
 const kIdentifier = Symbol("ruleNotifier");

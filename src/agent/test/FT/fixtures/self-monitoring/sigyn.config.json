@@ -7,7 +7,7 @@
   },
   "notifiers": {
     "discord": {
-      "notifier": "../../test/FT/mocks/sigyn-test-notifier.js",
+      "notifier": "../../test/FT/mocks/sigyn-test-notifier.ts",
       "webhookUrl": "https://discord.com/api/webhooks/aaa/bbb"
     }
   },

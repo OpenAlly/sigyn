@@ -1,7 +1,7 @@
 // Import Internal Dependencies
-import { type Logger } from "../index.js";
-import { Rule } from "../rules.js";
-import { type Alert, Notifier } from "./notifier.js";
+import { type Logger } from "../index.ts";
+import { Rule } from "../rules.ts";
+import { type Alert, Notifier } from "./notifier.ts";
 
 // CONSTANTS
 const kIdentifier = Symbol("compositeRuleNotifier");

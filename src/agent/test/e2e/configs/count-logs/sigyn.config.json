@@ -7,7 +7,7 @@
   },
   "notifiers": {
     "custom": {
-      "notifier": "../../test/FT/mocks/sigyn-test-notifier.js"
+      "notifier": "../../test/FT/mocks/sigyn-test-notifier.ts"
     }
   },
   "rules": [

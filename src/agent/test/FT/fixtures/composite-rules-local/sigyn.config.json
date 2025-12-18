@@ -6,8 +6,8 @@
     "apiUrl": "http://localhost:3000"
   },
   "notifiers": {
-    "../../test/FT/mocks/sigyn-test-notifier.js": {
-      "notifier": "../../test/FT/mocks/sigyn-test-notifier.js",
+    "../../test/FT/mocks/sigyn-test-notifier.ts": {
+      "notifier": "../../test/FT/mocks/sigyn-test-notifier.ts",
       "webhookUrl": "foo"
     }
   },

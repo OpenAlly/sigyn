@@ -3,15 +3,20 @@ import assert from "node:assert";
 import { describe, it, after, before, test } from "node:test";
 
 // Import Third-party Dependencies
-import { MockAgent, MockPool, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
+import {
+  MockAgent,
+  MockPool,
+  getGlobalDispatcher,
+  setGlobalDispatcher
+} from "@myunisoft/httpie";
 
 // Import Internal Dependencies
-import { WebhookNotifier } from "../src/webhook.js";
+import { WebhookNotifier } from "../src/webhook.ts";
 
 // CONSTANTS
 const kMockAgent = new MockAgent();
 const kDispatcher = getGlobalDispatcher();
-const kDummyWebhoobURL = "https://webhook.test";
+const kDummyWebhookURL = "https://webhook.test";
 
 const kDummyNotifierOptions = {
   webhookUrl: "https://webhook.test/dummy",
@@ -27,7 +32,7 @@ describe("Webhook", () => {
 
   before(() => {
     setGlobalDispatcher(kMockAgent);
-    pool = kMockAgent.get(kDummyWebhoobURL);
+    pool = kMockAgent.get(kDummyWebhookURL);
     kMockAgent.disableNetConnect();
   });
 

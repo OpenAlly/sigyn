@@ -1,19 +1,24 @@
+// Import Node.js Dependencies
 import os from "node:os";
 import fs from "node:fs";
 import path from "node:path";
 
 // This is the notifier execute function that will be called by the agent
-export function execute(...fnArgs) {
+export function execute(...fnArgs: any[]) {
   const testingNotifier = TestingNotifier.getInstance();
   testingNotifier.push(fnArgs);
 }
 
 export class TestingNotifier {
-  static instance;
+  static instance: TestingNotifier | null = null;
 
   get notifArguments() {
-    if (fs.existsSync(path.join(os.tmpdir(), "sigyn-notif-args.json"))) {
-      return JSON.parse(fs.readFileSync(path.join(os.tmpdir(), "sigyn-notif-args.json")));
+    const filePath = path.join(os.tmpdir(), "sigyn-notif-args.json");
+
+    if (fs.existsSync(filePath)) {
+      return JSON.parse(
+        fs.readFileSync(filePath, "utf-8")
+      );
     }
 
     return [];
@@ -33,20 +38,23 @@ export class TestingNotifier {
     return this.notifArguments.length;
   }
 
-  push(call) {
+  push(call: any[]) {
     const cache = [];
-    if (fs.existsSync(path.join(os.tmpdir(), "sigyn-notif-args.json"))) {
-      cache.push(...JSON.parse(fs.readFileSync(path.join(os.tmpdir(), "sigyn-notif-args.json"))));
+    const filePath = path.join(os.tmpdir(), "sigyn-notif-args.json");
+
+    if (fs.existsSync(filePath)) {
+      cache.push(...JSON.parse(fs.readFileSync(filePath, "utf-8")));
     }
     cache.push(call[0]);
-    fs.writeFileSync(path.join(os.tmpdir(), "sigyn-notif-args.json"), JSON.stringify(cache));
+    fs.writeFileSync(filePath, JSON.stringify(cache));
   }
 
   clear() {
-    fs.rmSync(path.join(os.tmpdir(), "sigyn-notif-args.json"), { force: true });
+    const filePath = path.join(os.tmpdir(), "sigyn-notif-args.json");
+    fs.rmSync(filePath, { force: true });
   }
 
-  toHaveBeenCalledWith(data) {
+  toHaveBeenCalledWith(data: Record<string, any>) {
     for (const [key, value] of Object.entries(data)) {
       if (value instanceof RegExp) {
         if (!value.test(this.lastNotifArguments.data[key])) {

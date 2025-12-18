@@ -2,14 +2,14 @@
   "name": "@sigyn/lab",
   "version": "1.0.0",
   "description": "A test and demonstration tool for generating and exploring logs in both formatted and JSON styles, integrated with Grafana Loki via Docker.",
+  "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --clean",
-    "start": "node ./dist/index.js",
+    "start": "node ./src/index.ts",
     "lint": "eslint src test",
-    "test": "glob -c \"tsx --test\" \"./test/**/*.spec.ts\""
+    "test": "node --test ./test/**/*.spec.ts"
   },
   "repository": {
     "type": "git",
@@ -30,9 +30,6 @@
   "dependencies": {
     "@myunisoft/loki": "^6.0.0",
     "@ngneat/falso": "^8.0.2",
-    "fastify": "^5.3.3",
-    "testcontainers": "^11.0.2",
-    "ts-pattern": "^5.6.0"
-  },
-  "type": "module"
+    "ts-pattern": "5.9.0"
+  }
 }

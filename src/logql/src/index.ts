@@ -1,8 +1,8 @@
 // Import Internal Dependencies
-import { StreamSelector } from "./streamSelector.js";
-import { LineFilters } from "./lineFilters.js";
-import { LabelFilters } from "./labelFilters.js";
-import { ParserExpression } from "./parserExpression.js";
+import { StreamSelector } from "./streamSelector.ts";
+import { LineFilters } from "./lineFilters.ts";
+import { LabelFilters } from "./labelFilters.ts";
+import { ParserExpression } from "./parserExpression.ts";
 
 export { StreamSelector, LineFilters, LabelFilters, ParserExpression };
 

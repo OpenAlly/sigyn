@@ -2,7 +2,7 @@
 import type {
   LokiLiteralPattern,
   LokiPatternType
-} from "./types.js";
+} from "./types.ts";
 
 export interface PatternShape<T extends LokiPatternType = string> {
   compile(): (log: string) => [] | [log: LokiLiteralPattern<T>];

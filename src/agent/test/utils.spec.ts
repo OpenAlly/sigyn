@@ -10,7 +10,7 @@ import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/
 import dayjs from "dayjs";
 
 // Import Internal Dependencies
-import * as utils from "../src/utils/index.js";
+import * as utils from "../src/utils/index.ts";
 
 // CONSTANTS
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));

@@ -3,7 +3,7 @@ import { Ajv2020 as Ajv, type ErrorObject } from "ajv/dist/2020.js";
 import _ajvKeywords from "ajv-keywords";
 
 // Import Internal Dependencies
-import type { ExtendedSigynConfig, PartialSigynConfig } from "./types.js";
+import type { ExtendedSigynConfig, PartialSigynConfig } from "./types.ts";
 import rulesSchema from "./schemas/rules.json" with { type: "json" };
 import templateSchema from "./schemas/templates.json" with { type: "json" };
 import configSchema from "./schemas/configSchema.json" with { type: "json" };
