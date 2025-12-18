@@ -24,9 +24,14 @@
     "coverage": "c8 -r html npm test",
     "lint": "eslint src test"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public",
+    "provenance": true
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/OpenAlly/sigyn.git",
+    "url": "https://github.com/OpenAlly/sigyn",
     "directory": "src/pattern"
   },
   "bugs": {
