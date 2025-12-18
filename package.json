@@ -10,7 +10,9 @@
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "clean": "clear-ts-build"
+    "clean": "clear-ts-build",
+    "ci:publish": "changeset publish",
+    "ci:version": "changeset version"
   },
   "keywords": [],
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
@@ -28,6 +30,8 @@
     "src/lab"
   ],
   "devDependencies": {
+    "@changesets/changelog-github": "0.5.2",
+    "@changesets/cli": "2.29.8",
     "@lavamoat/allow-scripts": "3.4.1",
     "@lavamoat/preinstall-always-fail": "2.1.1",
     "@openally/config.eslint": "^2.1.0",
