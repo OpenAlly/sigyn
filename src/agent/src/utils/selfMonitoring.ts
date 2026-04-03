@@ -1,6 +1,6 @@
 // Import Third-party Dependencies
 import { type SigynInitializedSelfMonitoring, getConfig } from "@sigyn/config";
-import { Result, Ok, Err } from "@openally/result";
+import { type Result, Ok, Err } from "@openally/result";
 
 // Import Internal Dependencies
 import { type DbAgentFailure, getDB } from "../database.ts";

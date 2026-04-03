@@ -2,7 +2,6 @@
 import assert from "node:assert";
 import { after, before, describe, it } from "node:test";
 import path from "node:path";
-import url from "node:url";
 
 // Import Third-party Dependencies
 import {
@@ -18,8 +17,6 @@ import { initConfig } from "../src/index.ts";
 const kLokiFixtureApiUrl = "http://localhost:3100";
 const kMockAgent = new MockAgent();
 const kGlobalDispatcher = getGlobalDispatcher();
-
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 describe("Extended templates", () => {
   before(() => {
@@ -37,7 +34,7 @@ describe("Extended templates", () => {
   });
 
   it("should extends the main template", async() => {
-    const config = await initConfig(path.join(__dirname, "fixtures/extended-templates/sigyn.config.json"));
+    const config = await initConfig(path.join(import.meta.dirname, "fixtures/extended-templates/sigyn.config.json"));
 
     assert.deepEqual(config.templates!, {
       main: {
@@ -61,7 +58,10 @@ describe("Extended templates", () => {
   });
 
   it("should extends content with 'before'", async() => {
-    const config = await initConfig(path.join(__dirname, "fixtures/extended-templates-content-before/sigyn.config.json"));
+    const config = await initConfig(path.join(
+      import.meta.dirname,
+      "fixtures/extended-templates-content-before/sigyn.config.json"
+    ));
 
     assert.deepEqual(config.templates!, {
       main: {
@@ -85,7 +85,10 @@ describe("Extended templates", () => {
   });
 
   it("should extends content with 'after'", async() => {
-    const config = await initConfig(path.join(__dirname, "fixtures/extended-templates-content-after/sigyn.config.json"));
+    const config = await initConfig(path.join(
+      import.meta.dirname,
+      "fixtures/extended-templates-content-after/sigyn.config.json"
+    ));
 
     assert.deepEqual(config.templates!, {
       main: {
@@ -109,7 +112,10 @@ describe("Extended templates", () => {
   });
 
   it("should extends content with 'at'", async() => {
-    const config = await initConfig(path.join(__dirname, "fixtures/extended-templates-content-at/sigyn.config.json"));
+    const config = await initConfig(path.join(
+      import.meta.dirname,
+      "fixtures/extended-templates-content-at/sigyn.config.json"
+    ));
 
     assert.deepEqual(config.templates!, {
       main: {
@@ -133,7 +139,10 @@ describe("Extended templates", () => {
   });
 
   it("should extends content with negative 'at'", async() => {
-    const config = await initConfig(path.join(__dirname, "fixtures/extended-templates-content-at/sigyn.config.json"));
+    const config = await initConfig(path.join(
+      import.meta.dirname,
+      "fixtures/extended-templates-content-at/sigyn.config.json"
+    ));
 
     assert.deepEqual(config.templates!, {
       main: {
@@ -157,7 +166,10 @@ describe("Extended templates", () => {
   });
 
   it("should extends the nested templates", async() => {
-    const config = await initConfig(path.join(__dirname, "fixtures/extended-templates-nested/sigyn.config.json"));
+    const config = await initConfig(path.join(
+      import.meta.dirname,
+      "fixtures/extended-templates-nested/sigyn.config.json"
+    ));
 
     assert.deepEqual(config.templates!, {
       main: {

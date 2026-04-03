@@ -2,7 +2,6 @@
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
-import url from "node:url";
 import { before, beforeEach, after, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
@@ -18,9 +17,8 @@ import { handleCompositeRules } from "../../src/compositeRules.ts";
 import { Rule } from "../../src/rules.ts";
 
 // CONSTANTS
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 const kSeverityFilterCompositeRulesConfigLocation = path.join(
-  __dirname,
+  import.meta.dirname,
   "/fixtures/composite-rules-sev-filters/sigyn.config.json"
 );
 const kLogger = new MockLogger();

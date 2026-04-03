@@ -2,7 +2,6 @@
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
-import url from "node:url";
 import { before, beforeEach, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
@@ -18,8 +17,7 @@ import { Rule } from "../../src/rules.ts";
 import { TestingNotifier } from "./mocks/sigyn-test-notifier.ts";
 
 // CONSTANTS
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const kCompositeRulesConfigLocation = path.join(__dirname, "/fixtures/composite-rules-local/sigyn.config.json");
+const kCompositeRulesConfigLocation = path.join(import.meta.dirname, "/fixtures/composite-rules-local/sigyn.config.json");
 const kLogger = new MockLogger();
 // time to wait for the task to be fully executed (alert sent)
 const kTimeout = isCI ? 350 : 200;

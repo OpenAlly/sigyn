@@ -2,7 +2,6 @@
 import { before, describe, it } from "node:test";
 import assert from "node:assert";
 import path from "node:path";
-import url from "node:url";
 import { setTimeout } from "node:timers/promises";
 
 // Import Internal Dependencies
@@ -11,8 +10,7 @@ import { setupEnvironment } from "./setup.ts";
 import { start } from "../../src/index.ts";
 
 // CONSTANTS
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const kConfigLocation = path.join(__dirname, "./configs/count-logs");
+const kConfigLocation = path.join(import.meta.dirname, "./configs/count-logs");
 const kTestingNotifier = TestingNotifier.getInstance();
 
 describe("Given a rule with 'on.count: 1'", () => {

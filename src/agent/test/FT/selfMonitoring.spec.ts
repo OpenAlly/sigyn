@@ -1,7 +1,6 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
 import path from "node:path";
-import url from "node:url";
 import { afterEach, before, beforeEach, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
@@ -18,8 +17,7 @@ import { getDB, initDB } from "../../src/database.ts";
 import { TestingNotifier } from "./mocks/sigyn-test-notifier.ts";
 
 // CONSTANTS
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const kFixturePath = path.join(__dirname, "/fixtures");
+const kFixturePath = path.join(import.meta.dirname, "/fixtures");
 const kRuleConfigLocation = path.join(kFixturePath, "/self-monitoring/sigyn.config.json");
 const kRuleNotMatchFiltersConfigLocation = path.join(kFixturePath, "/not-match-rule-filters/sigyn.config.json");
 const kRuleMatchRuleFiltersConfigLocation = path.join(kFixturePath, "/no-self-monitoring-filters/sigyn.config.json");

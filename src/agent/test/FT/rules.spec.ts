@@ -1,7 +1,6 @@
 // Import Node.js Dependencies
 import assert from "node:assert";
 import path from "node:path";
-import url from "node:url";
 import { before, describe, it } from "node:test";
 
 // Import Third-party Dependencies
@@ -15,9 +14,8 @@ import { MockLogger } from "./helpers.ts";
 import { Rule } from "../../src/rules.ts";
 
 // CONSTANTS
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const kMultiPollingConfigLocation = path.join(__dirname, "/fixtures/multi-polling/sigyn.config.json");
-const kLabelValueMatchConfigLocation = path.join(__dirname, "/fixtures/label-value-match/sigyn.config.json");
+const kMultiPollingConfigLocation = path.join(import.meta.dirname, "/fixtures/multi-polling/sigyn.config.json");
+const kLabelValueMatchConfigLocation = path.join(import.meta.dirname, "/fixtures/label-value-match/sigyn.config.json");
 const kLogger = new MockLogger();
 
 describe("Rule.getQueryRangeStartUnixTimestamp()", () => {

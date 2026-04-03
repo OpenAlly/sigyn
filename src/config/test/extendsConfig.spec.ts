@@ -2,7 +2,6 @@
 import assert from "node:assert";
 import { after, before, describe, it } from "node:test";
 import path from "node:path";
-import url from "node:url";
 
 // Import Third-party Dependencies
 import {
@@ -18,8 +17,6 @@ import { initConfig } from "../src/index.ts";
 const kLokiFixtureApiUrl = "http://localhost:3100";
 const kMockAgent = new MockAgent();
 const kGlobalDispatcher = getGlobalDispatcher();
-
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 describe("Extended configs", () => {
   before(() => {
@@ -37,7 +34,7 @@ describe("Extended configs", () => {
   });
 
   it("should extends the config", async() => {
-    const config = await initConfig(path.join(__dirname, "fixtures/extended-configs/sigyn.config.json"));
+    const config = await initConfig(path.join(import.meta.dirname, "fixtures/extended-configs/sigyn.config.json"));
 
     assert.deepEqual(config.templates!, {
       main: {

@@ -5,7 +5,7 @@ import dayjs from "dayjs";
 import ms from "ms";
 import { CronExpressionParser } from "cron-parser";
 import { type Database } from "better-sqlite3";
-import { Result, Ok, Err } from "@openally/result";
+import { type Result, Ok, Err } from "@openally/result";
 
 // Import Internal Dependencies
 import { type DbRule, type DbRuleLabel, getDB, getOldestLabelTimestamp } from "./database.ts";
