@@ -2,7 +2,6 @@
 import assert from "node:assert";
 import path from "node:path";
 import fs from "node:fs";
-import url from "node:url";
 import timers from "node:timers/promises";
 import { after, before, describe, it } from "node:test";
 
@@ -31,13 +30,12 @@ import { MockLogger } from "./helpers.ts";
 import { Rule } from "../../src/rules.ts";
 
 // CONSTANTS
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const kMultiPollingConfigLocation = path.join(__dirname, "/fixtures/multi-polling/sigyn.config.json");
-const kLabelConfigLocation = path.join(__dirname, "/fixtures/label/sigyn.config.json");
-const kLabelRangeValueConfigLocation = path.join(__dirname, "/fixtures/label-range-value/sigyn.config.json");
-const kLabelValueMatchConfigLocation = path.join(__dirname, "/fixtures/label-value-match/sigyn.config.json");
-const kLabelCountConfigLocation = path.join(__dirname, "/fixtures/label-count/sigyn.config.json");
-const kLabelScopeThrottleConfigLocation = path.join(__dirname, "/fixtures/throttle-label-scope/sigyn.config.json");
+const kMultiPollingConfigLocation = path.join(import.meta.dirname, "/fixtures/multi-polling/sigyn.config.json");
+const kLabelConfigLocation = path.join(import.meta.dirname, "/fixtures/label/sigyn.config.json");
+const kLabelRangeValueConfigLocation = path.join(import.meta.dirname, "/fixtures/label-range-value/sigyn.config.json");
+const kLabelValueMatchConfigLocation = path.join(import.meta.dirname, "/fixtures/label-value-match/sigyn.config.json");
+const kLabelCountConfigLocation = path.join(import.meta.dirname, "/fixtures/label-count/sigyn.config.json");
+const kLabelScopeThrottleConfigLocation = path.join(import.meta.dirname, "/fixtures/throttle-label-scope/sigyn.config.json");
 const kLokiFixtureApiUrl = "http://localhost:3100";
 const kMockAgent = new MockAgent();
 const kGlobalDispatcher = getGlobalDispatcher();
