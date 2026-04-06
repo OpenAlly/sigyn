@@ -2,21 +2,19 @@
   "name": "@sigyn/pattern",
   "version": "1.1.0",
   "description": "Loki pattern in JavaScript",
-  "main": "./dist/pattern.cjs",
-  "module": "./dist/pattern.js",
-  "types": "./dist/pattern.d.ts",
+  "main": "./dist/pattern.mjs",
+  "types": "./dist/pattern.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/pattern.d.ts",
-      "require": "./dist/pattern.cjs",
-      "import": "./dist/pattern.js"
+      "types": "./dist/pattern.d.mts",
+      "default": "./dist/pattern.mjs"
     }
   },
   "engines": {
     "node": ">=24"
   },
   "scripts": {
-    "build": "tsup src/pattern.ts --format cjs,esm --dts --clean",
+    "build": "tsdown src/pattern.ts --format esm --dts --clean",
     "prepublishOnly": "npm run build",
     "test-types": "npm run build && tsd",
     "test-only": "node --test ./test/**/*.spec.ts",
