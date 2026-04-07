@@ -6,7 +6,7 @@ on:
 
   pull_request:
     paths:
-      - "package-lock.json"
+      - "package.json"
       - "src/lab/**"
       - ".github/workflows/lab.yml"
       - "!src/lab/**/*.md"
