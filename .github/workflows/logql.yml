@@ -7,6 +7,7 @@ on:
     paths:
       - "package.json"
       - "src/logql/**"
+      - ".github/workflows/logql.yml"
       - "!src/logql/**/*.md"
 
 permissions:

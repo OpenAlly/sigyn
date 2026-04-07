@@ -7,6 +7,7 @@ on:
     paths:
       - "package.json"
       - "src/pattern/**"
+      - ".github/workflows/pattern.yml"
       - "!src/pattern/**/*.md"
 
 permissions:

@@ -7,6 +7,7 @@ on:
     paths:
       - "package.json"
       - "src/notifiers/**"
+      - ".github/workflows/notifiers.yml"
       - "!src/notifiers/**/*.md"
 
 permissions:
