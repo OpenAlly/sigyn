@@ -5,8 +5,9 @@ on:
     branches: [main]
   pull_request:
     paths:
-      - "package-lock.json"
+      - "package.json"
       - "src/pattern/**"
+      - ".github/workflows/pattern.yml"
       - "!src/pattern/**/*.md"
 
 permissions:
