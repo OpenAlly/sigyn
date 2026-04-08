@@ -10,7 +10,7 @@ import {
   MockAgent,
   getGlobalDispatcher,
   setGlobalDispatcher
-} from "@myunisoft/httpie";
+} from "@openally/httpie";
 import { type SigynInitializedConfig, initConfig } from "@sigyn/config";
 import isCI from "is-ci";
 

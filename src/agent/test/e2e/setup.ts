@@ -3,7 +3,7 @@ import path from "node:path";
 
 // Import Third-party Dependencies
 import { DockerComposeEnvironment } from "testcontainers";
-import { MockAgent, setGlobalDispatcher } from "@myunisoft/httpie";
+import { MockAgent, setGlobalDispatcher } from "@openally/httpie";
 import Fastify from "fastify";
 import { GrafanaApi } from "@myunisoft/loki";
 

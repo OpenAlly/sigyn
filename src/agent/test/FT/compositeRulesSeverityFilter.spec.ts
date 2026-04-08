@@ -6,7 +6,7 @@ import { before, beforeEach, after, describe, it } from "node:test";
 import { setTimeout } from "node:timers/promises";
 
 // Import Third-party Dependencies
-import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@openally/httpie";
 import { type SigynInitializedConfig, initConfig } from "@sigyn/config";
 import isCI from "is-ci";
 

@@ -8,7 +8,7 @@ import {
   MockAgent,
   getGlobalDispatcher,
   setGlobalDispatcher
-} from "@myunisoft/httpie";
+} from "@openally/httpie";
 
 // Import Internal Dependencies
 import { initConfig } from "../src/index.ts";

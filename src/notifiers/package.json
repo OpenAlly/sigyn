@@ -42,6 +42,6 @@
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
   "peerDependencies": {
-    "@myunisoft/httpie": "^2.0.3"
+    "@openally/httpie": "^1.1.2"
   }
 }

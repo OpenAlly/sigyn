@@ -8,7 +8,7 @@ import {
   MockPool,
   getGlobalDispatcher,
   setGlobalDispatcher
-} from "@myunisoft/httpie";
+} from "@openally/httpie";
 
 // Import Internal Dependencies
 import * as discord from "../src/index.ts";
@@ -69,7 +69,7 @@ describe("executeWebhook()", () => {
       },
       template: { title: "foo", content: [] }
     }), {
-      name: "Error",
+      name: "HttpieOnHttpError",
       message: "Bad Request"
     });
   });
