@@ -4,7 +4,7 @@ import type {
   NotifierFormattedSigynRule
 } from "@sigyn/config";
 import { morphix, type MorphixOptions } from "@sigyn/morphix";
-import * as httpie from "@myunisoft/httpie";
+import * as httpie from "@openally/httpie";
 
 // CONSTANTS
 const kSeverityEmoji = {

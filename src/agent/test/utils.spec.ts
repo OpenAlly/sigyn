@@ -5,7 +5,7 @@ import path from "node:path";
 
 // Import Third-party Dependencies
 import { initConfig } from "@sigyn/config";
-import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@myunisoft/httpie";
+import { MockAgent, getGlobalDispatcher, setGlobalDispatcher } from "@openally/httpie";
 import dayjs from "dayjs";
 
 // Import Internal Dependencies

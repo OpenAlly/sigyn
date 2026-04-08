@@ -48,6 +48,6 @@
     "minimatch": "^10.0.1"
   },
   "devDependencies": {
-    "@myunisoft/httpie": "^5.0.1"
+    "@openally/httpie": "^1.1.2"
   }
 }

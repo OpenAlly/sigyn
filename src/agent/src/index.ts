@@ -5,7 +5,7 @@ import timers from "node:timers/promises";
 // Import Third-party Dependencies
 import { initConfig } from "@sigyn/config";
 import { GrafanaApi } from "@myunisoft/loki";
-import { Agent, setGlobalDispatcher } from "@myunisoft/httpie";
+import { Agent, setGlobalDispatcher } from "@openally/httpie";
 import { ToadScheduler, CronJob, SimpleIntervalJob } from "toad-scheduler";
 import { pino } from "pino";
 import ms from "ms";

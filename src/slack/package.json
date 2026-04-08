@@ -42,7 +42,7 @@
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@myunisoft/httpie": "^5.0.1",
+    "@openally/httpie": "^1.1.2",
     "@slack/types": "^2.14.0"
   }
 }

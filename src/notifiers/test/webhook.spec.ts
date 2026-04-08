@@ -8,7 +8,7 @@ import {
   MockPool,
   getGlobalDispatcher,
   setGlobalDispatcher
-} from "@myunisoft/httpie";
+} from "@openally/httpie";
 
 // Import Internal Dependencies
 import { WebhookNotifier } from "../src/webhook.ts";

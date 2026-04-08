@@ -16,7 +16,7 @@ import {
   MockAgent,
   getGlobalDispatcher,
   setGlobalDispatcher
-} from "@myunisoft/httpie";
+} from "@openally/httpie";
 import type { Result } from "@openally/result";
 
 // Import Internal Dependencies
