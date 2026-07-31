@@ -1,6 +1,6 @@
 {
   "name": "@sigyn/lab",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A test and demonstration tool for generating and exploring logs in both formatted and JSON styles, integrated with Grafana Loki via Docker.",
   "type": "module",
   "private": true,
