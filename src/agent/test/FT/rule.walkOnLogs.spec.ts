@@ -1,3 +1,4 @@
+/* eslint-disable max-nested-callbacks */
 // Import Node.js Dependencies
 import assert from "node:assert";
 import path from "node:path";
@@ -212,7 +213,10 @@ describe("Rule.walkOnLogs()", () => {
 
           assert.equal(getRule(ruleConfig).counter, 0);
 
-          const createAlert = await pollingIn200ms(rule, Array.from(Array(5)).map(() => "one new log"));
+          const createAlert = await pollingIn200ms(
+            rule,
+            Array.from(Array(5)).map(() => "one new log")
+          );
 
           assert.equal(createAlert.ok, true);
           // once alert triggers, counter should be reset to 0

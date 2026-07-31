@@ -1,6 +1,6 @@
 // Import Third-party Dependencies
 import { type SigynInitializedRule } from "@sigyn/config";
-import { type LokiCombined } from "@myunisoft/loki";
+import { type LokiCombined } from "@openally/loki";
 import dayjs from "dayjs";
 import ms from "ms";
 import { CronExpressionParser } from "cron-parser";

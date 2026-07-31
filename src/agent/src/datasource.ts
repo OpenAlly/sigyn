@@ -2,7 +2,7 @@
 import {
   GrafanaApi,
   type Datasource as GrafanaDatasource
-} from "@myunisoft/loki";
+} from "@openally/loki";
 
 export class Datasource {
   #grafanaApi: GrafanaApi;
