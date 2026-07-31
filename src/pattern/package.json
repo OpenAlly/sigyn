@@ -2,21 +2,14 @@
   "name": "@sigyn/pattern",
   "version": "1.1.0",
   "description": "Loki pattern in JavaScript",
-  "main": "./dist/pattern.mjs",
-  "types": "./dist/pattern.d.mts",
-  "exports": {
-    ".": {
-      "types": "./dist/pattern.d.mts",
-      "default": "./dist/pattern.mjs"
-    }
-  },
+  "exports": "./dist/pattern.js",
   "engines": {
     "node": ">=24"
   },
   "scripts": {
-    "build": "tsdown src/pattern.ts --format esm --dts --clean",
+    "build": "tsc",
     "prepublishOnly": "npm run build",
-    "test-types": "npm run build && tsd",
+    "test-types": "tstyche",
     "test-only": "node --test ./test/**/*.spec.ts",
     "test": "npm run test-only && npm run test-types",
     "coverage": "c8 -r html npm test",
@@ -29,7 +22,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenAlly/sigyn",
+    "url": "git+https://github.com/OpenAlly/sigyn.git",
     "directory": "src/pattern"
   },
   "bugs": {
@@ -51,8 +44,8 @@
   },
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
+  "type": "module",
   "devDependencies": {
-    "tsd": "^0.33.0"
-  },
-  "type": "module"
+    "tstyche": "7.2.2"
+  }
 }

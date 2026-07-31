@@ -1,6 +1,6 @@
 // Import Third-party Dependencies
 import { randIp, randSuperhero } from "@ngneat/falso";
-import type { LokiIngestLogs } from "@myunisoft/loki";
+import type { LokiIngestLogs } from "@openally/loki";
 
 // Import Internal Dependencies
 import * as httpSeeder from "./http.ts";

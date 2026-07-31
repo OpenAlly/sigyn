@@ -5,7 +5,7 @@ import path from "node:path";
 import { DockerComposeEnvironment } from "testcontainers";
 import { MockAgent, setGlobalDispatcher } from "@openally/httpie";
 import Fastify from "fastify";
-import { GrafanaApi } from "@myunisoft/loki";
+import { GrafanaApi } from "@openally/loki";
 
 // CONSTANTS
 const kMockAgent = new MockAgent();

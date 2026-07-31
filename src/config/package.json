@@ -3,19 +3,12 @@
   "version": "4.0.0",
   "description": "Sigyn configuration manager",
   "type": "module",
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.mts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "default": "./dist/index.mjs"
-    }
-  },
+  "exports": "./dist/index.js",
   "engines": {
     "node": ">=24"
   },
   "scripts": {
-    "build": "tsdown src/index.ts --format esm --dts --clean",
+    "build": "tsc",
     "prepublishOnly": "npm run build",
     "test": "node --test ./test/**/*.spec.ts",
     "coverage": "c8 -r html npm test",
@@ -28,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenAlly/sigyn",
+    "url": "git+https://github.com/OpenAlly/sigyn.git",
     "directory": "src/config"
   },
   "bugs": {
@@ -42,12 +35,12 @@
   "author": "GENTILHOMME Thomas <gentilhomme.thomas@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@myunisoft/loki": "^6.0.0",
+    "@openally/loki": "7.0.2",
     "ajv": "^8.17.1",
     "ajv-keywords": "^5.1.0",
     "minimatch": "^10.0.1"
   },
   "devDependencies": {
-    "@openally/httpie": "^1.1.2"
+    "undici": "8.0.2"
   }
 }

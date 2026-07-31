@@ -3,7 +3,7 @@ import path from "node:path";
 
 // Import Third-party Dependencies
 import { DockerComposeEnvironment } from "testcontainers";
-import { GrafanaApi } from "@myunisoft/loki";
+import { GrafanaApi } from "@openally/loki";
 
 // Import Internal Dependencies
 import {

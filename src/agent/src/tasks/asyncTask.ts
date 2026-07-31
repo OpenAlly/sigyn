@@ -3,7 +3,7 @@ import { performance } from "node:perf_hooks";
 
 // Import Third-party Dependencies
 import { type SigynInitializedRule } from "@sigyn/config";
-import { GrafanaApi } from "@myunisoft/loki";
+import { GrafanaApi } from "@openally/loki";
 import { AsyncTask } from "toad-scheduler";
 import ms from "ms";
 

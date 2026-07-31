@@ -7,7 +7,7 @@ import {
   MockAgent,
   getGlobalDispatcher,
   setGlobalDispatcher
-} from "@openally/httpie";
+} from "undici";
 
 // Import Internal Dependencies
 import * as utils from "../src/utils/index.ts";

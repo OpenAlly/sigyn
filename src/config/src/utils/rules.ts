@@ -1,5 +1,5 @@
 // Import Third-party Dependencies
-import { GrafanaApi } from "@myunisoft/loki";
+import { GrafanaApi } from "@openally/loki";
 
 // Import Internal Dependencies
 import type {
