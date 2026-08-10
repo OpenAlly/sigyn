@@ -41,7 +41,7 @@
     "@openally/httpie": "^1.1.2",
     "@openally/loki": "7.0.2",
     "@openally/result": "3.1.0",
-    "better-sqlite3": "13.0.2",
+    "better-sqlite3": "13.0.3",
     "cron-parser": "^5.3.0",
     "dayjs": "^1.11.13",
     "ms": "^2.1.3",
