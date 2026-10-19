@@ -36,6 +36,6 @@
   "dependencies": {
     "@ngneat/falso": "^8.0.2",
     "@openally/loki": "7.0.2",
-    "ts-pattern": "5.9.0"
+    "ts-pattern": "5.9.2"
   }
 }
